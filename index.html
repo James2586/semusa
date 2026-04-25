@@ -123,8 +123,8 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
 .proc-step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 4px;}
 .proc-circle{width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(232,196,106,0.35);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:14px;position:relative;z-index:1;}
 .proc-circle span{font-family:'Playfair Display',serif;font-size:14px;color:var(--gold3);}
-.proc-step h4{font-size:10px;color:rgba(255,255,255,0.8);font-weight:400;margin-bottom:4px;}
-.proc-step p{font-size:9px;color:rgba(255,255,255,0.4);line-height:1.7;font-weight:300;}
+.proc-step h4{font-size:10px;color:#FFD700;font-weight:600;margin-bottom:4px;}
+.proc-step p{font-size:9px;color:rgba(255,215,0,0.85);line-height:1.7;font-weight:400;}
 
 .testimonials{background:var(--white);padding:52px 40px;}
 .test-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -236,7 +236,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
     <li><a class="nav-item-style" href="#" onclick="openProfile();return false;">소개</a></li>
     <li><a class="nav-item-style" href="#" onclick="document.querySelector('.greeting').scrollIntoView({behavior:'smooth'});return false;">인사말</a></li>
     <li><span class="nav-item-style news-item" style="cursor:default;">최신 세무뉴스</span></li>
-    <li><a class="nav-item-style" href="#" onclick="alert('공지사항\n\n2027년 2월 오픈 예정입니다.\n\n많은 기대 부탁드립니다.');return false;">공지사항</a></li>
+    <li><a class="nav-item-style" href="#" onclick="document.getElementById('noticeModal').style.display='flex';return false;">공지사항</a></li>
     <li>
       <button class="nav-item-style" onclick="openCalc()">모의 세금 계산 ▾</button>
       <div class="desktop-dropdown">
@@ -257,7 +257,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
       </div>
     </li>
   </ul>
-  <a class="nav-cta" href="tel:0212345678">상담 예약</a>
+  <a class="nav-cta" href="https://open.kakao.com/me/semusa" target="_blank">상담 예약</a>
   <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
 </nav>
 
@@ -267,7 +267,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
     <a class="mob-item" href="#" onclick="openProfile();closeMobileMenu();return false;">소개</a>
     <a class="mob-item" href="#" onclick="closeMobileMenu();setTimeout(function(){document.querySelector('.greeting').scrollIntoView({behavior:'smooth'});},200);return false;">인사말</a>
     <span class="mob-item news" style="cursor:default;">최신 세무뉴스</span>
-    <a class="mob-item" href="#" onclick="closeMobileMenu();alert('공지사항\n\n2027년 2월 오픈 예정입니다.\n\n많은 기대 부탁드립니다.');return false;">공지사항</a>
+    <a class="mob-item" href="#" onclick="closeMobileMenu();setTimeout(function(){document.getElementById('noticeModal').style.display='flex';},200);return false;">공지사항</a>
     <button class="mob-item" onclick="toggleMobCalc()">모의 세금 계산 <span class="mob-toggle-arrow">▾</span></button>
     <div class="mob-sub" id="mobCalcSub">
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('상속세')">상속세 계산기</button>
@@ -283,7 +283,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
       <a class="mob-sub-item" href="https://taxlaw.nts.go.kr/index.do" target="_blank">국세법령정보시스템 <span class="mob-sub-badge">↗</span></a>
       <a class="mob-sub-item" href="https://www.etaxkorea.net/" target="_blank">이택스코리아 <span class="mob-sub-badge">↗</span></a>
     </div>
-    <button class="mob-cta" onclick="window.location.href='tel:0212345678'">유료 상담 예약하기</button>
+    <button class="mob-cta" onclick="window.open('https://open.kakao.com/me/semusa','_blank')">유료 상담 예약하기</button>
   </div>
 </div>
 
@@ -296,7 +296,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
         <p class="hero-desc">풍부한 경험을 바탕으로<br>개인사업자부터 중소기업까지<br>최적의 세무·회계 솔루션을 제공합니다</p>
       </div>
       <div class="hero-actions">
-        <a class="btn-hero-main" href="tel:0212345678">유료 상담 예약하기</a>
+        <a class="btn-hero-main" href="https://open.kakao.com/me/semusa" target="_blank">유료 상담 예약하기</a>
         <button class="btn-hero-sub" onclick="document.querySelector('.services').scrollIntoView({behavior:'smooth'})">서비스 둘러보기</button>
       </div>
     </div>
@@ -319,7 +319,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
 
 <section class="why">
   <div class="sec-label"><span>WHY CHOOSE US</span></div>
-  <div class="sec-title">왜 <em>하나 더 세무회계</em>여야 할까요?</div>
+  <div class="sec-title">왜 <strong style="color:var(--ink);font-weight:700;">하나 더 세무회계</strong> 여야 할까요?</div>
   <div class="why-grid">
     <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3>정확한 신고</h3><p>실수 없는 세무 신고로 불필요한 가산세와 세무조사 리스크를 원천 차단합니다.</p></div>
     <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 10v1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3>합법적 절세</h3><p>법 테두리 안에서 최대한 절세할 수 있는 맞춤 전략을 선제적으로 제안합니다.</p></div>
@@ -374,15 +374,15 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
   <div class="sec-label"><span>TESTIMONIALS</span></div>
   <div class="sec-title">고객들이 <em>신뢰하는</em> 이유</div>
   <div class="test-grid">
-    <div class="test-card"><div class="test-top"><div class="test-stars"><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div></div><div class="test-tag">IT 스타트업</div></div><p>처음 창업할 때부터 지금까지 함께해주셨어요. 복잡한 세무 문제를 항상 명확하게 설명해주셔서 믿고 맡길 수 있었습니다.</p><div class="test-author"><div class="test-av">김</div><div><div class="test-name">김○○ 대표</div><div class="test-co">IT 스타트업 · 3년째 이용 중</div></div></div></div>
-    <div class="test-card"><div class="test-top"><div class="test-stars"><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div></div><div class="test-tag">의료법인</div></div><p>절세 컨설팅 이후 매년 세금 부담이 크게 줄었습니다. 선제적으로 방안을 제안해주셔서 정말 든든합니다.</p><div class="test-author"><div class="test-av">박</div><div><div class="test-name">박○○ 원장</div><div class="test-co">의료법인 · 5년째 이용 중</div></div></div></div>
+    <div class="test-card"><div class="test-top"><div class="test-stars"><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div></div><div class="test-tag">유통업</div></div><p>처음 창업할 때부터 지금까지 함께해주셨어요. 복잡한 세무 문제를 항상 명확하게 설명해주셔서 믿고 맡길 수 있었습니다.</p><div class="test-author"><div class="test-av">김</div><div><div class="test-name">김○○ 대표</div><div class="test-co">유통업</div></div></div></div>
+    <div class="test-card"><div class="test-top"><div class="test-stars"><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div><div class="test-star"></div></div><div class="test-tag">물류업</div></div><p>절세 컨설팅 이후 매년 세금 부담이 크게 줄었습니다. 선제적으로 방안을 제안해주셔서 정말 든든합니다.</p><div class="test-author"><div class="test-av">박</div><div><div class="test-name">박○○ 대표</div><div class="test-co">물류업</div></div></div></div>
   </div>
 </section>
 
 <div class="cta-band">
   <div class="cta-band-inner">
     <div><h3>지금 바로 <em>상담을 예약</em>하세요</h3><p>세무 전문가와 함께 최적의 해법을 찾아드립니다</p></div>
-    <a class="btn-cta-white" href="tel:0212345678">유료 상담 예약 →</a>
+    <a class="btn-cta-white" href="https://open.kakao.com/me/semusa" target="_blank">유료 상담 예약 →</a>
   </div>
 </div>
 
@@ -500,5 +500,41 @@ function closeProfileOutside(e){if(e.target===document.getElementById('profileOv
     </div>
   </div>
 </div>
+<!-- 공지사항 모달 -->
+<div id="noticeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;max-width:560px;width:100%;border-radius:12px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.18);">
+    <!-- 헤더 -->
+    <div style="background:var(--ink);padding:22px 28px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <p style="font-size:10px;letter-spacing:0.12em;color:var(--gold3);font-family:'Playfair Display',serif;margin-bottom:4px;">NOTICE</p>
+        <h2 style="font-size:16px;color:#fff;font-weight:600;font-family:'Noto Serif KR',serif;">공지사항</h2>
+      </div>
+      <button onclick="document.getElementById('noticeModal').style.display='none'" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.6);font-size:22px;line-height:1;padding:4px;">✕</button>
+    </div>
+    <!-- 본문 -->
+    <div style="padding:28px 28px 32px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <span style="background:#f5f0e8;color:var(--moss2);font-size:10px;font-weight:600;letter-spacing:0.08em;padding:4px 10px;border-radius:20px;">오픈 예정 안내</span>
+        <span style="font-size:11px;color:#999;">2025년 04월</span>
+      </div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--ink);font-family:'Noto Serif KR',serif;margin-bottom:16px;line-height:1.6;">하나 더 세무회계, 2027년 2월 공식 오픈 예정</h3>
+      <div style="font-size:12.5px;color:#444;line-height:2.1;font-family:'Noto Serif KR',serif;font-weight:300;">
+        <p style="margin-bottom:14px;">안녕하세요, <strong style="font-weight:600;color:var(--ink);">하나 더 세무회계</strong>입니다.</p>
+        <p style="margin-bottom:14px;">저희 하나 더 세무회계가 <strong style="font-weight:600;">2027년 2월</strong>을 목표로 공식 서비스 오픈을 준비하고 있습니다. 오픈에 앞서 현재 홈페이지를 통해 사전 안내 및 상담 예약을 받고 있으니 많은 관심 부탁드립니다.</p>
+        <p style="margin-bottom:14px;">하나 더 세무회계는 단순한 세무 대리를 넘어, 기장·절세 설계·상속·증여·조세불복 등 고객님의 모든 세금 고민을 함께 해결하는 <em style="color:var(--moss2);">전략적 세무 파트너</em>를 지향합니다. 이코노미조선 칼럼리스트로서의 전문 지식과 다수의 저서를 바탕으로, 검증된 노하우를 실질적인 절세 전략으로 제공해 드릴 것을 약속드립니다.</p>
+        <p style="margin-bottom:14px;">오픈 이후에는 더욱 다양한 콘텐츠와 서비스로 찾아뵐 예정이며, 공지사항 페이지도 2027년 2월 오픈과 함께 정식으로 운영될 예정입니다. 오픈 전이라도 카카오톡 오픈채팅을 통해 상담 예약이 가능하오니 언제든지 편하게 문의해 주세요.</p>
+        <p>앞으로 하나 더 세무회계를 많이 사랑해 주시고, 고객 여러분의 든든한 세무 파트너가 될 수 있도록 최선을 다하겠습니다. 감사합니다.</p>
+      </div>
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid #eee;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <p style="font-size:11px;color:#999;">문의: 카카오톡 오픈채팅 @semusa</p>
+        <div style="display:flex;gap:10px;">
+          <a href="https://open.kakao.com/me/semusa" target="_blank" style="background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:9px 18px;border-radius:6px;text-decoration:none;letter-spacing:0.04em;">상담 예약하기</a>
+          <button onclick="document.getElementById('noticeModal').style.display='none'" style="background:#f2f2f2;color:#555;font-size:11px;font-weight:500;padding:9px 16px;border-radius:6px;border:none;cursor:pointer;">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
