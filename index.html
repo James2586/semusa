@@ -243,6 +243,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
         <div class="dd-item" onclick="openCalcDirect('증여세')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg></div><span class="dd-text">증여세 계산기</span></div>
         <div class="dd-item" onclick="openCalcDirect('양도소득세')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div><span class="dd-text">양도소득세 계산기</span></div>
         <div class="dd-item" onclick="openCalcDirect('종합부동산세')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div><span class="dd-text">종합부동산세 계산기</span></div>
+        <div class="dd-item" onclick="openCalcDirect('부담부증여')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg></div><span class="dd-text">부담부증여 계산기</span></div>
       </div>
     </li>
     <li><a class="nav-item-style" href="https://economychosun.com/svc/news/search.html?query=%EC%84%B1%EA%B4%91%ED%98%B8&sort=0" target="_blank">이코노미조선 칼럼</a></li>
@@ -272,6 +273,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('증여세')">증여세 계산기</button>
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('양도소득세')">양도소득세 계산기</button>
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('종합부동산세')">종합부동산세 계산기</button>
+      <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('부담부증여')">부담부증여 계산기</button>
     </div>
     <a class="mob-item" href="https://economychosun.com/svc/news/search.html?query=%EC%84%B1%EA%B4%91%ED%98%B8&sort=0" target="_blank">이코노미조선 칼럼 <span class="mob-sub-badge">↗</span></a>
     <button class="mob-item" onclick="toggleMobSites()">자주 가는 사이트 <span class="mob-toggle-arrow">▾</span></button>
@@ -415,6 +417,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
           <div class="calc-option" onclick="showCalc('증여세')"><div class="calc-option-icon">🎁</div><h4>증여세 계산기</h4><p>증여 금액에 따른 예상 세액</p></div>
           <div class="calc-option" onclick="showCalc('양도소득세')"><div class="calc-option-icon">📈</div><h4>양도소득세 계산기</h4><p>부동산 양도 차익 세액</p></div>
           <div class="calc-option" onclick="showCalc('종합부동산세')"><div class="calc-option-icon">🏢</div><h4>종합부동산세 계산기</h4><p>보유 부동산 종부세</p></div>
+          <div class="calc-option" onclick="showCalc('부담부증여')" style="grid-column:1/-1"><div class="calc-option-icon">🔄</div><h4>부담부증여 계산기</h4><p>채무 포함 증여의 절세 효과 분석</p></div>
         </div>
       </div>
       <div class="calc-iframe-wrap" id="calcFrame">
@@ -430,7 +433,8 @@ var calcUrls={
   '상속세':'https://james2586.github.io/inheritance-tax8/',
   '증여세':'https://james2586.github.io/gift-tax_2/',
   '양도소득세':'https://james2586.github.io/yangdo_tax_13/',
-  '종합부동산세':'https://james2586.github.io/jongbuse_1/'
+  '종합부동산세':'https://james2586.github.io/jongbuse_1/',
+  '부담부증여':'https://budambu.vercel.app/'
 };
 function openCalc(){document.getElementById('calcOverlay').classList.add('open');showMenu();}
 function openCalcDirect(t){document.getElementById('calcOverlay').classList.add('open');showCalc(t);}
