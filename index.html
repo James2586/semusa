@@ -57,7 +57,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
 .mob-toggle-arrow{font-size:10px;color:var(--gold);}
 .mob-sub{display:none;background:var(--bg2);}
 .mob-sub.open{display:block;}
-.mob-sub-item{display:flex;align-items:center;justify-content:space-between;padding:11px 36px;font-size:12px;color:var(--ink3);font-weight:300;border-bottom:1px solid rgba(160,120,40,0.04);cursor:pointer;width:100%;text-align:left;background:none;border-left:none;border-right:none;border-top:none;font-family:'Noto Sans KR',sans-serif;text-decoration:none;}
+.mob-sub-item{display:flex;align-items:center;justify-content:space-between;padding:13px 32px;font-size:13px;color:var(--ink2);font-weight:400;border-bottom:1px solid rgba(160,120,40,0.08);cursor:pointer;width:100%;text-align:left;background:none;border-left:none;border-right:none;border-top:none;font-family:'Noto Sans KR',sans-serif;text-decoration:none;}
 .mob-sub-item:hover{background:var(--gold-pale);color:var(--gold);}
 .mob-sub-badge{font-size:9px;color:var(--gold2);}
 .mob-cta{margin:12px 24px 0;display:block;background:var(--moss);color:var(--white);text-align:center;padding:12px;font-size:12px;font-weight:400;letter-spacing:0.1em;border:none;cursor:pointer;width:calc(100% - 48px);font-family:'Noto Sans KR',sans-serif;}
@@ -249,6 +249,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
         <div class="dd-item" onclick="openCalcDirect('가수금')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><span class="dd-text">특정법인 증여 가수금 계산기</span></div>
         <div class="dd-item" onclick="openCalcDirect('초과배당')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div><span class="dd-text">특정법인 증여 초과배당 계산기</span></div>
         <div class="dd-item" onclick="openCalcDirect('DC퇴직금')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div><span class="dd-text">DC형 퇴직금 계산기</span></div>
+        <div class="dd-item" onclick="openCalcDirect('임원퇴직금')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><span class="dd-text">임원 퇴직금 계산기</span></div>
       </div>
     </li>
     <li><a class="nav-item-style" href="https://economychosun.com/svc/news/search.html?query=%EC%84%B1%EA%B4%91%ED%98%B8&sort=0" target="_blank">이코노미조선 칼럼</a></li>
@@ -284,6 +285,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('가수금')">특정법인 증여 가수금 계산기</button>
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('초과배당')">특정법인 증여 초과배당 계산기</button>
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('DC퇴직금')">DC형 퇴직금 계산기</button>
+      <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('임원퇴직금')">임원 퇴직금 계산기</button>
     </div>
     <a class="mob-item" href="https://economychosun.com/svc/news/search.html?query=%EC%84%B1%EA%B4%91%ED%98%B8&sort=0" target="_blank">이코노미조선 칼럼 <span class="mob-sub-badge">↗</span></a>
     <button class="mob-item" onclick="toggleMobSites()">자주 가는 사이트 <span class="mob-toggle-arrow">▾</span></button>
@@ -433,6 +435,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
           <div class="calc-option" onclick="showCalc('가수금')" style="grid-column:1/-1"><div class="calc-option-icon">💰</div><h4>특정법인 증여 가수금 계산기</h4><p>가수금을 활용한 특정법인 증여 세금 계산</p></div>
           <div class="calc-option" onclick="showCalc('초과배당')" style="grid-column:1/-1"><div class="calc-option-icon">📊</div><h4>특정법인 증여 초과배당 계산기</h4><p>초과배당을 활용한 특정법인 증여 세금 계산</p></div>
           <div class="calc-option" onclick="showCalc('DC퇴직금')" style="grid-column:1/-1"><div class="calc-option-icon">💼</div><h4>DC형 퇴직금 계산기</h4><p>확정기여형 퇴직연금 퇴직소득세 계산</p></div>
+          <div class="calc-option" onclick="showCalc('임원퇴직금')" style="grid-column:1/-1"><div class="calc-option-icon">👔</div><h4>임원 퇴직금 계산기</h4><p>임원 퇴직 시 퇴직소득세 및 한도 계산</p></div>
         </div>
       </div>
       <div class="calc-iframe-wrap" id="calcFrame">
@@ -454,7 +457,8 @@ var calcUrls={
   '특정법인증여':'https://special-corporate-gift.vercel.app/',
   '가수금':'https://gasugeum.vercel.app/',
   '초과배당':'https://chokwa-baedang.vercel.app/',
-  'DC퇴직금':'https://retirement-tax.vercel.app/'
+  'DC퇴직금':'https://retirement-tax.vercel.app/',
+  '임원퇴직금':'https://ceo-retirment-tax.vercel.app/'
 };
 function openCalc(){document.getElementById('calcOverlay').classList.add('open');showMenu();}
 function openCalcDirect(t){document.getElementById('calcOverlay').classList.add('open');showCalc(t);}
