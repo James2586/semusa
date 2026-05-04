@@ -275,6 +275,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
       <button class="nav-item-style" onclick="openCalc()">모의 세금 계산 ▾</button>
       <div class="desktop-dropdown">
         <div class="dd-item" onclick="openCalcDirect('상속세')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></div><span class="dd-text">상속세 계산기</span></div>
+        <div class="dd-item" onclick="openCalcDirect('상속세전문가')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg></div><span class="dd-text">상속세 계산기 (전문가용)</span></div>
         <div class="dd-item" onclick="openCalcDirect('증여세')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg></div><span class="dd-text">증여세 계산기</span></div>
         <div class="dd-item" onclick="openCalcDirect('양도소득세')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div><span class="dd-text">양도소득세 계산기</span></div>
         <div class="dd-item" onclick="openCalcDirect('종합부동산세')"><div class="dd-icon"><svg viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div><span class="dd-text">종합부동산세 계산기</span></div>
@@ -311,6 +312,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
     <button class="mob-item" onclick="toggleMobCalc()">모의 세금 계산 <span class="mob-toggle-arrow">▾</span></button>
     <div class="mob-sub" id="mobCalcSub">
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('상속세')">상속세 계산기</button>
+      <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('상속세전문가')">상속세 계산기 (전문가용)</button>
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('증여세')">증여세 계산기</button>
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('양도소득세')">양도소득세 계산기</button>
       <button class="mob-sub-item" onclick="closeMobileMenu();openCalcDirect('종합부동산세')">종합부동산세 계산기</button>
@@ -461,6 +463,7 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
         <p style="font-size:12px;color:#7A7464;font-weight:300;line-height:1.8;">계산하실 항목을 선택해 주세요.<br>결과는 참고용이며, 정확한 세액은 전문가 상담을 권장합니다.</p>
         <div class="calc-grid-modal">
           <div class="calc-option" onclick="showCalc('상속세')"><div class="calc-option-icon">🏠</div><h4>상속세 계산기</h4><p>상속 재산에 따른 예상 세액</p></div>
+          <div class="calc-option" onclick="showCalc('상속세전문가')"><div class="calc-option-icon">🏆</div><h4>상속세 계산기 (전문가용)</h4><p>전문가용 상세 상속세 계산</p></div>
           <div class="calc-option" onclick="showCalc('증여세')"><div class="calc-option-icon">🎁</div><h4>증여세 계산기</h4><p>증여 금액에 따른 예상 세액</p></div>
           <div class="calc-option" onclick="showCalc('양도소득세')"><div class="calc-option-icon">📈</div><h4>양도소득세 계산기</h4><p>부동산 양도 차익 세액</p></div>
           <div class="calc-option" onclick="showCalc('종합부동산세')"><div class="calc-option-icon">🏢</div><h4>종합부동산세 계산기</h4><p>보유 부동산 종부세</p></div>
@@ -483,9 +486,10 @@ body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg)
 
 <script>
 var calcUrls={
-  '상속세':'https://james2586.github.io/inheritance-tax8/',
+  '상속세':'https://inheritance-tax8.vercel.app/',
+  '상속세전문가':'https://inheritance-tax-1.vercel.app/',
   '증여세':'https://gift-tax-2.vercel.app/',
-  '양도소득세':'https://james2586.github.io/yangdo_tax_13/',
+  '양도소득세':'https://yangdo-tax-13.vercel.app/',
   '종합부동산세':'https://james2586.github.io/jongbuse_1/',
   '부담부증여':'https://budambu.vercel.app/',
   '취득세':'https://buytax.vercel.app/',
