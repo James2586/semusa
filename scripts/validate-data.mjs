@@ -67,6 +67,20 @@ export function checkServices(text, calcSlugs) {
   return errors;
 }
 
+export function checkHome(text, svcSlugs) {
+  const errors = [];
+  const { data, error } = parseJsonFile("home.json", text);
+  if (error) return [error];
+  (data.situations || []).forEach((s, i) => {
+    if (!s.text) errors.push(`home.json: ${i + 1}번째 상황의 text가 비었습니다.`);
+    if (!svcSlugs.has(s.service)) errors.push(`home.json: ${i + 1}번째 상황의 service "${s.service}"는 services.json에 없습니다.`);
+  });
+  if (!(data.situations || []).length) errors.push("home.json: situations가 비었습니다.");
+  if (!Number.isInteger(data.booksTotal) || data.booksTotal < 1) errors.push("home.json: booksTotal은 책 권수(숫자)여야 합니다.");
+  for (const k of ["consult", "steps", "prepare"]) if (!(data[k] || []).length) errors.push(`home.json: ${k}가 비었습니다.`);
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -114,7 +128,10 @@ export function validateAll(root = ROOT) {
   try { calcSlugs = new Set(JSON.parse(calcText).calculators.map((c) => c.slug)); } catch {}
   errors.push(...checkServices(read("src/data/services.json"), calcSlugs));
   errors.push(...checkSite(read("src/data/site.json")));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json"]) {
+  let svcSlugs = new Set();
+  try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
+  errors.push(...checkHome(read("src/data/home.json"), svcSlugs));
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

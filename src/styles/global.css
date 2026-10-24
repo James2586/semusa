@@ -12,7 +12,7 @@
   --on-moss: #F3F0E7;
   --on-moss2: #C3CDC6;
   --gold: #C4993C;
-  --gold-text: #8A6620;
+  --gold-text: #806020;
   --gold-hi: #E8C46A;
   --gold-soft: #F5EDD4;
   --kakao: #FEE500;
@@ -54,7 +54,8 @@ p { margin: 0; }
 
 .gut { padding-left: var(--gutter); padding-right: var(--gutter-r); }
 .wrap { max-width: 1080px; margin: 0 auto; }
-.narrow { max-width: 760px; }
+.narrow { max-width: 1080px; }
+.narrow > * { max-width: 760px; }
 .skip { position: absolute; left: -9999px; top: 0; background: var(--moss); color: var(--on-moss); padding: 10px 14px; z-index: 100; }
 .skip:focus { left: 12px; top: calc(env(safe-area-inset-top, 0px) + 8px); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

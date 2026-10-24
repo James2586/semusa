@@ -56,3 +56,12 @@ test("계산기 상세 페이지에는 휴대폰 아래 막대가 없다", { ski
   assert.ok(!readFileSync(join(DIST, "calculators/gift.html"), "utf8").includes('class="bbar"'));
   assert.ok(readFileSync(join(DIST, "index.html"), "utf8").includes('class="bbar"'));
 });
+
+test("홈: 6구역, 상황 칸은 있는 서비스 페이지로, 책 33권·후기 2건·카카오톡 버튼", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "index.html"), "utf8");
+  for (const id of ["h-hero", "h-situ", "h-books", "h-how", "h-faq", "h-loc"]) assert.match(h, new RegExp(`id="${id}"`), id);
+  for (const m of h.matchAll(/href="\/services\/([a-z-]+)"/g)) assert.ok(existsSync(join(DIST, "services", `${m[1]}.html`)), m[1]);
+  assert.match(h, /책 33권/);
+  assert.equal((h.match(/class="card rv"/g) || []).length, 2);
+  assert.match(h, /class="btn btn-kakao"/);
+});

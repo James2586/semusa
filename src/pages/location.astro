@@ -1,49 +1,12 @@
 ---
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
+import LocationBlock from "../components/LocationBlock.astro";
 import site from "../data/site.json";
-import KakaoIcon from "../components/KakaoIcon.astro";
-const q = encodeURIComponent(site.address.full.replace(/^서울시/, "서울"));
 ---
 <Base title="오시는 길" description={`${site.address.full} · ${site.hours}`}>
   <PageHead title="오시는 길" crumbs={[{ name: "오시는 길" }]} />
   <section class="gut" style="padding-bottom:64px">
-    <div class="wrap loc">
-      <dl>
-        <dt>주소</dt><dd id="addr">{site.address.full}</dd>
-        {site.transit && <><dt>교통</dt><dd>{site.transit}</dd></>}
-        {site.parking && <><dt>주차</dt><dd>{site.parking}</dd></>}
-        <dt>운영</dt><dd>{site.hours}</dd>
-        <dt>메일</dt><dd>{site.email}</dd>
-      </dl>
-      <div class="acts">
-        <button class="btn btn-line btn-block" type="button" id="copyAddr">주소 복사</button>
-        <p class="copy-ok" id="copyOk" role="status"></p>
-        <div class="two">
-          <a class="btn btn-line" href={`https://map.kakao.com/link/search/${q}`} target="_blank" rel="noopener">카카오맵 ↗</a>
-          <a class="btn btn-line" href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener">네이버 지도 ↗</a>
-        </div>
-        <a class="btn btn-kakao btn-block" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />방문 전 카카오톡으로 예약</a>
-      </div>
-    </div>
+    <div class="wrap"><LocationBlock /></div>
   </section>
 </Base>
-<style>
-  .loc { display: grid; gap: 24px; }
-  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; font-size: 17px; }
-  dt { color: var(--muted); font-size: 15.5px; padding-top: 1px; }
-  dd { margin: 0; }
-  .acts { display: grid; gap: 10px; align-content: start; }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .copy-ok { font-size: 15px; color: var(--moss2); min-height: 1.5em; }
-  @media (min-width: 900px) { .loc { grid-template-columns: 1fr 1fr; gap: 48px; } }
-</style>
-<script>
-  const btn = document.getElementById("copyAddr")!;
-  const ok = document.getElementById("copyOk")!;
-  const addr = document.getElementById("addr")!;
-  btn.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(addr.textContent || ""); ok.textContent = "주소를 복사했어요."; }
-    catch { const r = document.createRange(); r.selectNodeContents(addr); const s = getSelection()!; s.removeAllRanges(); s.addRange(r); ok.textContent = "주소를 선택했어요. 길게 눌러 복사하세요."; }
-  });
-</script>
