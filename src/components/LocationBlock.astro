@@ -17,11 +17,11 @@ const q = encodeURIComponent(site.address.full.replace(/^서울시/, "서울"));
     </dl>
   </div>
   <div class="acts">
-    <button class="btn btn-line btn-block" type="button" data-copy-addr>주소 복사</button>
+    <button class="btn btn-moss btn-block" type="button" data-copy-addr>주소 복사</button>
     <p class="copy-ok" role="status" data-copy-ok></p>
     <div class="two">
-      <a class="btn btn-line" href={`https://map.kakao.com/link/search/${q}`} target="_blank" rel="noopener">카카오맵 ↗</a>
-      <a class="btn btn-line" href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener">네이버 지도 ↗</a>
+      <a class="btn btn-moss" href={`https://map.kakao.com/link/search/${q}`} target="_blank" rel="noopener">카카오맵 ↗</a>
+      <a class="btn btn-moss" href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener">네이버 지도 ↗</a>
     </div>
     <a class="btn btn-kakao btn-block" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />방문 전 카카오톡으로 예약</a>
   </div>

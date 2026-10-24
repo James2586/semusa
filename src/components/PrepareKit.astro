@@ -15,9 +15,9 @@ const { items, id, title } = Astro.props;
   <div class="pk-bar" data-pk-bar hidden>
     <p class="pk-n" aria-live="polite" data-pk-n></p>
     <div class="pk-acts">
-      <button type="button" class="btn btn-moss pk-send" data-pk-send>목록 보내기</button>
-      <button type="button" class="pk-tl" data-pk-print>인쇄 한 장</button>
-      <button type="button" class="pk-tl" data-pk-reset>표시 지우기</button>
+      <button type="button" class="btn btn-moss pk-b" data-pk-send>목록 보내기</button>
+      <button type="button" class="btn btn-moss pk-b" data-pk-print>인쇄 한 장</button>
+      <button type="button" class="btn btn-moss pk-b" data-pk-reset>표시 지우기</button>
     </div>
     <p class="pk-st" role="status" data-pk-st>챙긴 표시는 이 기기에만 남고, 어디로도 보내지 않습니다.</p>
   </div>
@@ -38,10 +38,8 @@ const { items, id, title } = Astro.props;
   .pk-bar { display: grid; gap: 8px; }
   .pk-bar[hidden] { display: none; }
   .pk-n { font-size: 15px; font-weight: 700; color: var(--moss); }
-  .pk-acts { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
-  .pk-send { min-height: 44px; padding: 0 18px; }
-  .pk-tl { min-height: 44px; padding: 0 2px; border: 0; background: none; font: 500 15.5px var(--f-body); color: var(--ink); text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; cursor: pointer; }
-  .pk-tl:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .pk-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .pk-b { min-height: 44px; padding: 0 18px; }
   .pk-st { font-size: 14px; color: var(--ink2); }
   .pk-print-h { display: none; }
   /* 「인쇄 한 장」: 누른 목록만 종이에 */
