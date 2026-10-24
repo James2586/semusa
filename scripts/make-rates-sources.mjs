@@ -2,10 +2,11 @@
 // /rates가 보이는 조문·부칙만 docs/rates-sources.json으로 옮긴다. 손으로 고치지 말고:
 //   node scripts/make-rates-sources.mjs [택스 서치 tests/fixtures 경로 — 기본 ../tax-search/tests/fixtures]
 // 쪽은 이 파일의 원문 줄을 그대로 그린다(표는 src/lib/lawTable.js가 선 문자 표를 풀어서) — 숫자를 따로 옮겨 적지 않는다.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { argDir, writeOrCheck } from "./lib/sourceCheck.mjs";
 import { join, resolve } from "node:path";
 
-const DIR = resolve(process.argv[2] || join(new URL("..", import.meta.url).pathname, "../tax-search/tests/fixtures"));
+const DIR = resolve(argDir(join(new URL("..", import.meta.url).pathname, "../tax-search/tests/fixtures")));
 const J = (f) => JSON.parse(readFileSync(join(DIR, f), "utf8"));
 const at = (o, path) => path.reduce((x, k) => x?.[k], o);
 const eff = (m) => m.effective || m.effectiveDate || m.basicEffectiveDate || null;
@@ -48,6 +49,5 @@ for (const [id, file, path, art] of ADDENDA) {
   items[id] = { law: a.law, article: `부칙(법률 제${a.promulgationNo}호, ${a.promulgationDate}) 제${art}조`, title: art === "1" ? "시행일" : "적용례", promulgationDate: a.promulgationDate, promulgationNo: a.promulgationNo,
     effectiveDate: null, fetchedAt: j.fetchedAt, from: `tax-search tests/fixtures/${file}`, lines: [{ d: 1, t }] };
 }
-writeFileSync(join(new URL("..", import.meta.url).pathname, "docs/rates-sources.json"),
-  JSON.stringify({ _note: "세율·공제 한눈에(/rates) 원문 — 법제처 법령 원문을 택스 서치가 받아 둔 것. scripts/make-rates-sources.mjs로만 갱신.", items }, null, 1) + "\n");
-console.log(`조문·부칙 ${Object.keys(items).length}개 → docs/rates-sources.json`);
+writeOrCheck(join(new URL("..", import.meta.url).pathname, "docs/rates-sources.json"), items,
+  "세율·공제 한눈에(/rates) 원문 — 법제처 법령 원문을 택스 서치가 받아 둔 것. scripts/make-rates-sources.mjs로만 갱신.", "세율·공제 원문");

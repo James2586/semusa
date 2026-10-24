@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 42개(색인 38 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 42);
+test("페이지 43개(색인 39 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 43);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 38);
+  assert.equal((sm.match(/<loc>/g) || []).length, 39);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -309,4 +309,17 @@ test("이번 달 마감 띠: 모든 쪽에(머리글 바로 아래) · 기한은
     assert.ok(occ.length >= 12, f); // 매달 원천세만으로도 1년 12번
     for (const [iso, wd, name] of occ) { assert.match(iso, /^\d{4}-\d{2}-\d{2}$/); assert.match(wd, /^[월화수목금]$/, `${iso} ${wd}`); assert.ok(names.has(name), name); }
   }
+});
+
+test("원문 기준일: 옮겨 둔 원문마다 법률 번호·받은 날 · 기한 근거 조문 · 감시 작업은 --check로 둘 다 대조", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "sources.html"), "utf8");
+  for (const f of ["docs/glossary-sources.json", "docs/rates-sources.json"]) for (const a of Object.values(JSON.parse(readFileSync(f, "utf8")).items)) {
+    assert.ok(h.includes(`법률 제${a.promulgationNo}호`), `${a.law} ${a.article}`);
+    assert.ok(h.includes(a.fetchedAt.split("-").map(Number).join(". ") + "."), a.fetchedAt);
+  }
+  for (const y of JSON.parse(readFileSync("src/data/deadlines.json", "utf8")).yearly) assert.ok(h.includes(y.law), y.law);
+  const wf = readFileSync(".github/workflows/law-watch.yml", "utf8");
+  assert.match(wf, /make-glossary-sources\.mjs tax-search\/tests\/fixtures --check/);
+  assert.match(wf, /make-rates-sources\.mjs tax-search\/tests\/fixtures --check/);
+  assert.match(wf, /TAX_SEARCH_TOKEN/);
 });

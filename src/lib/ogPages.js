@@ -14,6 +14,7 @@ export function ogPagesFrom({ services = [], calculators = [], groups = [], book
     { path: "/glossary", file: "glossary", kicker: "용어 풀이", title: "세금 말, 쉬운 말로", sub: "쉬운 말 풀이와 법조문 원문을 함께" },
     { path: "/faq", file: "faq", kicker: "자주 묻는 질문", title: "자주 묻는 질문", sub: "근거 조문과 함께 답합니다" },
     { path: "/rates", file: "rates", kicker: "세율·공제 한눈에", title: "세율과 공제, 원문 그대로", sub: "상속·증여 · 양도 · 취득 · 종부 · 종합소득 · 법인세" },
+    { path: "/sources", file: "sources", kicker: "원문 기준일", title: "법조문 원문, 언제 받은 것인지", sub: "법률 번호 · 공포일 · 받은 날 · 쓰는 곳" },
     { path: "/life", file: "life", kicker: "세금 생애 지도", title: "일생의 일마다, 먼저 볼 기한", sub: "사업 · 집 · 증여 · 양도 · 퇴직 · 상속" },
     { path: "/topics", file: "topics", kicker: "주제 모아 보기", title: "주제마다 한 쪽에", sub: topics.map((t) => t.name).join(" · ") },
     // 부제는 그 쪽에 실제로 있는 구역만(칼럼 유무는 press 주제 칸으로 판단 — 쪽의 RelatedColumns와 같은 기준)

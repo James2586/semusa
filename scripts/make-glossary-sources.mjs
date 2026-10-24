@@ -2,10 +2,11 @@
 // 용어 풀이가 인용하는 조문만 docs/glossary-sources.json으로 옮긴다. 손으로 고치지 말고:
 //   node scripts/make-glossary-sources.mjs [택스 서치 tests/fixtures 경로 — 기본 ../tax-search/tests/fixtures]
 // tests/glossary.test.mjs가 src/data/glossary.json의 인용(quote)을 이 파일 원문과 글자 그대로 대조한다.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { argDir, writeOrCheck } from "./lib/sourceCheck.mjs";
 import { join, resolve } from "node:path";
 
-const DIR = resolve(process.argv[2] || join(new URL("..", import.meta.url).pathname, "../tax-search/tests/fixtures"));
+const DIR = resolve(argDir(join(new URL("..", import.meta.url).pathname, "../tax-search/tests/fixtures")));
 const J = (f) => JSON.parse(readFileSync(join(DIR, f), "utf8"));
 const at = (o, path) => path.reduce((x, k) => x?.[k], o);
 
@@ -36,6 +37,5 @@ for (const [id, file, path, law, article, metaPath] of SPEC) {
   items[id] = { law, article, title: a.title, promulgationDate: m.promulgationDate || null, promulgationNo: m.promulgationNo || null,
     effectiveDate: a.effectiveDate || m.basicEffectiveDate || null, fetchedAt: j.fetchedAt, from: `tax-search tests/fixtures/${file}`, lines: a.lines.map((l) => l.t) };
 }
-writeFileSync(join(new URL("..", import.meta.url).pathname, "docs/glossary-sources.json"),
-  JSON.stringify({ _note: "용어 풀이 인용 원문 — 법제처 법령 원문을 택스 서치가 받아 둔 것. scripts/make-glossary-sources.mjs로만 갱신.", items }, null, 1) + "\n");
-console.log(`조문 ${Object.keys(items).length}개 → docs/glossary-sources.json`);
+writeOrCheck(join(new URL("..", import.meta.url).pathname, "docs/glossary-sources.json"), items,
+  "용어 풀이 인용 원문 — 법제처 법령 원문을 택스 서치가 받아 둔 것. scripts/make-glossary-sources.mjs로만 갱신.", "용어 풀이 원문");

@@ -1,0 +1,62 @@
+---
+// 원문 기준일(2026-10-24 5차 A3): 이 사이트가 옮겨 둔 법조문 원문 목록 — 법률 번호·공포일·받은 날과 쓰는 곳.
+// 원문은 docs/glossary-sources.json·docs/rates-sources.json(택스 서치가 법제처에서 받아 둔 것), 기한 규칙 근거는 deadlines.json의 law 글 그대로.
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import gSrc from "../../docs/glossary-sources.json";
+import rSrc from "../../docs/rates-sources.json";
+import glossary from "../data/glossary.json";
+import rates from "../data/rates.json";
+import dl from "../data/deadlines.json";
+
+const ymd = (s: string | null) => (s ? `${Number(s.slice(0, 4))}. ${Number(s.slice(4, 6))}. ${Number(s.slice(6, 8))}.` : "");
+const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
+const useG: Record<string, string[]> = {}, useR: Record<string, string[]> = {};
+for (const t of glossary.terms as any[]) for (const q of t.quotes) (useG[q.src] ||= []).includes(t.term) || useG[q.src].push(t.term);
+for (const s of rates.sections as any[]) for (const g of s.groups) for (const it of g.items) (useR[it.src] ||= []).includes(s.name) || useR[it.src].push(s.name);
+const rows = [
+  ...Object.entries((gSrc as any).items).map(([id, a]: any) => ({ a, where: `용어 풀이 — ${useG[id]?.join(", ") || "-"}`, href: "/glossary" })),
+  ...Object.entries((rSrc as any).items).map(([id, a]: any) => ({ a, where: `세율·공제 — ${useR[id]?.join(", ") || "-"}`, href: "/rates" })),
+];
+const dlLaws = [...new Set([...dl.events.flatMap((e: any) => [e.law, e.fact?.law]), ...dl.yearly.map((y: any) => y.law)].filter(Boolean))];
+---
+<Base title="원문 기준일" description="이 사이트가 옮겨 둔 법조문 원문의 법률 번호·공포일·받은 날과 쓰는 곳.">
+  <PageHead tag="원문 기준일" title="법조문 원문, 언제 받은 것인지" crumbs={[{ name: "원문 기준일" }]}
+    lead="용어 풀이와 세율·공제 한눈에가 옮겨 둔 법조문 원문 목록입니다. 법이 바뀌면 원문을 다시 받아 사이트 글을 확인한 뒤 고칩니다." />
+  <section class="gut sr-sec">
+    <div class="wrap sr-in">
+      <div class="sr-tw" tabindex="0" role="region" aria-label="옮겨 둔 법조문 원문">
+        <table>
+          <thead><tr><th scope="col">조문</th><th scope="col">판</th><th scope="col">받은 날</th><th scope="col">쓰는 곳</th></tr></thead>
+          <tbody>
+            {rows.map(({ a, where, href }) => (
+              <tr><th scope="row">{a.law} {a.article}<small>{a.title}</small></th><td>법률 제{a.promulgationNo}호<small>{ymd(a.promulgationDate)} 공포</small></td><td>{dot(a.fetchedAt)}</td><td><a href={href}>{where}</a></td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div class="sr-dl">
+        <h2 class="sec-h">기한 규칙의 근거 조문</h2>
+        <p class="sr-note">기한 달력·올해 세금 달력·첫 화면 기한 계산이 쓰는 규칙의 근거입니다. 법조문 원문과 대조해 적었습니다.</p>
+        <ul>{dlLaws.map((l) => <li>{l}</li>)}</ul>
+      </div>
+      <p class="sr-note">원문 출처는 법제처 국가법령정보입니다. 지난 거래·과세기간에는 그때 판이 적용될 수 있습니다.</p>
+    </div>
+  </section>
+</Base>
+<style>
+  .sr-sec { padding-block: 24px 64px; }
+  .sr-in { display: grid; gap: 32px; }
+  .sr-tw { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .sr-tw:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  thead th { font-size: 14px; color: var(--ink2); font-weight: 700; }
+  tbody th { font-weight: 600; }
+  small { display: block; font-size: 14px; font-weight: 400; color: var(--ink2); }
+  td a { color: var(--ink); text-underline-offset: 3px; }
+  tbody tr:last-child > * { border-bottom: 0; }
+  .sr-dl { display: grid; gap: 10px; }
+  .sr-dl ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: 15.5px; color: var(--ink2); }
+  .sr-note { font-size: 15px; color: var(--ink2); }
+</style>
