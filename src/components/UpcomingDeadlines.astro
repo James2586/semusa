@@ -1,0 +1,52 @@
+---
+// 매년(매달) 돌아오는 기한 — 날짜 규칙·근거 조문은 src/data/deadlines.json "yearly". 남은 날은 보는 날 기준이라 화면에서 채운다
+// (자바스크립트가 없으면 규칙 글과 근거 조문만 보인다).
+import data from "../data/deadlines.json";
+import { fetchHolidayRows } from "../lib/holidays.js";
+const holidays = await fetchHolidayRows();
+---
+<div data-up-wrap>
+  <ul class="up-list" data-up>
+    {data.yearly.map((i) => (
+      <li data-id={i.id}><span class="up-dd" data-dd></span><b>{i.name}</b><span class="up-when"><span data-date></span>{i.when}</span><span class="up-law">{i.law}</span></li>
+    ))}
+  </ul>
+  <p class="up-note" data-up-note>기한이 토·일요일·공휴일이면 다음 날로 옮겼습니다.</p>
+  <script type="application/json" data-up-data set:html={JSON.stringify({ yearly: data.yearly, holidays }).replace(/</g, "\\u003c")} />
+</div>
+
+<style is:global>
+  .up-list { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--ink); }
+  .up-list li { display: grid; grid-template-columns: 80px minmax(0, 1fr); column-gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .up-list li > :not(.up-dd) { grid-column: 2; }
+  .up-dd { grid-row: 1 / span 3; font-family: "Hanadeo Num", "Noto Serif KR", serif; font-size: 22px; line-height: 1.35; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .up-dd.soon { color: var(--gold-text); }
+  .up-list b { font-size: 17px; }
+  .up-when { font-size: 15.5px; font-variant-numeric: tabular-nums; }
+  .up-when [data-date]:not(:empty)::after { content: " — "; }
+  .up-law { font-size: 14px; color: var(--muted); }
+  .up-note { margin-top: 10px; font-size: 14px; color: var(--muted); }
+</style>
+
+<script>
+  import { nextYearly } from "../lib/deadlineCalc.js";
+  import { buildHolidayIndex, unknownYearNote } from "../lib/ntsDeadline.js";
+  document.querySelectorAll<HTMLElement>("[data-up-wrap]").forEach((wrap) => {
+    const json = JSON.parse(wrap.querySelector("[data-up-data]")!.textContent || "{}");
+    const holidays = buildHolidayIndex(json.holidays || []);
+    const list = wrap.querySelector<HTMLElement>("[data-up]")!;
+    const rows = (json.yearly as any[]).map((it) => ({ it, r: nextYearly(it, { holidays }), li: list.querySelector<HTMLElement>(`[data-id="${it.id}"]`)! }));
+    rows.sort((a, b) => a.r.dday - b.r.dday);
+    let unknown = "";
+    for (const { r, li } of rows) {
+      const dd = li.querySelector<HTMLElement>("[data-dd]")!;
+      dd.textContent = r.dday === 0 ? "D-DAY" : `D-${r.dday}`;
+      dd.classList.toggle("soon", r.dday <= 30);
+      const [y, m, d] = r.deadlineIso.split("-").map(Number);
+      li.querySelector("[data-date]")!.textContent = `${y}. ${m}. ${d}. (${r.weekday})${r.shifted.length ? " · 쉬는 날이라 다음 날" : ""}`;
+      list.appendChild(li);
+      unknown ||= unknownYearNote(r);
+    }
+    if (unknown) wrap.querySelector("[data-up-note]")!.textContent = unknown;
+  });
+</script>

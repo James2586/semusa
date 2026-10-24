@@ -1,7 +1,7 @@
 # semusa — 하나 더 세무회계 홈페이지
 
 - 배포: https://semusatax.vercel.app (main 병합 → Vercel). 작업 가지에서 만든 것은 단계가 끝나 운영자가 확인하기 전에는 main에 병합하지 않는다.
-- Astro 7 정적 사이트. `npm run build && npm test`(자료 검사·빌드·제목 글꼴 자르기·검사 26개).
+- Astro 7 정적 사이트. `npm run build && npm test`(자료 검사·빌드·제목 글꼴 자르기·검사 33개).
 
 ## 운영자 결정 (바꾸려면 운영자에게 먼저 묻는다)
 
@@ -22,6 +22,11 @@
 - 하위 컴포넌트(`KakaoIcon` 등)에 스타일을 줄 땐 `:global()` — Astro 범위 스타일은 자식 컴포넌트에 닿지 않는다.
 - 서비스 페이지의 기한(`services.json` deadlines)·계산기 안내 글(`calculators.json`)은 법조문 원문과 대조한 것만, `law`(근거 조문) 필수 — 근거 인용은 `docs/calculator-content-sources.json`. 글을 고치면 근거도 같이 고친다.
 - 계산기 iframe은 화면 한 장 높이로 둔다(높이 자동 맞춤 금지) — 계산기 13개의 결과·보고서 창이 화면에 고정되어 떠서, iframe을 내용 길이로 늘리면 그 창이 화면 밖에 뜬다.
+- 신고 기한 계산(2026-10-24 시안 D — 홈 첫 화면·서비스 페이지 `calcEvents`): 규칙·근거 조문·"하나 더 확인할 것"은 `src/data/deadlines.json`만(법조문 대조분만 — `scripts/validate-data.mjs`가 law 칸을 막음), 계산은 `src/lib/deadlineCalc.js`(`tests/deadline.test.mjs`).
+  "말일부터 N개월"은 말일 다음 날을 기산일로 민법 제160조, "날부터 N일"은 초일 불산입. 공휴일 연장은 `src/lib/ntsDeadline.js`·`civilPeriod.js` — 택스 서치 `shared/`와 **같은 파일**(고치지 말고 그쪽에서 복사).
+  공휴일은 빌드 때 통합검색 22 공개 자료(`/api/faq?resource=holidays`, `src/lib/holidays.js`)에서 읽고, 못 읽으면 토·일·노동절만 넘기며 화면에 "공휴일 자료 없음"을 적는다(빌드는 멈추지 않음) — 임시공휴일이 생기면 다시 배포해야 반영된다.
+  남은 날 숫자는 자릿수 바퀴(움직임 줄이기면 바로), 화면 읽기용 글자(`data-num-sr`)를 빼지 말 것. JS가 만드는 칸에도 닿게 이 부품 스타일은 `dl-` 머리글자의 전역 스타일.
+- 종이색은 풀빛 도는 회색(#F2F3EE), + 기호는 로고·마감 표시·옅은 모눈(`.plusgrid`)에만 — 장식으로 늘리지 말 것(2026-10-24 시안 1판에서 십자수처럼 보인다는 지적).
 - 칼럼·책 카드 표지는 `src/components/Thumb.astro` — 블로그 글은 제목 낱말로 주제(`src/lib/thumbTopic.js`)를 골라 색·그림을 바꾸고, RSS에 네이버 사진(pstatic.net)이 있으면 사진을 쓴다(못 불러오면 그림).
 - 아이콘 PNG·`manifest.webmanifest`는 favicon.svg와 같은 그림(숲색 바탕 + 금색 십자) — `tests/icons.test.mjs`가 픽셀을 본다(예전 PNG에 깨진 그림 표시가 찍혀 바로가기 아이콘이 하얬다).
 - 칼럼·책의 블로그 최신 글은 빌드 때 RSS를 읽고(`src/lib/blogFeed.js`), 못 읽으면 그 칸만 뺀다 — 빌드를 실패시키지 말 것.

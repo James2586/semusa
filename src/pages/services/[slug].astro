@@ -5,6 +5,7 @@ import svcData from "../../data/services.json";
 import calcData from "../../data/calculators.json";
 import home from "../../data/home.json";
 import site from "../../data/site.json";
+import DeadlineCalc from "../../components/DeadlineCalc.astro";
 
 export function getStaticPaths() {
   return svcData.services.map((s) => ({ params: { slug: s.slug }, props: { svc: s } }));
@@ -24,6 +25,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
     <div class="wrap narrow">
       <span class="tag">기한부터 확인하세요</span>
       <h2 class="sec-h" id="h-dl">신고·청구 기한</h2>
+      {svc.calcEvents && <div class="svc-calc"><DeadlineCalc events={svc.calcEvents} uid={`s-${svc.slug}`} heading={`${svc.name} 기한 계산`} /></div>}
       <div class="dls">
         {svc.deadlines.map((d: any) => (
           <div class="card dl">
@@ -104,6 +106,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
 <style>
   .urgent-band { background: var(--gold-soft); border-bottom: 1px solid rgba(160, 120, 40, .3); }
   .urgent-band p { padding-block: 14px; font-weight: 600; color: var(--ink); }
+  .svc-calc { margin-top: 18px; }
   .dls { display: grid; gap: 14px; margin-top: 18px; }
   .dl { display: grid; gap: 8px; }
   .dl h3 { font-size: 18px; }
