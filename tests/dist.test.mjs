@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 40개(색인 36 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 40);
+test("페이지 41개(색인 37 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 41);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 36);
+  assert.equal((sm.match(/<loc>/g) || []).length, 37);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -236,4 +236,22 @@ test("상담 요청 글: 길잡이·기한 달력에 붙고, 이 기기 안에�
     assert.match(h, /이 글은 이 기기 안에서만 만들고 어디로도 보내지 않습니다/, f);
   }
   assert.doesNotMatch(readFileSync("src/components/ConsultNote.astro", "utf8"), /localStorage|sessionStorage|fetch\(/);
+});
+
+test("세금 생애 지도: 정거장마다 펼침 단추·내용(기한 근거·계산기·용어) · 첫 화면 맛보기 링크", { skip: !has }, () => {
+  const L = JSON.parse(readFileSync("src/data/lifemap.json", "utf8"));
+  const G = Object.fromEntries(JSON.parse(readFileSync("src/data/guide.json", "utf8")).situations.map((s) => [s.id, s]));
+  const dl = JSON.parse(readFileSync("src/data/deadlines.json", "utf8"));
+  const h = readFileSync(join(DIST, "life.html"), "utf8");
+  for (const s of [...L.stops, ...L.anytime]) {
+    assert.match(h, new RegExp(`id="lm-b-${s.id}"[^>]*aria-controls="lm-p-${s.id}"`), s.id);
+    const g = G[s.guide];
+    if (g.event) assert.ok(h.includes(dl.events.find((e) => e.id === g.event).law), `${s.id}: event law`);
+    for (const y of g.yearly || []) assert.ok(h.includes(dl.yearly.find((e) => e.id === y).law), `${s.id}: ${y}`);
+    for (const c of g.calculators) assert.match(h, new RegExp(`href="/calculators/${c}"`), `${s.id}: ${c}`);
+    for (const t of s.glossary) assert.match(h, new RegExp(`href="/glossary#g-${t}"`), `${s.id}: ${t}`);
+  }
+  assert.equal((h.match(/class="lm-panel"[^>]*hidden/g) || []).length, L.stops.length + L.anytime.length - 1); // 처음엔 하나만 펼침
+  const home = readFileSync(join(DIST, "index.html"), "utf8");
+  for (const s of L.stops) assert.match(home, new RegExp(`href="/life#${s.id}"`));
 });

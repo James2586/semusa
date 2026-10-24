@@ -1,0 +1,160 @@
+---
+// 세금 생애 지도(2026-10-24 4차 D1): 일생의 일을 한 줄 지도로 — 정거장을 누르면 그 일의 기한·계산기·용어·더 보기가 펼쳐진다.
+// 글은 lifemap.json 이름표뿐, 내용은 guide.json(상황 → 기한·계산기·서비스)·deadlines.json·glossary.json·topics.json 그대로(새 세법 글 없음).
+// 주소 #<정거장 id>로 그 일을 펼친 채 연다. 자바스크립트가 없으면 전부 펼친다.
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import life from "../data/lifemap.json";
+import guide from "../data/guide.json";
+import dl from "../data/deadlines.json";
+import glossary from "../data/glossary.json";
+import calcData from "../data/calculators.json";
+import svcData from "../data/services.json";
+import topicData from "../data/topics.json";
+
+const sitBy = Object.fromEntries(guide.situations.map((s: any) => [s.id, s]));
+const evBy = Object.fromEntries(dl.events.map((e: any) => [e.id, e]));
+const yBy = Object.fromEntries(dl.yearly.map((e: any) => [e.id, e]));
+const gBy = Object.fromEntries(glossary.terms.map((t: any) => [t.id, t]));
+const cBy = Object.fromEntries(calcData.calculators.map((c: any) => [c.slug, c]));
+const sBy = Object.fromEntries(svcData.services.map((s: any) => [s.slug, s]));
+const tBy = Object.fromEntries(topicData.topics.map((t: any) => [t.slug, t]));
+const why = (e: any) => String(e.why || "").replace("{n}", e.rule.monthEnd ?? "");
+const resolve = (st: any) => {
+  const sit = sitBy[st.guide];
+  return { ...st, ev: sit.event ? evBy[sit.event] : null, yearly: (sit.yearly || []).map((y: string) => yBy[y]),
+    calcs: (sit.calculators || []).map((c: string) => cBy[c]), svcs: (sit.services || []).map((s: string) => sBy[s]),
+    terms: (st.glossary || []).map((g: string) => gBy[g]), topic: st.topic ? tBy[st.topic] : null };
+};
+const stops = life.stops.map(resolve), anytime = life.anytime.map(resolve);
+const DEFAULT = "buy";
+---
+<Base title="세금 생애 지도" description="사업을 시작하고, 집을 사고, 자녀에게 넘겨주고, 집을 팔고, 상속이 생기기까지 — 일생의 일마다 먼저 볼 신고 기한·계산기·용어를 한 줄 지도로.">
+  <PageHead tag="세금 생애 지도" title="일생의 일마다, 먼저 볼 기한" crumbs={[{ name: "세금 생애 지도" }]}
+    lead="일을 누르면 그 일의 신고 기한·계산기·용어가 펼쳐집니다. 순서는 흔히 겪는 차례일 뿐, 사람마다 다릅니다." />
+
+  <section class="gut lm-sec" data-lm>
+    <div class="wrap">
+      <noscript><style>.lm-panel[hidden] { display: grid !important; }</style></noscript>
+      {[["lm-main", "일생의 일", stops], ["lm-any", "언제든 생길 수 있는 일", anytime]].map(([cls, label, list]: any) => (
+        <div class:list={["lm-track", cls]} style={`--n:${list.length}`} role="group" aria-label={label}>
+          {cls === "lm-any" && <p class="lm-any-h">{label}</p>}
+          {list.map((s: any, i: number) => (
+            <div class="lm-stop" style={`--i:${i + 1}`}>
+              <button type="button" class="lm-btn" id={`lm-b-${s.id}`} aria-expanded={s.id === DEFAULT ? "true" : "false"} aria-controls={`lm-p-${s.id}`} data-stop={s.id}>
+                <span class="lm-dot" aria-hidden="true"></span><span class="lm-l">{s.label}</span>
+              </button>
+              <div class="lm-panel" id={`lm-p-${s.id}`} role="region" aria-labelledby={`lm-b-${s.id}`} hidden={s.id !== DEFAULT}>
+                <div class="lm-dl">
+                  <p class="lm-k">기한</p>
+                  {s.ev && (<>
+                    <p class="lm-dn">{s.ev.name}</p>
+                    <p class="lm-dw">{why(s.ev)}{s.ev.rule.abroadMonths ? ` (${s.ev.abroadLabel}이면 ${s.ev.rule.abroadMonths}개월)` : ""}</p>
+                    <p class="lm-law">근거 {s.ev.law}</p>
+                    <a class="lm-go" href={`/deadline?e=${s.ev.id}`}>날짜를 넣어 달력으로 계산 ›</a>
+                  </>)}
+                  {s.yearly.length > 0 && (<>
+                    <ul class="lm-yl">{s.yearly.map((y: any) => <li><b>{y.name}</b><span>{y.when}</span><span class="lm-law">근거 {y.law}</span></li>)}</ul>
+                    <a class="lm-go" href="/tax-calendar">올해 세금 달력 ›</a>
+                  </>)}
+                  {!s.ev && s.yearly.length === 0 && <p class="lm-dw">이 일의 신고 기한은 아직 이 지도에 싣지 않았습니다. 계산기로 먼저 살펴보고, 기한은 상담 때 함께 확인하세요.</p>}
+                </div>
+                <div class="lm-side">
+                  {s.calcs.length > 0 && (
+                    <div><p class="lm-k2">먼저 계산해 보기</p><ul class="lm-cl">{s.calcs.map((c: any) => <li><a href={`/calculators/${c.slug}`}>{c.name} ›</a></li>)}</ul><p class="lm-note">결과는 참고용입니다.</p></div>
+                  )}
+                  {s.terms.length > 0 && (
+                    <div><p class="lm-k2">먼저 알아 둘 말</p><ul class="lm-tl">{s.terms.map((t: any) => <li><a href={`/glossary#g-${t.id}`}>{t.term}</a></li>)}</ul></div>
+                  )}
+                  <p class="lm-more">
+                    <a class="more-link" href={`/guide?s=${s.guide}`}>상황 길잡이로 ›</a>
+                    {s.topic && <a class="more-link" href={`/topics/${s.topic.slug}`}>{s.topic.name} 모아 보기 ›</a>}
+                    {!s.topic && s.svcs[0] && <a class="more-link" href={`/services/${s.svcs[0].slug}`}>{s.svcs[0].name} ›</a>}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+      <p class="lm-foot">기한이 토·일요일이나 공휴일이면 그다음 날까지입니다. 사정마다 다를 수 있으니 상담 때 함께 확인합니다.</p>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .lm-sec { padding-block: 28px 64px; }
+  .lm-sec .wrap { display: grid; gap: 28px; }
+  /* 휴대폰: 세로 줄 — 왼쪽 선 위의 점, 펼친 내용은 그 점 바로 아래 */
+  .lm-track { position: relative; display: grid; gap: 0; }
+  .lm-track::before { content: ""; position: absolute; left: 11px; top: 22px; bottom: 22px; width: 2px; background: var(--line2); }
+  .lm-any::before { background: none; border-left: 2px dashed var(--line2); width: 0; top: 64px; }
+  .lm-any-h { font-size: 15px; font-weight: 700; color: var(--gold-text); padding: 6px 0 6px 36px; }
+  .lm-stop { display: grid; }
+  .lm-btn { position: relative; display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 6px 0; border: 0; background: none; text-align: left; cursor: pointer; font: 600 17px var(--f-body); color: var(--ink); }
+  .lm-dot { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--moss); background: var(--paper); box-sizing: border-box; transition: background .2s, box-shadow .2s; }
+  .lm-btn[aria-expanded="true"] .lm-dot { background: var(--moss); box-shadow: 0 0 0 4px var(--gold-soft), inset 0 0 0 4px var(--paper); }
+  .lm-btn[aria-expanded="true"] .lm-l { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 6px; text-decoration-thickness: 2px; }
+  .lm-btn:hover .lm-l { color: var(--moss); }
+  .lm-btn:focus-visible { outline: 3px solid var(--moss); outline-offset: 3px; border-radius: 6px; }
+  .lm-panel { display: grid; gap: 14px; margin: 4px 0 14px 36px; }
+  .lm-dl { background: var(--moss); color: var(--on-moss); border-radius: 10px; padding: 16px; display: grid; gap: 6px; align-content: start; }
+  .lm-k { font-size: 14px; font-weight: 700; color: var(--gold-hi); }
+  .lm-dn { font-size: 19px; font-weight: 700; }
+  .lm-dw { font-size: 16px; color: var(--on-moss2); }
+  .lm-law { font-size: 14px; color: var(--on-moss2); }
+  .lm-yl { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .lm-yl li { display: grid; gap: 1px; }
+  .lm-yl span:not(.lm-law) { font-size: 15.5px; color: var(--on-moss2); }
+  .lm-go { color: var(--gold-hi); font-weight: 700; font-size: 15.5px; min-height: 44px; display: inline-flex; align-items: center; }
+  .lm-dl :focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+  .lm-side { display: grid; gap: 14px; align-content: start; }
+  .lm-k2 { font-size: 15px; font-weight: 700; padding-left: 10px; border-left: 3px solid var(--gold); margin-bottom: 4px; }
+  .lm-cl, .lm-tl { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 16px; }
+  .lm-cl a, .lm-tl a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); font-size: 16px; text-underline-offset: 4px; }
+  .lm-note { font-size: 14px; color: var(--ink2); }
+  .lm-more { display: flex; flex-wrap: wrap; gap: 10px; }
+  .lm-foot { font-size: 14.5px; color: var(--ink2); }
+  /* 컴퓨터: 가로 한 줄 — 점들이 한 선 위에, 펼친 내용은 줄 아래 넓게 */
+  @media (min-width: 900px) {
+    .lm-track { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); column-gap: 8px; }
+    .lm-any { grid-template-columns: repeat(var(--n), 220px) minmax(0, 1fr); }
+    .lm-track::before { left: 0; right: 0; top: 33px; bottom: auto; width: auto; height: 2px; }
+    .lm-any::before { border-left: 0; border-top: 2px dashed var(--line2); height: 0; top: 70px; right: auto; width: calc(var(--n) * 228px); }
+    .lm-any-h { grid-column: 1 / -1; padding: 0 0 6px; }
+    .lm-stop { display: contents; }
+    .lm-btn { grid-row: 1; grid-column: var(--i); flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 10px 4px; font-size: 16px; line-height: 1.4; }
+    .lm-any .lm-btn { grid-row: 2; }
+    .lm-panel { grid-row: 2; grid-column: 1 / -1; margin: 14px 0 0; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+    .lm-any .lm-panel { grid-row: 3; }
+    .lm-dl { padding: 22px 24px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .lm-panel:not([hidden]) { animation: lm-in .28s cubic-bezier(.2, .7, .2, 1); }
+    @keyframes lm-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+
+<script>
+  // 한 번에 하나만 펼친다. 주소 #<id>로 열고, 누르면 주소도 바꾼다(다른 사람에게 그 일을 펼친 채 보낼 수 있게)
+  const root = document.querySelector<HTMLElement>("[data-lm]")!;
+  const btns = [...root.querySelectorAll<HTMLButtonElement>("[data-stop]")];
+  function open(id: string, user = false) {
+    const target = btns.find((b) => b.dataset.stop === id);
+    if (!target) return;
+    for (const b of btns) {
+      const on = b === target;
+      b.setAttribute("aria-expanded", String(on));
+      document.getElementById(b.getAttribute("aria-controls")!)!.hidden = !on;
+    }
+    if (user) {
+      history.replaceState(null, "", `#${id}`);
+      // 휴대폰에선 펼친 내용이 화면 밖이면 그 일 버튼이 보이게
+      if (matchMedia("(max-width: 899px)").matches) target.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    }
+  }
+  for (const b of btns) b.addEventListener("click", () => open(b.dataset.stop!, true));
+  const fromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (btns.some((b) => b.dataset.stop === id)) open(id); };
+  fromHash();
+  addEventListener("hashchange", fromHash);
+</script>

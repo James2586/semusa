@@ -194,6 +194,25 @@ export function checkTopics(text, ctx) {
   return errors;
 }
 
+// 세금 생애 지도(4차 D1): 정거장마다 상황 길잡이 상황·주제·용어 id가 실제로 있는지, id 겹침 없음
+export function checkLifemap(text, { guideIds, topicSlugs, glossaryIds }) {
+  const errors = [];
+  const { data, error } = parseJsonFile("lifemap.json", text);
+  if (error) return [error];
+  const seen = new Set();
+  for (const s of [...(data.stops || []), ...(data.anytime || [])]) {
+    const at = `lifemap.json "${s.id}"`;
+    if (!/^[a-z][a-z-]*$/.test(s.id || "") || !s.label) errors.push(`${at}: id(영문 소문자)·label이 있어야 합니다.`);
+    if (seen.has(s.id)) errors.push(`${at}: id가 겹칩니다.`);
+    seen.add(s.id);
+    if (!guideIds.has(s.guide)) errors.push(`${at}: guide "${s.guide}"는 guide.json situations에 없습니다.`);
+    if (s.topic && !topicSlugs.has(s.topic)) errors.push(`${at}: topic "${s.topic}"는 topics.json에 없습니다.`);
+    for (const g of s.glossary || []) if (!glossaryIds.has(g)) errors.push(`${at}: glossary "${g}"는 glossary.json에 없습니다.`);
+  }
+  if ((data.stops || []).length < 3) errors.push("lifemap.json: stops가 셋 이상이어야 합니다.");
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -263,8 +282,13 @@ export function validateAll(root = ROOT) {
       pressTopics: ids("src/data/press.json", (d) => d.articles.map((a) => a.topic)),
       bookTitles: ids("src/data/home.json", (d) => d.books.map((b) => b.title)),
     }));
+    errors.push(...checkLifemap(read("src/data/lifemap.json"), {
+      guideIds: ids("src/data/guide.json", (d) => d.situations.map((s) => s.id)),
+      topicSlugs: ids("src/data/topics.json", (d) => d.topics.map((t) => t.slug)),
+      glossaryIds: ids("src/data/glossary.json", (d) => d.terms.map((t) => t.id)),
+    }));
   }
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json", "src/data/topics.json"]) {
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json", "src/data/topics.json", "src/data/lifemap.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");
