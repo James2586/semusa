@@ -1,0 +1,375 @@
+---
+// 기한 달력(2026-10-24 "결정적 한 장면"): 계산 결과를 달력으로 펼친다 — 센 날이 칸을 따라 채워지고, 원래 마감일이 쉬는 날이면
+// 그 칸들을 건너 진짜 마감일에 멈춘다. 계산은 홈 계산 카드와 같은 computeDeadline, 칸 옮기기는 deadlineCalendar.js(새 세법 사실 없음).
+// 주소 ?e=일&d=날짜(&a=1 해외)만으로 같은 달력 — 이름·금액 같은 개인정보는 주소에 담지 않는다.
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import KakaoIcon from "../components/KakaoIcon.astro";
+import data from "../data/deadlines.json";
+import site from "../data/site.json";
+import { fetchHolidayRows } from "../lib/holidays.js";
+const holidays = await fetchHolidayRows();
+const evs = data.events;
+---
+<Base title="기한 달력" description="무슨 일이 있었는지 고르고 날짜를 넣으면, 신고 기한까지 센 날과 건너뛴 쉬는 날을 달력으로 보여 드립니다.">
+  <PageHead tag="기한 달력" title="기한을 달력으로 봅니다" crumbs={[{ name: "기한 달력" }]}
+    lead="센 날이 칸을 따라 채워지고, 마감일이 쉬는 날이면 그 칸을 건너 진짜 마감일에 멈춥니다." />
+
+  <section class="gut dc-sec" data-dc>
+    <div class="wrap dc-in">
+      <noscript><style>.dc-form { display: none; }</style><p class="dc-nojs">이 달력은 자바스크립트가 켜져 있어야 보입니다. <a href="/#h-hero">홈의 기한 계산</a>에서 같은 계산을 할 수 있습니다.</p></noscript>
+      <form class="dc-form" data-form aria-label="기한 달력 조건">
+        <fieldset class="dc-f">
+          <legend>무슨 일이 있었나요?</legend>
+          <div class="dc-chips">
+            {evs.map((e, i) => <label><input type="radio" name="dc-ev" value={e.id} id={`dc-ev-${e.id}`} checked={i === 2} /><span>{e.chip}</span></label>)}
+          </div>
+        </fieldset>
+        <div class="dc-f dc-date-f">
+          <label for="dc-date" data-date-label>{evs[2].dateLabel}</label>
+          <input type="date" id="dc-date" data-date min="1950-01-01" max="2100-12-31" />
+          <label class="dc-chk" data-abroad-w hidden><input type="checkbox" id="dc-abroad" data-abroad />{evs.find((e) => e.abroadLabel)?.abroadLabel}</label>
+        </div>
+      </form>
+
+      <div class="dc-stage" data-stage hidden>
+        <div class="dc-top">
+          <p class="dc-ev"><b data-name></b><span data-start></span><span class="dc-ex" data-ex hidden>예시 날짜</span></p>
+          <button type="button" class="dc-replay" data-replay>다시 보기</button>
+        </div>
+        <div class="dc-months" data-months></div>
+        <div class="dc-legend" aria-hidden="true">
+          <span><i class="lg-start"></i>시작일</span><span><i class="lg-mend"></i>그 달 마지막 날</span><span><i class="lg-cnt"></i>센 날</span><span><i class="lg-rest"></i>쉬는 날</span><span><i class="lg-raw"></i>원래 마감일</span><span><i class="lg-final"></i>진짜 마감일</span><span><i class="lg-today"></i>오늘</span>
+        </div>
+        <div class="dc-out" data-out>
+          <div class="dc-big"><span class="dc-dd" aria-hidden="true"><span class="dc-num" data-num></span><small data-unit></small></span><span class="dc-date" data-dt></span></div>
+          <p class="dc-hop" data-hop></p>
+          <p class="dc-why" data-why></p>
+          <p class="dc-law" data-law></p>
+        </div>
+        <p class="sr-only" aria-live="polite" data-live></p>
+        <ul class="sr-only" data-srlist></ul>
+      </div>
+
+      <div class="dc-fact" data-fact-box hidden>
+        <span class="dc-fact-t">하나 더 확인할 것</span>
+        <span data-fact></span>
+        <span class="dc-fact-l" data-fact-law></span>
+      </div>
+
+      <div class="dc-acts" data-acts hidden>
+        <button type="button" class="btn btn-moss" data-share>가족에게 보내기</button>
+        <button type="button" class="btn btn-line" data-ics>내 달력에 넣기</button>
+        <button type="button" class="btn btn-line" data-print>인쇄 한 장</button>
+        <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 기한으로 상담하기</a>
+        <p class="dc-note" role="status" data-status>보내는 것은 일 종류와 날짜가 담긴 주소뿐입니다. 결과는 참고용입니다.</p>
+      </div>
+      <p class="dc-print-note"><span data-print-day></span>상담 때 이 종이를 가져오세요. 결과는 참고용이며, 사정마다 다를 수 있으니 상담 때 함께 확인합니다. {site.name} · {site.siteUrl}</p>
+    </div>
+    <script type="application/json" data-dc-data set:html={JSON.stringify({ events: evs, holidays }).replace(/</g, "\\u003c")} />
+  </section>
+</Base>
+
+<style is:global>
+  .dc-sec { padding-block: 24px 64px; }
+  .dc-in { display: grid; gap: 16px; }
+  .dc-nojs { padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .dc-form { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .dc-f { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 8px; }
+  .dc-f legend, .dc-date-f > label:first-child { padding: 0; font-size: 15px; font-weight: 700; color: var(--ink2); }
+  .dc-chips { display: flex; flex-wrap: wrap; gap: 8px 6px; }
+  .dc-chips label { position: relative; }
+  .dc-chips input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .dc-chips span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--line2); border-radius: 999px; font-size: 15.5px; background: var(--surface); white-space: nowrap; }
+  .dc-chips input:checked + span { background: var(--moss); border-color: var(--moss); color: var(--on-moss); font-weight: 700; }
+  .dc-chips input:focus-visible + span { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .dc-date-f input[type="date"] { min-height: 52px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 8px; background: var(--paper); font: 500 17px var(--f-body); color: var(--ink); max-width: 320px; }
+  .dc-date-f input[type="date"]:focus-visible { outline: 3px solid var(--moss); outline-offset: 1px; }
+  .dc-chk { display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15.5px; color: var(--ink2); }
+  .dc-chk input { width: 20px; height: 20px; accent-color: var(--moss); }
+
+  /* 장면 판 */
+  .dc-stage { --rest: #E8E2D6; --cnt: #C5D6C9; --hop: #B8553A; background: var(--moss); color: var(--on-moss); border-radius: 12px; padding: 18px 14px 18px; display: grid; gap: 14px; }
+  .dc-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: center; }
+  .dc-ev { font-size: 15px; color: var(--on-moss2); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+  .dc-ev b { color: var(--on-moss); font-size: 16.5px; }
+  .dc-ex { font-size: 14px; color: var(--gold-hi); border: 1px solid rgba(232, 196, 106, .5); border-radius: 999px; padding: 0 9px; line-height: 1.6; }
+  .dc-replay { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(243, 240, 231, .4); background: transparent; color: var(--on-moss); font: 600 15px var(--f-body); cursor: pointer; }
+  .dc-replay:focus-visible, .dc-stage :focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+  .dc-months { display: grid; gap: 12px; }
+  .dc-mon { background: var(--surface); color: var(--ink); border-radius: 8px; padding: 10px 10px 8px; min-width: 0; }
+  .dc-mt { margin: 0 0 6px; font-family: var(--f-display); font-size: 17px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .dc-mt small { font-family: var(--f-body); font-size: 14px; color: var(--muted); font-weight: 400; }
+  .dc-g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .dc-wd { font-size: 14px; color: var(--muted); text-align: center; }
+  .dc-d { position: relative; aspect-ratio: 1 / 1; max-height: 52px; border-radius: 5px; display: grid; place-items: center; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--ink2); }
+  .dc-d.wk { color: var(--muted); }
+  .dc-d.hol { background: var(--rest); }
+  .dc-d.cnt { background: var(--cnt); color: var(--ink); }
+  .dc-d.start, .dc-d.mend { box-shadow: inset 0 0 0 2px var(--gold); color: var(--ink); font-weight: 700; }
+  /* 그 달 마지막 날: 시작일과 같은 금색 테두리 + 아래 점(시작일과 구별) */
+  .dc-d.mend::before { content: ""; position: absolute; bottom: 5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--gold-text); }
+  .dc-d.raw { box-shadow: inset 0 0 0 2px var(--hop); }
+  .dc-d.dc-skip { background: var(--rest); }
+  .dc-d.dc-skip::after { content: ""; position: absolute; left: 18%; right: 18%; top: 50%; border-top: 1.5px solid var(--hop); transform: rotate(-35deg); }
+  .dc-d.final { background: var(--moss); color: var(--on-moss); font-weight: 700; box-shadow: 0 0 0 2px var(--gold-hi); z-index: 1; }
+  .dc-d.today { outline: 2px dashed var(--gold-text); outline-offset: -2px; }
+  .dc-fold { display: grid; gap: 4px; align-content: center; justify-items: start; background: rgba(243, 240, 231, .08); border: 1px dashed rgba(243, 240, 231, .35); border-radius: 8px; padding: 12px 14px; color: var(--on-moss); }
+  .dc-ft { font-family: var(--f-display); font-size: 17px; }
+  .dc-fold span { font-size: 14px; color: var(--on-moss2); }
+  .dc-fold button { margin-top: 4px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(243, 240, 231, .4); background: transparent; color: var(--on-moss); font: 600 14.5px var(--f-body); cursor: pointer; }
+  .dc-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--ink2); background: var(--surface); border-radius: 8px; padding: 8px 12px; }
+  .dc-legend span { white-space: nowrap; }
+  .dc-legend i { position: relative; display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: -3px; margin-right: 6px; }
+  .lg-start, .lg-mend { box-shadow: inset 0 0 0 2px var(--gold); } .lg-mend::before { content: ""; position: absolute; bottom: 2px; left: 6px; width: 4px; height: 4px; border-radius: 50%; background: var(--gold-text); }
+  .lg-cnt { background: var(--cnt); } .lg-rest { background: var(--rest); } .lg-raw { box-shadow: inset 0 0 0 2px var(--hop); } .lg-final { background: var(--moss); box-shadow: 0 0 0 2px var(--gold-hi); } .lg-today { outline: 2px dashed var(--gold-text); outline-offset: -2px; }
+  .dc-out { display: grid; gap: 6px; border-top: 1px solid rgba(243, 240, 231, .16); padding-top: 14px; }
+  .dc-big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+  .dc-dd { display: inline-flex; align-items: baseline; gap: 8px; }
+  .dc-dd small { font-size: 15.5px; color: var(--gold-hi); }
+  .dc-num { --h: 1.3em; display: inline-flex; height: var(--h); overflow: hidden; font-family: "Hanadeo Num", "Noto Serif KR", serif; font-size: clamp(56px, 16vw, 88px); line-height: var(--h); letter-spacing: -.04em; color: #fff;
+    -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); }
+  .dc-reel { display: block; height: var(--h); overflow: hidden; }
+  .dc-reel > span { display: flex; flex-direction: column; transition: transform var(--dur, .9s) cubic-bezier(.16, .84, .3, 1); }
+  .dc-reel i { font-style: normal; height: var(--h); display: block; text-align: center; }
+  .dc-date { font-family: var(--f-display); font-weight: 700; font-size: clamp(21px, 5.6vw, 28px); view-transition-name: dl-date; }
+  .dc-date::after { content: "까지"; font-family: var(--f-body); font-weight: 400; font-size: .6em; color: var(--on-moss2); margin-left: 6px; }
+  .dc-hop { font-size: 15.5px; color: var(--on-moss2); }
+  .dc-hop b { color: var(--gold-hi); font-weight: 600; }
+  .dc-why, .dc-law { font-size: 15px; color: var(--on-moss2); }
+  .dc-law { font-size: 14px; }
+  .dc-out.late .dc-num { color: #F4C0B2; }
+  .dc-fact { display: grid; gap: 4px; padding: 16px 18px; border-left: 2px solid var(--gold); background: var(--surface); border-radius: 0 10px 10px 0; }
+  .dc-fact-t { font-size: 14px; font-weight: 700; color: var(--gold-text); }
+  .dc-fact-l { font-size: 14px; color: var(--muted); }
+  .dc-acts { display: grid; gap: 10px; }
+  .dc-acts .btn { width: 100%; }
+  .dc-note { font-size: 14.5px; color: var(--muted); }
+  .dc-print-note { display: none; }
+  /* 장면: 센 칸이 차례로 → 원래 마감일 → 건너뜀 → 진짜 마감일 */
+  .dc-stage.play .dc-d.cnt { animation: dc-fill .18s ease-out both; animation-delay: calc(var(--k) * var(--step)); }
+  .dc-stage.play .dc-d.raw { animation: dc-pop .3s ease-out both; animation-delay: var(--t1); }
+  .dc-stage.play .dc-d.dc-skip { animation: dc-pop .25s ease-out both; animation-delay: calc(var(--t1) + .35s + var(--j) * .28s); }
+  .dc-stage.play .dc-d.final { animation: dc-final .45s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--t2); }
+  .dc-stage.play .dc-out { animation: dc-in .4s ease-out both; animation-delay: calc(var(--t2) + .15s); }
+  @keyframes dc-fill { from { background: transparent; } }
+  @keyframes dc-pop { from { transform: scale(.82); } }
+  @keyframes dc-final { from { transform: scale(.5); } 60% { transform: scale(1.12); } }
+  @keyframes dc-in { from { opacity: 0; transform: translateY(6px); } }
+  @media (min-width: 640px) { .dc-acts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dc-note { grid-column: 1 / -1; } }
+  @media (min-width: 900px) {
+    .dc-sec { padding-block: 32px 96px; }
+    .dc-form { grid-template-columns: minmax(0, 1fr) 320px; align-items: end; padding: 20px 22px; }
+    .dc-stage { padding: 26px 26px 22px; }
+    .dc-months { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: start; }
+    .dc-acts { grid-template-columns: repeat(4, auto); justify-content: start; }
+    .dc-acts .btn { width: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { .dc-stage.play * { animation: none !important; } .dc-reel > span { transition: none; } }
+  /* 인쇄 한 장: 머리글·버튼은 빼고 흰 종이에 */
+  @media print {
+    .hdr, .bbar, .foot, .closing, .totop, .page-head, .dc-form, .dc-acts, .dc-replay, .dc-fold button, .skip-link { display: none !important; }
+    body { background: #fff; }
+    .dc-sec { padding: 0; }
+    .dc-stage { background: #fff; color: #000; border: 1px solid #000; }
+    .dc-stage *, .dc-stage *::after, .dc-ev b, .dc-num { color: #000 !important; }
+    .dc-mon { border: 1px solid #999; }
+    .dc-d.final { background: #000; color: #fff !important; }
+    .dc-num { -webkit-mask-image: none; mask-image: none; }
+    .dc-print-note { display: block; font-size: 12pt; }
+    .dc-stage { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 10px; gap: 8px; }
+    .dc-months { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+    .dc-d { aspect-ratio: auto; height: 22px; font-size: 10pt; }
+    .dc-num { font-size: 40pt; }
+  }
+</style>
+
+<script>
+  import { computeDeadline } from "../lib/deadlineCalc.js";
+  import { buildHolidayIndex, toIso, parseIso, unknownYearNote } from "../lib/ntsDeadline.js";
+  import { planCalendar, deadlineIcs } from "../lib/deadlineCalendar.js";
+
+  const root = document.querySelector<HTMLElement>("[data-dc]")!;
+  const q = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  const json = JSON.parse(q("[data-dc-data]").textContent || "{}");
+  const events: any[] = json.events || [];
+  const holidays = buildHolidayIndex(json.holidays || []);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const today = new Date();
+  const form = q<HTMLFormElement>("[data-form]"), dateIn = q<HTMLInputElement>("[data-date]"), abroad = q<HTMLInputElement>("[data-abroad]");
+  const stage = q("[data-stage]");
+  const WD = ["일", "월", "화", "수", "목", "금", "토"];
+  const md = (iso: string) => { const [, m, d] = iso.split("-").map(Number); return `${m}. ${d}.`; };
+  const dot = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return `${y}. ${m}. ${d}.`; };
+  let cur: { ev: any; r: any } | null = null;
+
+  // 주소에서 일·날짜를 읽는다(없으면 예시: 오늘에서 20일 전)
+  const params = new URLSearchParams(location.search);
+  const pe = events.find((e) => e.id === params.get("e"));
+  if (pe) (q<HTMLInputElement>(`#dc-ev-${pe.id}`)).checked = true;
+  const pd = params.get("d");
+  const example = !(pd && parseIso(pd) && pd >= "1950-01-01" && pd <= "2100-12-31");
+  dateIn.value = example ? toIso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 20)) : pd!;
+  if (params.get("a") === "1") abroad.checked = true;
+  q("[data-ex]").hidden = !example;
+
+  // 남은 날 숫자 바퀴(홈 계산 카드와 같은 움직임)
+  function roll(n: number, animate: boolean, delay = 0) {
+    const box = q("[data-num]"); box.textContent = "";
+    String(n).split("").forEach((ch, i) => {
+      const reel = document.createElement("span"); reel.className = "dc-reel";
+      const col = document.createElement("span");
+      for (let k = 0; k < 40; k++) { const d = document.createElement("i"); d.textContent = String(k % 10); col.appendChild(d); }
+      reel.appendChild(col); box.appendChild(reel);
+      const to = Number(ch);
+      col.style.transform = `translateY(calc(var(--h) * ${animate ? 0 : -to}))`;
+      if (animate) {
+        void col.offsetHeight;
+        col.style.transitionDelay = delay + "s"; col.style.setProperty("--dur", (0.75 + i * 0.14) + "s");
+        col.style.transform = `translateY(calc(var(--h) * ${-(to + 10 * (1 + Math.min(i, 2)))}))`;
+      }
+    });
+  }
+
+  function monthEl(mo: any, note: string) {
+    const el = document.createElement("div"); el.className = "dc-mon"; el.setAttribute("aria-hidden", "true"); // 화면 읽기는 아래 요약 목록으로
+    let h = `<h3 class="dc-mt">${mo.y}년 ${mo.m}월<small>${note}</small></h3><div class="dc-g">` + WD.map((w) => `<span class="dc-wd">${w}</span>`).join("") + "<span></span>".repeat(mo.first);
+    for (const c of mo.cells) {
+      const cls = ["dc-d"]; const st: string[] = [];
+      if (c.weekend) cls.push("wk");
+      if (c.holiday) cls.push("hol");
+      if (c.counted) { cls.push("cnt"); st.push(`--k:${c.vk}`); }
+      if (c.start) cls.push("start");
+      if (c.monthEnd) cls.push("mend");
+      if (c.raw) cls.push("raw");
+      if (c.skip) { cls.push("dc-skip"); st.push(`--j:${c.j}`); }
+      if (c.final) cls.push("final");
+      if (c.today) cls.push("today");
+      const tip = [c.holiday, c.start && "시작일", c.monthEnd && "그 달 마지막 날", c.today && "오늘", c.raw && "원래 마감일", c.skip && `${c.skip}이라 건너뜀`, c.final && "진짜 마감일"].filter(Boolean).join(" · ");
+      h += `<span class="${cls.join(" ")}" style="${st.join(";")}"${tip ? ` title="${c.d}일 ${tip}"` : ""}>${c.d}</span>`;
+    }
+    el.innerHTML = h + "</div>";
+    return el;
+  }
+
+  function draw(animate: boolean) {
+    const ev = cur!.ev, r = cur!.r;
+    const plan = planCalendar(r, { holidays, today })!;
+    const box = q("[data-months]"); box.textContent = "";
+    // 보이는 센 칸만 차례 번호(접힌 달은 빼고) — 채워지는 시간은 1.2초 안
+    let vk = 0;
+    const visible = plan.items.filter((it: any) => it.type === "month");
+    for (const mo of visible) for (const c of mo.cells) if (c.counted) c.vk = vk++;
+    const step = Math.min(28, 1200 / Math.max(1, vk));
+    const t1 = (vk * step) / 1000 + 0.2, t2 = t1 + (r.shifted.length ? 0.35 + r.shifted.length * 0.28 + 0.2 : 0);
+    stage.style.setProperty("--step", step + "ms"); stage.style.setProperty("--t1", t1 + "s"); stage.style.setProperty("--t2", t2 + "s");
+    const noteOf = (mo: any) => {
+      const n: string[] = [];
+      if (mo.cells.some((c: any) => c.start)) n.push("시작");
+      if (mo.cells.some((c: any) => c.final)) n.push("마감");
+      else if (mo.cells.some((c: any) => c.raw)) n.push("원래 마감");
+      if (mo.counted && !n.length) n.push(`${mo.counted}일 셈`);
+      return n.join(" · ");
+    };
+    for (const it of plan.items as any[]) {
+      if (it.type === "month") { box.appendChild(monthEl(it, noteOf(it))); continue; }
+      const f = document.createElement("div"); f.className = "dc-fold";
+      const a = it.months[0], b = it.months[it.months.length - 1];
+      const range = it.months.length > 1 ? (a.y === b.y ? `${a.m}월~${b.m}월` : `${a.y}년 ${a.m}월~${b.y}년 ${b.m}월`) : `${a.m}월`;
+      f.innerHTML = `<b class="dc-ft">${range}</b><span>${it.counted}일 모두 셈${it.today ? " · 오늘이 이 사이" : ""}</span>`;
+      const btn = document.createElement("button"); btn.type = "button"; btn.textContent = `${range} 펼치기`;
+      btn.addEventListener("click", () => {
+        stage.classList.remove("play"); // 새로 넣는 달 칸이 한꺼번에 번쩍이지 않게
+        const frag = document.createDocumentFragment();
+        const say = document.createElement("p"); say.className = "sr-only"; say.tabIndex = -1;
+        say.textContent = `${range}을 펼쳤습니다. 날짜별 내용은 아래 요약 목록에 있습니다.`;
+        frag.appendChild(say);
+        for (const mo of it.months) frag.appendChild(monthEl(mo, noteOf(mo)));
+        f.replaceWith(frag); say.focus();
+      });
+      f.appendChild(btn); box.appendChild(f);
+    }
+    // 결과 글
+    q("[data-name]").textContent = ev.name;
+    q("[data-start]").textContent = `${ev.dateLabel.replace(/\(.*\)/, "")} ${dot(r.startIso)}`;
+    const unit = r.dday > 0 ? "일 남음" : r.dday === 0 ? "오늘 마감" : "일 지남";
+    q("[data-unit]").textContent = unit;
+    q("[data-out]").classList.toggle("late", r.dday < 0);
+    q("[data-dt]").textContent = `${dot(r.deadlineIso)} (${r.weekday})`;
+    q("[data-hop]").innerHTML = r.shifted.length
+      ? `<b>${r.shifted.map((x: any) => `${md(x.iso)}(${x.weekday})${/^[토일]요일$/.test(x.reason) ? "" : ` ${x.reason}`}`).join(" · ")}</b> — 쉬는 날이라 ${md(r.deadlineIso)}(${r.weekday})로 미뤄집니다(${r.extLaw}).`
+      : "마감일이 쉬는 날이 아니라 미뤄지지 않습니다.";
+    const mid = plan.holidaysInCount.length ? ` 사이의 쉬는 날(${plan.holidaysInCount.map((h: any) => h.name).join("·")})도 그대로 셉니다.` : "";
+    q("[data-why]").textContent = `${r.why}${r.monthEndIso ? ` — ${md(r.monthEndIso)} 다음 날부터` : ` — ${md(r.startIso)} 다음 날부터`} ${plan.counted}일을 셉니다.${mid}${r.dday < 0 ? " 기한이 지났습니다. 지금 할 수 있는 일을 상담하세요." : ""}`;
+    const unk = unknownYearNote(r);
+    q("[data-law]").textContent = `근거: ${ev.law}${unk ? ` ${unk}` : ""} · 결과는 참고용입니다.`;
+    q("[data-fact]").textContent = ev.fact.text; q("[data-fact-law]").textContent = ev.fact.law;
+    q("[data-ics]").hidden = r.dday < 0; // 지난 기한은 달력에 넣을 일이 없다
+    q("[data-print-day]").textContent = `기준일 ${dot(toIso(today))} — `;
+    // 화면 읽기: 달력 칸 대신 요약
+    const sr = [`시작일 ${dot(r.startIso)}`, r.monthEndIso && `그 달 마지막 날 ${dot(r.monthEndIso)}`, `${plan.counted}일을 셈`, ...r.shifted.map((x: any) => `${dot(x.iso)} ${x.reason}이라 건너뜀`), `진짜 마감일 ${dot(r.deadlineIso)} ${r.weekday}요일`].filter(Boolean);
+    q("[data-srlist]").innerHTML = sr.map((t) => `<li>${t}</li>`).join("");
+    q("[data-live]").textContent = `${ev.name} 기한 ${dot(r.deadlineIso)} ${r.weekday}요일, ${r.dday > 0 ? `${r.dday}일 남음` : r.dday === 0 ? "오늘 마감" : `${-r.dday}일 지남`}`;
+    lastT2 = t2;
+    if (animate) play(); else { stage.classList.remove("play"); roll(Math.abs(r.dday), false); }
+  }
+  let lastT2 = 0;
+  function play() {
+    if (!cur) return;
+    stage.classList.remove("play");
+    if (!reduce) { void stage.offsetWidth; stage.classList.add("play"); }
+    roll(Math.abs(cur.r.dday), !reduce, lastT2);
+  }
+
+  function run(animate: boolean, push = false) {
+    const pick = form.querySelector<HTMLInputElement>('input[name="dc-ev"]:checked')!;
+    const ev = events.find((e) => e.id === pick.value);
+    q("[data-date-label]").textContent = ev.dateLabel;
+    q("[data-abroad-w]").hidden = !ev.rule.abroadMonths;
+    const r = computeDeadline(ev, dateIn.value, { abroad: !!abroad.checked && !!ev.rule.abroadMonths, holidays, today });
+    if (!r) return; // 날짜를 치는 중이면 지난 달력을 그대로 둔다
+    cur = { ev, r };
+    if (push) history.replaceState(null, "", shareUrl());
+    draw(animate);
+  }
+  function shareUrl() {
+    const u = new URL(location.pathname, location.origin);
+    if (!cur) return u.href;
+    u.searchParams.set("e", cur.ev.id); u.searchParams.set("d", cur.r.startIso);
+    if (abroad.checked && cur.ev.rule.abroadMonths) u.searchParams.set("a", "1");
+    return u.href;
+  }
+
+  form.addEventListener("input", () => { q("[data-ex]").hidden = true; run(true, true); });
+  form.addEventListener("submit", (e) => e.preventDefault());
+  q("[data-replay]").addEventListener("click", play);
+  q("[data-replay]").hidden = reduce; // 움직임 줄이기면 다시 볼 움직임이 없다
+  const status = q("[data-status]");
+  q("[data-share]").addEventListener("click", async () => {
+    if (!cur) return;
+    const url = shareUrl(), title = `${cur.ev.name} 기한 — ${dot(cur.r.deadlineIso)}(${cur.r.weekday})`;
+    try {
+      if (navigator.share) { await navigator.share({ title, text: `${title} · 하나 더 세무회계 기한 달력`, url }); return; }
+      await navigator.clipboard.writeText(url);
+      status.textContent = "주소를 복사했어요. 카카오톡 대화창에 붙여 넣어 보내세요.";
+    } catch (err) { if ((err as Error)?.name !== "AbortError") status.textContent = `주소: ${url}`; }
+  });
+  q("[data-ics]").addEventListener("click", () => {
+    if (!cur) return;
+    const ics = deadlineIcs({ name: cur.ev.name, deadlineIso: cur.r.deadlineIso, startIso: cur.r.startIso, url: shareUrl(), law: cur.ev.law });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    a.download = `deadline-${cur.r.deadlineIso}.ics`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    status.textContent = "일정 파일을 받았어요. 열면 휴대폰 달력에 마감일과 알림(30일 전·7일 전, 이미 지난 알림은 빼고)이 들어갑니다. 구글 달력은 알림을 따로 설정해 주세요.";
+  });
+  q("[data-print]").addEventListener("click", () => window.print());
+  // 처음: 판이 화면에 들어왔을 때 한 번 재생
+  for (const sel of ["[data-stage]", "[data-fact-box]", "[data-acts]"]) q(sel).hidden = false;
+  run(false);
+  if (!reduce && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); play(); } }, { threshold: 0.3 });
+    io.observe(stage);
+  }
+</script>

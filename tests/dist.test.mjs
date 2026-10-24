@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 28개(색인 25 + 공지·개인정보 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 28);
+test("페이지 29개(색인 26 + 공지·개인정보 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 29);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 25);
+  assert.equal((sm.match(/<loc>/g) || []).length, 26);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -136,4 +136,14 @@ test("모든 페이지 바닥글과 전문가 소개에 통합검색 22로 가�
   const url = JSON.parse(readFileSync(new URL("../src/data/site.json", import.meta.url), "utf8")).taxSearch.url;
   for (const f of htmlFiles(DIST)) assert.ok(readFileSync(f, "utf8").includes(`href="${url}"`), f);
   assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /통합검색 22 열기/);
+});
+
+test("기한 달력(2026-10-24): 홈·서비스 계산 카드에서 이어지고, 자바스크립트 없이도 안내가 있다", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "deadline.html"), "utf8");
+  assert.match(h, /<noscript>[\s\S]*홈의 기한 계산/);
+  assert.match(h, /data-ics/);
+  assert.match(h, /data-dc-data/);
+  for (const f of ["index.html", "services/inheritance-gift.html", "services/real-estate.html", "services/appeal.html"]) {
+    assert.match(readFileSync(join(DIST, f), "utf8"), /href="\/deadline" data-cal/, f);
+  }
 });

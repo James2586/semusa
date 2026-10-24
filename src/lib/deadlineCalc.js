@@ -9,12 +9,15 @@ const ddayOf = (deadline, today) => Math.round((dayStart(deadline) - dayStart(to
 
 export function computeDeadline(ev, startIso, { abroad = false, holidays = null, today = new Date() } = {}) {
   const base = parseIso(startIso);
-  if (!base || !ev?.rule) return null;
+  // 연도를 치는 중인 값(0202-…)은 계산하지 않는다 — 날짜 칸의 min·max(1950~2100)와 같은 범위만
+  if (!base || !ev?.rule || base.getFullYear() < 1950 || base.getFullYear() > 2100) return null;
   let rawIso, monthEndIso = null, n = null;
   if (ev.rule.monthEnd) {
     n = abroad && ev.rule.abroadMonths ? ev.rule.abroadMonths : ev.rule.monthEnd;
     monthEndIso = toIso(new Date(base.getFullYear(), base.getMonth() + 1, 0));
-    rawIso = civilMonthsEnd(addDaysIso(monthEndIso, 1), n).endIso;
+    const end = civilMonthsEnd(addDaysIso(monthEndIso, 1), n);
+    if (!end) return null; // 연도를 치는 중(0202-… 같은 값)이면 계산하지 않는다
+    rawIso = end.endIso;
   } else {
     rawIso = addDaysIso(toIso(base), ev.rule.days);
   }

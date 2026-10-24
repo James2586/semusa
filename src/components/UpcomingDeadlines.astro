@@ -25,6 +25,13 @@ const items = only ? data.yearly.filter((i) => only.includes(i.id)) : data.yearl
   .up-list li > :not(.up-dd) { grid-column: 2; }
   .up-dd { grid-row: 1 / span 3; font-size: 20px; font-weight: 600; line-height: 1.4; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
   .up-dd.soon { color: var(--gold-text); }
+  /* D-숫자 자릿수 바퀴(2026-10-24 운영자 "D- 숫자도 모션 그래픽") — 목록이 화면에 들어올 때 한 번, 위 줄부터 차례로 */
+  .up-odo { --h: 1.4em; display: inline-flex; height: var(--h); overflow: hidden; line-height: var(--h); vertical-align: top;
+    -webkit-mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent); }
+  .up-reel { display: block; height: var(--h); overflow: hidden; }
+  .up-reel > span { display: flex; flex-direction: column; transition: transform var(--dur, .9s) cubic-bezier(.16, .84, .3, 1); }
+  .up-reel i { font-style: normal; height: var(--h); display: block; text-align: center; }
+  @media (prefers-reduced-motion: reduce) { .up-reel > span { transition: none; } }
   .up-list b { font-size: 17px; }
   .up-when { font-size: 15.5px; font-variant-numeric: tabular-nums; }
   .up-when [data-date]:not(:empty)::after { content: " — "; }
@@ -42,9 +49,18 @@ const items = only ? data.yearly.filter((i) => only.includes(i.id)) : data.yearl
     const rows = (json.yearly as any[]).map((it) => ({ it, r: nextYearly(it, { holidays })!, li: list.querySelector<HTMLElement>(`[data-id="${it.id}"]`)! })).filter((x) => x.r);
     rows.sort((a, b) => a.r.dday - b.r.dday);
     let unknown = "";
+    const reels: { col: HTMLElement; i: number; row: number }[] = [];
+    let row = 0;
     for (const { r, li } of rows) {
       const dd = li.querySelector<HTMLElement>("[data-dd]")!;
-      dd.textContent = r.dday === 0 ? "D-DAY" : `D-${r.dday}`;
+      const label = r.dday === 0 ? "D-DAY" : `D-${r.dday}`;
+      if (r.dday === 0) dd.textContent = label;
+      else {
+        // 화면 읽기는 글자 그대로, 눈에는 자릿수 바퀴(0~9가 네 바퀴 — 마지막 바퀴의 숫자에 멈춤)
+        dd.innerHTML = `<span class="sr-only">${label}</span><span class="up-odo" aria-hidden="true">D-${String(r.dday).split("").map((ch) => `<span class="up-reel"><span data-to="${ch}">${Array.from({ length: 40 }, (_, k) => `<i>${k % 10}</i>`).join("")}</span></span>`).join("")}</span>`;
+        reels.push(...[...dd.querySelectorAll<HTMLElement>("[data-to]")].map((col, i) => ({ col, i, row })));
+        row++;
+      }
       dd.classList.toggle("soon", r.dday <= 30);
       const [y, m, d] = r.deadlineIso.split("-").map(Number);
       const [, rm, rd] = r.rawIso.split("-").map(Number);
@@ -54,5 +70,17 @@ const items = only ? data.yearly.filter((i) => only.includes(i.id)) : data.yearl
       unknown ||= unknownYearNote(r);
     }
     if (unknown) wrap.querySelector("[data-up-note]")!.textContent = unknown;
+    // 처음엔 완성된 숫자(마지막 바퀴). 움직임이 켜져 있으면 0으로 돌려 두었다가 목록이 화면에 들어올 때 굴린다
+    const place = (animate: boolean) => reels.forEach(({ col, i, row }) => {
+      const to = Number(col.dataset.to) + 30;
+      if (!animate) { col.style.transition = "none"; col.style.transform = `translateY(calc(var(--h) * ${-to}))`; return; }
+      col.style.transition = ""; col.style.transitionDelay = `${row * 0.08}s`; col.style.setProperty("--dur", `${0.8 + i * 0.16}s`);
+      col.style.transform = `translateY(calc(var(--h) * ${-to}))`;
+    });
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
+      reels.forEach(({ col }) => { col.style.transition = "none"; col.style.transform = "translateY(0)"; });
+      const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); void list.offsetHeight; place(true); } }, { threshold: 0.25 });
+      io.observe(list);
+    } else place(false);
   });
 </script>
