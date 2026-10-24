@@ -9,6 +9,7 @@
     { "text": "세무조사·고지서를 받았어요", "sub": "기한이 정해진 일이에요. 바로 상담하세요.", "service": "appeal", "urgent": true }
   ],
   "books": [
+    { "title": "크리에이터를 위한 유튜버 세무 관리", "color": "#000000", "cover": "/img/books/youtuber.webp", "coauthors": ["조성식"] },
     { "title": "알면 돈 버는 상속세 및 증여세 절세전략", "color": "#FF0000", "cover": "/img/books/inherit-gift-strategy.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "알면 돈 버는 양도소득세 절세전략", "color": "#C00000", "date": "2026-05", "cover": "/img/books/transfer-strategy.webp", "coauthors": ["한경식"] },
     { "title": "알면 돈 버는 부가가치세 오늘부터 시작", "color": "#002060", "date": "2026-02", "cover": "/img/books/vat-today.webp" },
