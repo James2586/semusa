@@ -1,0 +1,78 @@
+---
+// 칼럼·책 카드 표지: 주제마다 색과 그림이 다르다(2026-10-24 — 예전엔 모든 카드가 같은 숲색에 글자뿐이었다).
+// 블로그 글에 대표 사진이 있으면 사진을 쓰고, 사진을 못 불러오면(columns.astro 스크립트가 지움) 아래 그림이 보인다.
+interface Props { topic: string; label: string; image?: string; books?: string[] }
+const { topic, label, image, books = [] } = Astro.props;
+---
+<span class:list={["th", `th-${topic}`]}>
+  <span class="th-l">{label}</span>
+  <svg class="th-g" viewBox="0 0 200 140" aria-hidden="true" focusable="false">
+    {topic === "inherit" && (
+      <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <circle cx="100" cy="28" r="14" /><path d="M100 42v22M52 64h96M52 64v18M148 64v18M100 64v18" />
+        <circle cx="52" cy="96" r="12" /><circle cx="100" cy="96" r="12" /><circle cx="148" cy="96" r="12" />
+        <path d="M30 128h40M78 128h44M126 128h44" opacity=".5" />
+      </g>
+    )}
+    {topic === "estate" && (
+      <g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round">
+        <path d="M14 132V84l34-28 34 28v48z" /><path d="M36 132v-26h24v26" />
+        <path d="M90 132V64l46-38 46 38v68z" fill="currentColor" fill-opacity=".14" /><path d="M118 72h16v16h-16zM146 72h16v16h-16zM128 132v-28h20v28" />
+        <path d="M6 132h188" />
+      </g>
+    )}
+    {topic === "corp" && (
+      <g fill="none" stroke="currentColor" stroke-width="3">
+        <path d="M28 134V40h52v94M96 134V14h60v120M168 134V66h24v68" />
+        <path d="M40 54h10M58 54h10M40 72h10M58 72h10M40 90h10M58 90h10M40 108h10M58 108h10M108 30h12M132 30h12M108 50h12M132 50h12M108 70h12M132 70h12M108 90h12M132 90h12M108 110h12M132 110h12" stroke-width="5" opacity=".7" />
+        <path d="M8 134h192" />
+      </g>
+    )}
+    {topic === "audit" && (
+      <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <path d="M26 12h86l22 22v100H26z" /><path d="M112 12v22h22" />
+        <path d="M42 50h70M42 66h70M42 82h44M42 98h56" opacity=".6" />
+        <circle cx="132" cy="92" r="28" fill="currentColor" fill-opacity=".1" /><path d="M152 112l26 26" stroke-width="8" />
+      </g>
+    )}
+    {topic === "column" && (
+      <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <rect x="22" y="14" width="160" height="118" rx="3" />
+        <path d="M38 34h128" stroke-width="9" />
+        <path d="M38 56h56M38 70h56M38 84h56M38 98h56M38 112h40M110 56h56M110 70h56M110 84h56M110 98h56M110 112h30" opacity=".6" />
+      </g>
+    )}
+    {topic === "tax" && (
+      <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+        <rect x="30" y="10" width="84" height="124" rx="8" /><rect x="44" y="24" width="56" height="24" rx="3" fill="currentColor" fill-opacity=".15" />
+        <path d="M50 70h6M72 70h6M94 70h0M50 92h6M72 92h6M50 114h6M72 114h6" stroke-width="8" />
+        <ellipse cx="156" cy="118" rx="30" ry="9" /><path d="M126 118v-14M186 118v-14" /><ellipse cx="156" cy="104" rx="30" ry="9" /><path d="M126 104v-14M186 104v-14" /><ellipse cx="156" cy="90" rx="30" ry="9" fill="currentColor" fill-opacity=".15" />
+      </g>
+    )}
+    {topic === "books" && (
+      <g>
+        {books.map((c, i) => <rect x={40 + i * 46} y={26 + (i % 2) * 10} width="38" height={108 - (i % 2) * 10} rx="3" fill={c} />)}
+        <rect x={40 + books.length * 46} y="20" width="38" height="114" rx="3" fill="currentColor" fill-opacity=".25" />
+        <path d="M24 134h160" stroke="currentColor" stroke-width="3" />
+      </g>
+    )}
+  </svg>
+  {image && <img class="th-ph" src={image} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />}
+</span>
+
+<style>
+  .th { position: absolute; inset: 0; display: block; overflow: hidden; background: var(--bg); color: var(--fg); }
+  .th-l { position: absolute; left: 22px; top: 20px; font-family: var(--f-display); font-weight: 700; font-size: 24px; line-height: 1.2; z-index: 1; }
+  .th-l::after { content: ""; display: block; width: 28px; height: 2px; margin-top: 10px; background: var(--gold); }
+  .th-g { position: absolute; right: 6%; bottom: 0; width: 58%; height: 82%; color: var(--art); }
+  .th-ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; }
+  .th-inherit { --bg: #8E2F25; --fg: #FFF4EE; --art: rgba(255, 236, 224, .55); }
+  .th-estate { --bg: #1F4E8C; --fg: #F1F5FB; --art: rgba(225, 236, 252, .55); }
+  .th-corp { --bg: #23262E; --fg: #F3F0E7; --art: rgba(232, 196, 106, .6); }
+  .th-audit { --bg: var(--gold-soft); --fg: var(--ink); --art: rgba(128, 96, 32, .7); }
+  .th-column { --bg: #E9E4D8; --fg: var(--ink); --art: rgba(60, 56, 40, .55); }
+  .th-tax { --bg: var(--moss); --fg: var(--on-moss); --art: rgba(232, 196, 106, .55); }
+  .th-books { --bg: var(--moss2); --fg: var(--on-moss); --art: var(--on-moss); }
+  .th-books .th-g { width: 62%; }
+  @media (min-width: 900px) { .th-l { left: 28px; top: 26px; font-size: 28px; } }
+</style>

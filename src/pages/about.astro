@@ -45,6 +45,10 @@ const stats = [
           <VideoCard id="portfolio" />
           <VideoCard id="tonghap22" />
         </div>
+        <div class="tool">
+          <a class="more-link" href={site.taxSearch.url} target="_blank" rel="noopener">{site.taxSearch.name} 열기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a>
+          <p>{site.taxSearch.note} 서비스입니다. 세무 저서 22권·판례·계산을 한곳에서 찾습니다.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -66,6 +70,10 @@ const stats = [
   .cv li::marker { color: var(--gold); }
   .cv a { color: var(--gold-text); }
   .vids { display: grid; gap: 28px; }
+  .tool { margin-top: 24px; display: grid; gap: 10px; justify-items: start; }
+  .tool .more-link { width: 100%; }
+  .tool p { font-size: 15.5px; color: var(--muted); }
+  @media (min-width: 900px) { .tool .more-link { width: auto; } }
   @media (min-width: 640px) { .vids { grid-template-columns: repeat(2, minmax(0, 300px)); } }
   @media (min-width: 900px) { .about { grid-template-columns: 300px 1fr; gap: 56px; align-items: start; } .pic { max-width: none; position: sticky; top: 90px; } }
 </style>

@@ -2,6 +2,8 @@
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
 import VideoCard from "../components/VideoCard.astro";
+import Thumb from "../components/Thumb.astro";
+import { topicOf } from "../lib/thumbTopic.js";
 import site from "../data/site.json";
 import home from "../data/home.json";
 import videoData from "../data/videos.json";
@@ -12,12 +14,12 @@ const posts = await fetchBlogPosts("https://rss.blog.naver.com/semusatax.xml", 7
 const [featured, ...restPosts] = posts;
 const ch = Object.fromEntries(site.channels.map((c) => [c.name, c.url]));
 
-type Card = { kind: string; title: string; text?: string; date?: string; href: string; external: boolean; go: string; thumb: "word" | "book" | "video"; color?: string; poster?: string };
+type Card = { kind: string; title: string; text?: string; date?: string; href: string; external: boolean; go: string; thumb: "art" | "book" | "video"; topic?: { id: string; label: string }; image?: string; color?: string; poster?: string };
 const cards: Card[] = [
-  ...restPosts.map((p) => ({ kind: "블로그", title: p.title, text: p.excerpt, date: p.date, href: p.link, external: true, go: "블로그에서 읽기", thumb: "word" as const })),
-  { kind: "칼럼", title: "이코노미조선 칼럼 모아 보기", text: "이코노미조선에 연재한 세금 칼럼을 한곳에서 읽어 보세요.", href: ch["이코노미조선 칼럼"], external: true, go: "칼럼 읽기", thumb: "word" },
+  ...restPosts.map((p) => ({ kind: "블로그", title: p.title, text: p.excerpt, date: p.date, href: p.link, external: true, go: "블로그에서 읽기", thumb: "art" as const, topic: topicOf(p.title), image: p.image })),
+  { kind: "칼럼", title: "이코노미조선 칼럼 모아 보기", text: "이코노미조선에 연재한 세금 칼럼을 한곳에서 읽어 보세요.", href: ch["이코노미조선 칼럼"], external: true, go: "칼럼 읽기", thumb: "art", topic: { id: "column", label: "이코노미조선 칼럼" } },
   ...home.books.map((b) => ({ kind: "책", title: b.title, text: `${site.rep} 지음`, href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "book" as const, color: b.color })),
-  { kind: "책", title: `책 ${home.booksTotal}권 전체 보기`, text: "상속·증여, 법인, 부동산, 업종별 세무관리까지 직접 쓴 책 목록입니다.", href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "word" },
+  { kind: "책", title: `책 ${home.booksTotal}권 전체 보기`, text: "상속·증여, 법인, 부동산, 업종별 세무관리까지 직접 쓴 책 목록입니다.", href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "art", topic: { id: "books", label: `책 ${home.booksTotal}권` } },
   ...videoData.videos.map((v) => ({ kind: "영상", title: v.title, text: v.note, href: `/about#video-${v.id}`, external: false, go: "영상 보기", thumb: "video" as const, poster: v.poster })),
 ];
 const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼럼");
@@ -63,7 +65,7 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
           <li data-kind={c.kind}>
             <a class="card-a" href={c.href} {...(c.external ? { target: "_blank", rel: "noopener" } : {})}>
               <span class:list={["thumb", `thumb-${c.thumb}`]} aria-hidden="true">
-                {c.thumb === "word" && <span class="tw">{c.kind}</span>}
+                {c.thumb === "art" && <Thumb topic={c.topic!.id} label={c.topic!.label} image={c.image} books={home.books.map((b) => b.color)} />}
                 {c.thumb === "book" && <span class="tb" style={`--c:${c.color}`}></span>}
                 {c.thumb === "video" && <img src={c.poster} alt="" loading="lazy" width="540" height="960" />}
               </span>
@@ -113,9 +115,6 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
   .thumb { display: block; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; position: relative; background: var(--moss); }
   .thumb > * { transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
   .card-a:hover .thumb > *, .card-a:focus-visible .thumb > * { transform: scale(1.05); }
-  .thumb-word { display: grid; place-items: center; background: linear-gradient(135deg, var(--moss) 0%, var(--moss2) 100%); }
-  .tw { font-family: var(--f-display); font-weight: 700; font-size: 40px; color: rgba(243, 240, 231, .9); }
-  .thumb-word::after { content: ""; position: absolute; left: 24px; right: 24px; bottom: 22px; height: 2px; background: var(--gold); opacity: .8; }
   .thumb-book { display: grid; place-items: center; background: var(--paper2); }
   .tb { width: 27%; aspect-ratio: 3 / 4.3; background: var(--c); color: #FFF7E6; border-radius: 1px 3px 3px 1px; box-shadow: 0 12px 20px -12px rgba(0, 0, 0, .6), inset 3px 0 0 rgba(0, 0, 0, .18); padding: 8%; display: flex; }
   .tb::after { content: ""; display: block; width: 100%; height: 2px; margin-top: 18%; background: rgba(255, 247, 230, .7); }
@@ -152,6 +151,11 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
 </style>
 
 <script>
+  // 블로그 대표 사진을 못 불러오면 사진만 지워 아래 표지 그림이 보이게 한다
+  document.querySelectorAll<HTMLImageElement>(".th-ph").forEach((img) => {
+    const drop = () => img.remove();
+    if (img.complete && img.naturalWidth === 0) drop(); else img.addEventListener("error", drop);
+  });
   const btns = document.querySelectorAll<HTMLButtonElement>(".flt");
   const items = document.querySelectorAll<HTMLLIElement>(".cards li");
   const status = document.getElementById("flt-status")!;
