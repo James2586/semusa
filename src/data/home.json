@@ -11,7 +11,6 @@
   "books": [
     { "title": "알면 돈 버는 상속세 및 증여세 절세전략", "color": "#FF0000", "cover": "/img/books/inherit-gift-strategy.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "알면 돈 버는 양도소득세 절세전략", "color": "#C00000", "date": "2026-05", "cover": "/img/books/transfer-strategy.webp", "coauthors": ["한경식"] },
-    { "title": "알면 돈 버는 부동산 절세전략", "color": "#3EFC5E", "date": "2026-03" },
     { "title": "알면 돈 버는 부가가치세 오늘부터 시작", "color": "#002060", "date": "2026-02", "cover": "/img/books/vat-today.webp" },
     { "title": "알면 돈 버는 양도소득세 오늘부터 시작", "color": "#C00000", "cover": "/img/books/transfer-today.webp" },
     { "title": "알면 돈 버는 도소매업 세금의 정석", "color": "#7030A0", "cover": "/img/books/wholesale-retail.webp" },
