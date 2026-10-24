@@ -10,7 +10,8 @@
   ],
   "books": [
     { "title": "알면 돈 버는 상속증여 오늘부터 시작", "color": "#B8372B" },
-    { "title": "알면 돈 버는 법인컨설팅", "color": "#1F4E8C" }
+    { "title": "알면 돈 버는 법인컨설팅", "color": "#1F4E8C" },
+    { "title": "알면 돈 버는 부가가치세 오늘부터 시작", "color": "#14285E", "cover": "/img/books/vat-today.webp" }
   ],
   "booksTotal": 33,
   "consult": [

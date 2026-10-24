@@ -11,6 +11,7 @@ import VideoCard from "../components/VideoCard.astro";
 import DeadlineCalc from "../components/DeadlineCalc.astro";
 import UpcomingDeadlines from "../components/UpcomingDeadlines.astro";
 import { shelfSpines } from "../lib/shelf.js";
+import Pager from "../components/Pager.astro";
 
 const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]));
 const calcCount = calcData.calculators.length;
@@ -80,10 +81,13 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
         <span class="tag">칼럼·책</span>
         <h2 class="sec-h" id="h-books">책 {home.booksTotal}권을 직접 썼습니다</h2>
         <p class="sec-sub">상속·증여, 법인, 부동산 세금을 다룬 책을 쓰고, 이코노미조선에 칼럼을 연재합니다.</p>
-        <div class="bks">
-          {home.books.map((b) => <a class="bk" style={`background:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><b>{b.title}</b><small>{site.rep}</small></a>)}
+        <div class="bks" id="home-bks" aria-label="책 목록">
+          {home.books.map((b) => b.cover
+            ? <a class="bk bk-img" href={site.booksUrl} target="_blank" rel="noopener"><img src={b.cover} width="400" height="571" alt={`『${b.title}』 표지`} loading="lazy" decoding="async" /></a>
+            : <a class="bk" style={`background:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><b>{b.title}</b><small>{site.rep}</small></a>)}
           <a class="bk bk-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="shelf" aria-hidden="true">{shelf.map((b) => <i style={`--c:${b.c};--h:${Math.round(b.h * 100)}%;--w:${b.w}`}></i>)}</span><b>{home.booksTotal}권<br />전체 보기</b><small>교보문고 ↗</small></a>
         </div>
+        <Pager target="home-bks" label="책 목록" />
         <ul class="chan">
           {channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
           <li><a href="/columns"><span>칼럼·책 모두 보기</span><span aria-hidden="true">›</span></a></li>
@@ -204,7 +208,13 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
   .cal .all small { color: var(--gold-hi); }
 
   /* 4 칼럼·책 */
-  .bks { margin-top: 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 460px; }
+  /* 책 표지 줄: 휴대폰은 옆으로 넘긴다(권수가 늘어도 표지가 작아지지 않게) */
+  .bks { margin-top: 22px; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 16px; scrollbar-width: none; }
+  .bks::-webkit-scrollbar { display: none; }
+  .bks > .bk { flex: none; width: 136px; scroll-snap-align: start; padding: 16px 14px; }
+  .two > * { min-width: 0; } /* 표지 줄이 단 폭을 밀어 화면이 옆으로 넘치지 않게 */
+  .bks > .bk-img { padding: 0; overflow: hidden; background: var(--paper2); }
+  .bk-img img { width: 100%; height: 100%; object-fit: cover; }
   .bk { aspect-ratio: 3 / 4.2; max-width: 100%; border-radius: 2px 6px 6px 2px; padding: 12% 11%; display: flex; flex-direction: column; justify-content: space-between; color: #FFF6E4; text-decoration: none; box-shadow: inset 3px 0 0 rgba(0, 0, 0, .18), 0 14px 22px -16px rgba(0, 0, 0, .55); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
   .bk:hover, .bk:focus-visible { transform: translateY(-4px); }
   .bk b { font-size: clamp(14px, 3.6vw, 16.5px); line-height: 1.4; }
@@ -266,6 +276,9 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
     .svc li + li a { padding-left: 20px; border-left: 1px solid var(--line); }
     .svc :global(svg) { grid-row: 1; grid-column: 1; }
     .two { grid-template-columns: 1fr 1fr; gap: 72px; }
+    .bks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; padding-bottom: 0; }
+    .bks > .bk { width: auto; padding: 12% 11%; }
+    .bks > .bk-img { padding: 0; }
     .cal { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .vid { justify-self: center; align-self: center; }
     .how { grid-template-columns: repeat(3, minmax(0, 1fr)); }

@@ -1,6 +1,6 @@
 // 빌드 전에 운영자가 고치는 파일(src/data/*.json, src/content/faq/*.md)을 검사한다.
 // 틀린 곳이 있으면 파일 이름과 줄 번호를 한국어로 알려 주고 빌드를 멈춘다.
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -98,7 +98,7 @@ export function checkDeadlines(text) {
   return errors;
 }
 
-export function checkHome(text, svcSlugs) {
+export function checkHome(text, svcSlugs, root = ROOT) {
   const errors = [];
   const { data, error } = parseJsonFile("home.json", text);
   if (error) return [error];
@@ -108,6 +108,11 @@ export function checkHome(text, svcSlugs) {
   });
   if (!(data.situations || []).length) errors.push("home.json: situations가 비었습니다.");
   if (!Number.isInteger(data.booksTotal) || data.booksTotal < 1) errors.push("home.json: booksTotal은 책 권수(숫자)여야 합니다.");
+  (data.books || []).forEach((b, i) => {
+    if (!b.title || !/^#[0-9A-Fa-f]{6}$/.test(b.color || "")) errors.push(`home.json: ${i + 1}번째 책에 title과 color("#RRGGBB")가 있어야 합니다.`);
+    // 표지 사진(선택): public/ 아래 실제 파일이어야 한다
+    if (b.cover !== undefined && !(/^\/img\/books\/[a-z0-9-]+\.(webp|png|jpg)$/.test(b.cover) && existsSync(join(root, "public", b.cover)))) errors.push(`home.json: ${i + 1}번째 책 cover "${b.cover}" 파일이 public/img/books/에 없습니다.`);
+  });
   for (const k of ["consult", "steps", "prepare"]) if (!(data[k] || []).length) errors.push(`home.json: ${k}가 비었습니다.`);
   return errors;
 }
@@ -166,7 +171,7 @@ export function validateAll(root = ROOT) {
   errors.push(...checkSite(read("src/data/site.json")));
   let svcSlugs = new Set();
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
-  errors.push(...checkHome(read("src/data/home.json"), svcSlugs));
+  errors.push(...checkHome(read("src/data/home.json"), svcSlugs, root));
   for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
