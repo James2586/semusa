@@ -35,7 +35,7 @@ const DEFAULT = "buy";
 
   <section class="gut lm-sec" data-lm>
     <div class="wrap">
-      <noscript><style>.lm-panel[hidden] { display: grid !important; }</style></noscript>
+      <noscript><style>.lm-panel[hidden] { display: grid !important; } .lm-track { grid-template-columns: minmax(0, 1fr) !important; } .lm-track::before { display: none; } .lm-stop { display: grid !important; } .lm-btn, .lm-panel { grid-row: auto !important; grid-column: auto !important; } .lm-btn { flex-direction: row !important; text-align: left !important; }</style></noscript>
       {[["lm-main", "일생의 일", stops], ["lm-any", "언제든 생길 수 있는 일", anytime]].map(([cls, label, list]: any) => (
         <div class:list={["lm-track", cls]} style={`--n:${list.length}`} role="group" aria-label={label}>
           {cls === "lm-any" && <p class="lm-any-h">{label}</p>}
@@ -91,7 +91,7 @@ const DEFAULT = "buy";
   .lm-any::before { background: none; border-left: 2px dashed var(--line2); width: 0; top: 64px; }
   .lm-any-h { font-size: 15px; font-weight: 700; color: var(--gold-text); padding: 6px 0 6px 36px; }
   .lm-stop { display: grid; }
-  .lm-btn { position: relative; display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 6px 0; border: 0; background: none; text-align: left; cursor: pointer; font: 600 17px var(--f-body); color: var(--ink); }
+  .lm-btn { scroll-margin-top: calc(var(--header-h) + 12px); position: relative; display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 6px 0; border: 0; background: none; text-align: left; cursor: pointer; font: 600 17px var(--f-body); color: var(--ink); }
   .lm-dot { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--moss); background: var(--paper); box-sizing: border-box; transition: background .2s, box-shadow .2s; }
   .lm-btn[aria-expanded="true"] .lm-dot { background: var(--moss); box-shadow: 0 0 0 4px var(--gold-soft), inset 0 0 0 4px var(--paper); }
   .lm-btn[aria-expanded="true"] .lm-l { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 6px; text-decoration-thickness: 2px; }
@@ -154,7 +154,13 @@ const DEFAULT = "buy";
     }
   }
   for (const b of btns) b.addEventListener("click", () => open(b.dataset.stop!, true));
-  const fromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (btns.some((b) => b.dataset.stop === id)) open(id); };
+  // 주소 #<id>로 오면 그 일을 펼치고 그 단추가 보이게(휴대폰에선 아래쪽 일이 화면 밖이었다 — 첫 화면 맛보기 줄이 여기로 잇는다)
+  const fromHash = () => {
+    const id = decodeURIComponent(location.hash.slice(1)), b = btns.find((x) => x.dataset.stop === id);
+    if (!b) return;
+    open(id);
+    b.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
   fromHash();
   addEventListener("hashchange", fromHash);
 </script>

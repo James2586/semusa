@@ -334,7 +334,8 @@ const evs = data.events;
     cur = { ev, r };
     if (push) history.replaceState(null, "", shareUrl());
     // 상담 요청 글(4차 C1) — 일 종류·날짜·기한만(이 기기 안에서만)
-    sendConsult({ situation: ev.chip, dateLabel: ev.dateLabel, dateText: dot(r.startIso), deadlineName: ev.name, deadlineText: `${dot(r.deadlineIso)}(${r.weekday})` });
+    const isAbroad = !!abroad.checked && !!ev.rule.abroadMonths; // 해외 기한(9개월)이면 그 까닭도 글에 — deadlines.json abroadLabel 그대로
+    sendConsult({ situation: ev.chip, dateLabel: ev.dateLabel, dateText: dot(r.startIso), deadlineName: ev.name, deadlineText: `${dot(r.deadlineIso)}(${r.weekday})`, notes: isAbroad ? [ev.abroadLabel] : [] });
     draw(animate);
   }
   function shareUrl() {

@@ -18,3 +18,8 @@ test("비어 있는 것은 줄을 만들지 않는다 · 기한은 날짜가 있
   assert.doesNotMatch(t, /기한:|준비된 것|아직 없는 것|보던 화면/);
   assert.match(t, /· 궁금한 점: $/);
 });
+
+test("참고 줄(해외 기한 까닭 등)은 자료 글 그대로 · 준비 줄 앞에", () => {
+  const t = buildConsultMessage({ situation: "상속", deadlineName: "상속세 신고·납부", deadlineText: "2027. 6. 30.(수)", notes: ["돌아가신 분이나 상속인이 외국에 주소를 둠"], prepared: ["재산 목록"] });
+  assert.match(t, /· 기한: [^\n]+\n· 참고: 돌아가신 분이나 상속인이 외국에 주소를 둠\n· 준비된 것: 재산 목록/);
+});

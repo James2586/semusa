@@ -126,7 +126,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
           <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 상황으로 상담하기</a>
           <p class="gd-st" role="status" data-status>보내는 것은 고른 상황과 날짜가 담긴 주소뿐입니다.</p>
         </div>
-        <ConsultNote open />
+        <div data-cn-wrap hidden><ConsultNote open /></div>
       </div>
     </div>
     <script type="application/json" data-gd-data set:html={JSON.stringify({ situations: guide.situations, events: dl.events, yearly: dl.yearly, holidays }).replace(/</g, "\\u003c")} />
@@ -203,6 +203,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
   const holidays = buildHolidayIndex(json.holidays || []);
   const form = q<HTMLFormElement>("[data-form]"), dateIn = q<HTMLInputElement>("[data-date]");
   const res = q("[data-res]"), status = q("[data-status]");
+  q("[data-cn-wrap]").hidden = false; // 상담 요청 글은 자바스크립트가 있어야 만들어진다
   const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
   const ddText = (n: number) => (n > 0 ? `D-${n}` : n === 0 ? "오늘 마감" : `${-n}일 지남`);
   const okDate = (v: string) => !!(v && parseIso(v) && v >= "1950-01-01" && v <= "2100-12-31");
@@ -283,7 +284,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
     return u.toString();
   }
   form.addEventListener("change", () => render());
-  res.addEventListener("change", (e) => { if ((e.target as HTMLElement).closest(".pk")) render(); }); // 챙긴 서류 표시가 바뀌면 상담 글도
+  document.addEventListener("pk-sync", () => render()); // 챙긴 서류 표시가 바뀌면(「표시 지우기」 포함) 상담 글도
   dateIn.addEventListener("input", () => render());
   q("[data-share]").addEventListener("click", async () => {
     const url = shareUrl(), g = sits.find((x) => x.id === val("gd-s"));

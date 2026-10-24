@@ -15,7 +15,9 @@ export function ogPagesFrom({ services = [], calculators = [], groups = [], book
     { path: "/faq", file: "faq", kicker: "자주 묻는 질문", title: "자주 묻는 질문", sub: "근거 조문과 함께 답합니다" },
     { path: "/life", file: "life", kicker: "세금 생애 지도", title: "일생의 일마다, 먼저 볼 기한", sub: "사업 · 집 · 증여 · 양도 · 퇴직 · 상속" },
     { path: "/topics", file: "topics", kicker: "주제 모아 보기", title: "주제마다 한 쪽에", sub: topics.map((t) => t.name).join(" · ") },
-    ...topics.map((t) => ({ path: `/topics/${t.slug}`, file: `topic-${t.slug}`, kicker: "주제 모아 보기", title: t.name, sub: "기한 · 용어 · 계산기 · 칼럼 · 책" })),
+    // 부제는 그 쪽에 실제로 있는 구역만(칼럼 유무는 press 주제 칸으로 판단 — 쪽의 RelatedColumns와 같은 기준)
+    ...topics.map((t) => ({ path: `/topics/${t.slug}`, file: `topic-${t.slug}`, kicker: "주제 모아 보기", title: t.name,
+      sub: [["기한", 1], ["용어", t.glossary?.length], ["계산기", t.calculators?.length], ["칼럼", t.press?.length], ["책", t.books?.length]].filter(([, n]) => n).map(([l]) => l).join(" · ") })),
     ...services.map((s) => ({ path: `/services/${s.slug}`, file: `services-${s.slug}`, kicker: "서비스", title: s.name, sub: (s.keyDeadlines || []).map(([l, v]) => `${l} ${v}`).join(" · ") })),
     ...calculators.map((c) => ({ path: `/calculators/${c.slug}`, file: `calc-${c.slug}`, kicker: `세금 계산기 · ${gname[c.group] || ""}`, title: c.name, sub: `${c.short} · 결과는 참고용` })),
   ];
