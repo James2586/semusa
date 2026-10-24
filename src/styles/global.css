@@ -82,6 +82,14 @@ p { margin: 0; }
 .sec { padding-block: 56px; }
 .sec-alt { background: var(--paper2); }
 .ruled { border-top: 1px solid var(--line); }
+/* 페이지 머리 꼬리표(금색 짧은 선) — PageHead·소개·404 */
+.ph-tag { margin-top: 14px; font-size: 15px; font-weight: 600; color: var(--ink2); display: flex; gap: 10px; align-items: center; }
+.ph-tag::before { content: ""; width: 20px; height: 1px; background: var(--gold); }
+/* 거르기 칩(계산기 분야·질문 분야·칼럼 종류) — 고른 것은 숲색 */
+.fchip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line2); background: var(--surface); color: var(--ink2); font: 600 15.5px var(--f-body); cursor: pointer; transition: background .2s, color .2s, border-color .2s, transform .12s; }
+.fchip:hover { border-color: var(--moss); }
+.fchip:active { transform: scale(.98); }
+.fchip[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: var(--on-moss); }
 .sec-dark { background: var(--moss); color: var(--on-moss); }
 .tag { display: block; font-size: 14px; font-weight: 700; color: var(--gold-text); margin-bottom: 6px; }
 .sec-dark .tag { color: var(--gold-hi); }

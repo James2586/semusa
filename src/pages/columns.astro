@@ -4,6 +4,7 @@ import PageHead from "../components/PageHead.astro";
 import VideoCard from "../components/VideoCard.astro";
 import Thumb from "../components/Thumb.astro";
 import { topicOf } from "../lib/thumbTopic.js";
+import { inkFor } from "../lib/shelf.js";
 import site from "../data/site.json";
 import home from "../data/home.json";
 import videoData from "../data/videos.json";
@@ -26,7 +27,7 @@ const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼�
 const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
 ---
 <Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그, 영상.`}>
-  <PageHead title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead={`상속·증여, 법인, 부동산 세금을 다룬 책 ${home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.`} />
+  <PageHead tag="칼럼·책" photo={{ name: "own-face", w: [600, 900], ratio: "6 / 5" }} title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead={`상속·증여, 법인, 부동산 세금을 다룬 책 ${home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.`} />
 
   <section class="gut feat-sec" aria-label="대표 글">
     <div class="wrap">
@@ -56,7 +57,7 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
       <div class="list-hd">
         <h2 class="sec-h" id="h-all">모두 보기</h2>
         <div class="filters" role="group" aria-label="종류로 거르기">
-          {kinds.map((k, i) => <button type="button" class="flt" aria-pressed={i === 0 ? "true" : "false"} data-kind={k}>{k}</button>)}
+          {kinds.map((k, i) => <button type="button" class="flt fchip" aria-pressed={i === 0 ? "true" : "false"} data-kind={k}>{k}</button>)}
         </div>
       </div>
       <p class="sr-only" role="status" id="flt-status"></p>
@@ -66,7 +67,7 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
             <a class="card-a" href={c.href} {...(c.external ? { target: "_blank", rel: "noopener" } : {})}>
               <span class:list={["thumb", `thumb-${c.thumb}`]} aria-hidden="true">
                 {c.thumb === "art" && <Thumb topic={c.topic!.id} label={c.topic!.label} image={c.image} books={home.books.slice(0, 2).map((b) => b.color)} />}
-                {c.thumb === "book" && (c.cover ? <img class="tbi" src={c.cover} alt="" width="400" height="571" loading="lazy" decoding="async" /> : <span class="tb" style={`--c:${c.color}`}></span>)}
+                {c.thumb === "book" && (c.cover ? <img class="tbi" src={c.cover} alt="" width="400" height="571" loading="lazy" decoding="async" /> : <span class="tb" style={`--c:${c.color};color:${inkFor(c.color || "#1E3A2A")}`}><b>{c.title.replace(/^알면 돈 버는 /, "")}</b></span>)}
                 {c.thumb === "video" && <img src={c.poster} alt="" loading="lazy" width="540" height="960" />}
               </span>
               <span class="chip">{c.kind}</span>
@@ -107,8 +108,6 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
 
   .list-hd { display: grid; gap: 12px; margin-bottom: 18px; }
   .filters { display: flex; flex-wrap: wrap; gap: 8px; }
-  .flt { min-height: 44px; padding: 0 16px; border: 1px solid var(--line2); background: var(--surface); color: var(--ink2); border-radius: 999px; font: 600 15.5px var(--f-body); cursor: pointer; }
-  .flt[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: var(--on-moss); }
   .cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; }
   .cards li { display: flex; }
   .card-a { flex: 1; display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: var(--ink); }
@@ -118,6 +117,18 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
   .thumb-book { display: grid; place-items: center; background: var(--paper2); }
   .tb { width: 27%; aspect-ratio: 3 / 4.3; background: var(--c); color: #FFF7E6; border-radius: 1px 3px 3px 1px; box-shadow: 0 12px 20px -12px rgba(0, 0, 0, .6), inset 3px 0 0 rgba(0, 0, 0, .18); padding: 8%; display: flex; }
   .tb::after { content: ""; display: block; width: 100%; height: 2px; margin-top: 18%; background: rgba(255, 247, 230, .7); }
+  .tb b { display: none; }
+  /* 표지 벽("책"을 고르면): 표지만 2~6단으로 크게 — 제목은 표지 아래 한 줄 */
+  .cards.wall { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+  .wall .thumb { aspect-ratio: 400 / 571; background: none; overflow: visible; }
+  .wall .tbi { position: static; width: 100%; height: 100%; object-fit: cover; }
+  .wall .tb { width: 100%; height: 100%; aspect-ratio: auto; flex-direction: column; justify-content: space-between; padding: 12% 11%; }
+  .wall .tb::after { display: none; }
+  .wall .tb b { display: block; font-size: 15.5px; line-height: 1.4; }
+  .wall .chip, .wall .cx, .wall .go { display: none; }
+  .wall .ct { font-size: 15.5px; border-left: 0; padding-left: 0; }
+  .wall .thumb-art { aspect-ratio: 400 / 571; }
+  .wall li:last-child:nth-child(odd) { grid-column: auto; }
   /* 표지 사진: 칸 높이의 86%로 가운데(높이 % 가 먹도록 절대 위치) */
   .tbi { position: absolute; top: 7%; left: 0; right: 0; margin: 0 auto; height: 86%; width: auto; max-width: none; border-radius: 2px 4px 4px 2px; box-shadow: 0 12px 20px -12px rgba(0, 0, 0, .6); }
   .thumb-video img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
@@ -147,6 +158,8 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
     .cards li:last-child:nth-child(odd) .card-a { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 32px; align-content: start; }
     .cards li:last-child:nth-child(odd) .thumb { grid-row: 1 / span 5; }
     .cards li:last-child:nth-child(odd) .chip { justify-self: start; }
+    .cards.wall { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 32px 24px; }
+    .wall li:last-child:nth-child(odd) .card-a { display: flex; }
     .follow { grid-template-columns: 1fr auto; align-items: center; gap: 48px; padding: 44px 48px; }
     .follow ul { min-width: 300px; }
   }
@@ -166,6 +179,7 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
     btns.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     let n = 0;
     items.forEach((li) => { const show = k === "전체" || li.dataset.kind === k; li.hidden = !show; if (show) n++; });
+    document.querySelector(".cards")!.classList.toggle("wall", k === "책");
     status.textContent = `${k} ${n}개`;
   }));
 </script>

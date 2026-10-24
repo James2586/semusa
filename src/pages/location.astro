@@ -5,8 +5,13 @@ import LocationBlock from "../components/LocationBlock.astro";
 import site from "../data/site.json";
 ---
 <Base title="오시는 길" description={`${site.address.full} · ${site.hours}`}>
-  <PageHead title="오시는 길" crumbs={[{ name: "오시는 길" }]} />
-  <section class="gut" style="padding-bottom:64px">
-    <div class="wrap"><LocationBlock /></div>
+  <PageHead tag="오시는 길" title="찾아오시는 길" lead="방문 상담은 미리 예약합니다. 카카오톡으로 날짜를 먼저 알려 주세요." crumbs={[{ name: "오시는 길" }]} photo={{ name: "mood-paper", w: [800, 1200], ratio: "4 / 3" }} />
+  <section class="gut loc-sec">
+    <div class="wrap"><div class="loc-card"><LocationBlock /></div></div>
   </section>
 </Base>
+<style>
+  .loc-sec { padding-block: 32px 64px; }
+  .loc-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px 18px; }
+  @media (min-width: 900px) { .loc-card { padding: 36px 40px; } }
+</style>

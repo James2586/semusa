@@ -5,6 +5,7 @@ import calcData from "../../data/calculators.json";
 import svcData from "../../data/services.json";
 import site from "../../data/site.json";
 import KakaoIcon from "../../components/KakaoIcon.astro";
+import PlusList from "../../components/PlusList.astro";
 
 export function getStaticPaths() {
   return calcData.calculators.map((c) => ({ params: { slug: c.slug }, props: { calc: c } }));
@@ -17,8 +18,8 @@ const hasGuide = calc.covers?.length || calc.notCovered?.length || calc.prepare?
 const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc.short}. ${site.repTitle} ${site.rep}이 만든 모의 계산기.`;
 ---
 <Base title={calc.name} description={desc} hideBar>
-  <PageHead title={calc.name} lead={calc.short} crumbs={[{ name: "세금 계산기", href: "/calculators" }, { name: calc.name }]}>
-    <p class="meta">{group.name} · 검토 {site.repTitle} {site.rep}</p>
+  <PageHead tag={`세금 계산기 · ${group.name}`} title={calc.name} lead={calc.short} crumbs={[{ name: "세금 계산기", href: "/calculators" }, { name: calc.name }]}>
+    <p class="meta">검토 {site.repTitle} {site.rep}</p>
   </PageHead>
 
   <section class="gut">
@@ -36,17 +37,24 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
 
   <section class="gut calc-sec" id="calc">
     <div class="wrap">
-      <div class="frame-hd">
-        <span>{calc.name}</span>
-        <a href={calc.url} target="_blank" rel="noopener">새 창에서 열기 ↗</a>
+      <div class="frame" id="calc-frame-box">
+        <div class="frame-hd">
+          <span><svg class="fp" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>{calc.name}</span>
+          <a href={calc.url} target="_blank" rel="noopener">새 창에서 열기 ↗<span class="sr-only">(새 창)</span></a>
+        </div>
+        <div class="frame-body">
+          <iframe
+            class="calc-frame"
+            src={calc.url}
+            title={`${calc.name} — 계산 화면`}
+            allow="clipboard-write"
+            referrerpolicy="strict-origin-when-cross-origin"
+          ></iframe>
+          <div class="frame-wait" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg><span>계산 화면을 불러오는 중</span></div>
+        </div>
       </div>
-      <iframe
-        class="calc-frame"
-        src={calc.url}
-        title={`${calc.name} — 계산 화면`}
-        allow="clipboard-write"
-        referrerpolicy="strict-origin-when-cross-origin"
-      ></iframe>
+      {/* 불러오는 중 모양: 계산 화면이 뜨면 걷는다(자바스크립트가 없으면 처음부터 안 보임). 바로 뒤에서 걸어야 load를 놓치지 않는다 */}
+      <script is:inline>(function(){var b=document.getElementById("calc-frame-box"),f=b.querySelector("iframe");b.classList.add("loading");function done(){b.classList.remove("loading")}f.addEventListener("load",done);setTimeout(done,15000)})();</script>
       <p class="note">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다. 계산 화면은 안에서 위아래로 움직입니다. 크게 보려면 "새 창에서 열기"를 눌러 주세요.</p>
     </div>
   </section>
@@ -68,11 +76,11 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
       )}
 
       <h2 class="sec-h more-h">이어서 보기</h2>
-      <div class="rows">
-        {services.map((s) => <a class="row-link" href={`/services/${s.slug}`}><span>{s.name} 상담 안내<small>{s.short}</small></span><span class="arr" aria-hidden="true">›</span></a>)}
-        {siblings.map((c) => <a class="row-link" href={`/calculators/${c.slug}`}><span>{c.name}<small>{c.short}</small></span><span class="arr" aria-hidden="true">›</span></a>)}
-        <a class="row-link" href="/calculators"><span>세금 계산기 전체</span><span class="arr" aria-hidden="true">›</span></a>
-      </div>
+      <PlusList label="이어서 보기" items={[
+        ...services.map((s) => ({ href: `/services/${s.slug}`, kicker: "서비스", title: `${s.name} 상담 안내`, desc: s.short })),
+        ...siblings.map((c) => ({ href: `/calculators/${c.slug}`, kicker: group.name, title: c.name, desc: c.short })),
+        { href: "/calculators", title: `세금 계산기 전체 ${calcData.calculators.length}종` },
+      ]} />
     </div>
   </section>
 </Base>
@@ -89,17 +97,26 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
   .acc ul { margin: 0 0 16px; padding-left: 1.1em; display: grid; gap: 6px; color: var(--ink2); font-size: 16.5px; }
   .acc li::marker { color: var(--gold); }
   .calc-sec { padding-block: 28px 8px; }
-  .frame-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; background: var(--moss); color: var(--on-moss); font-size: 15.5px; font-weight: 600; border-radius: 6px 6px 0 0; }
-  .frame-hd a { color: var(--gold-hi); font-weight: 500; white-space: nowrap; }
+  /* 계산 화면 틀: 결과 판과 같은 숲색, 왼쪽에 +, 오른쪽 "새 창에서 열기" */
+  .frame { border: 6px solid var(--moss); border-top: 0; border-radius: 10px; overflow: hidden; background: var(--moss); }
+  .frame-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 10px 12px 10px; background: var(--moss); color: var(--on-moss); font-size: 15.5px; font-weight: 600; }
+  .frame-hd > span { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .fp { width: 15px; height: 15px; flex: none; color: var(--gold-hi); }
+  .frame-hd a { color: var(--gold-hi); font-weight: 500; white-space: nowrap; display: inline-flex; align-items: center; min-height: 44px; }
+  .frame-body { position: relative; background: var(--surface); border-radius: 4px; overflow: hidden; }
+  .frame-wait { position: absolute; inset: 0; display: none; place-content: center; justify-items: center; gap: 14px; background: var(--surface); color: var(--muted); font-size: 15px; }
+  .frame-wait svg { width: 34px; height: 34px; color: var(--moss); animation: fspin 2.4s linear infinite; }
+  .loading .frame-wait { display: grid; }
+  @keyframes fspin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .frame-wait svg { animation: none; } }
   /* 계산기 결과·보고서 창이 화면에 고정되어 뜨므로, 계산 화면은 휴대폰 화면 한 장 높이로 두고 안에서 스크롤한다(높이를 내용에 맞추면 그 창이 화면 밖에 뜰 수 있음) */
   .calc-sec { scroll-margin-top: var(--header-h); }
-  .calc-frame { display: block; width: 100%; height: max(560px, calc(100svh - var(--header-h) - 48px)); border: 1px solid var(--line2); border-top: none; background: var(--surface); }
+  .calc-frame { display: block; width: 100%; height: max(560px, calc(100svh - var(--header-h) - 70px)); border: 0; background: var(--surface); }
   .note { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
   .after { padding-block: 24px 64px; }
   .acts { display: grid; gap: 10px; }
   .dl { margin-top: 40px; }
   .more-h { margin-top: 40px; font-size: 23px; }
-  .after .rows { margin-top: 12px; }
 </style>
 
 <script>

@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import PageHead from "../../components/PageHead.astro";
+import DeadlineBand from "../../components/DeadlineBand.astro";
 import PlusList from "../../components/PlusList.astro";
 import svcData from "../../data/services.json";
 // 줄마다 서비스 이름 + 핵심 기한(첫 화면과 같은 services.json keyDeadlines) + 이런 분께 한 줄
@@ -14,19 +15,10 @@ const items = svcData.services.map((s: any) => ({ href: `/services/${s.slug}`, t
     <div class="wrap">
       <h2 class="sr-only" id="h-list">서비스 목록</h2>
       <PlusList items={items} label="서비스" />
-      <a class="find" href="/#h-hero">
-        <span><small>어떤 일인지 모르겠다면</small><b class="find-t">무슨 일이 있었는지 고르고 날짜만 넣어 보세요</b></span>
-        <span class="find-go">기한 계산 <span aria-hidden="true">›</span></span>
-      </a>
+      <DeadlineBand kicker="어떤 일인지 모르겠다면" />
     </div>
   </section>
 </Base>
 <style>
   .list-sec { padding-top: 28px; }
-  .find { margin-top: 36px; display: grid; gap: 12px; padding: 22px 22px; background: var(--moss); color: var(--on-moss); border-radius: 10px; text-decoration: none; }
-  .find small { display: block; font-size: 14px; color: var(--gold-hi); font-weight: 700; margin-bottom: 4px; }
-  .find-t { font-family: var(--f-display); font-size: 21px; line-height: 1.4; }
-  .find-go { font-weight: 700; color: var(--gold-hi); }
-  .find:hover .find-go { text-decoration: underline; text-underline-offset: 4px; }
-  @media (min-width: 900px) { .find { grid-template-columns: 1fr auto; align-items: center; padding: 28px 32px; } .find-t { font-size: 24px; } }
 </style>

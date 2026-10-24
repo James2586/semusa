@@ -1,79 +1,214 @@
 ---
+// 전문가 소개(2026-10-24 2차 개편): 머리에 큰 사진·이름 → 숫자 셋(자릿수 바퀴) → 인사말(글 그대로) → 약력 연표(확인된 것만, 연도 모르면 연도 없이)
+// → 서가(책 33권 — 제목을 아는 책은 책등에 제목, 누르면 표지) + 서점 사진 → 영상 2편 · 통합검색 22 → 마무리 띠
 import Base from "../layouts/Base.astro";
-import PageHead from "../components/PageHead.astro";
 import site from "../data/site.json";
 import VideoCard from "../components/VideoCard.astro";
+import BookCover from "../components/BookCover.astro";
+import Odometer from "../components/Odometer.astro";
 import home from "../data/home.json";
 import calcData from "../data/calculators.json";
 import svcData from "../data/services.json";
+import { shelfSpines, inkFor } from "../lib/shelf.js";
 // 숫자는 자료 파일에서 센 것만(지어내지 않음)
 const stats = [
   { label: "직접 쓴 세무 저서", n: home.booksTotal, unit: "권" },
   { label: "모의 세금 계산기", n: calcData.calculators.length, unit: "종" },
   { label: "상담 분야", n: svcData.services.length, unit: "개" },
 ];
+const short = (t: string) => t.replace(/^알면 돈 버는 /, "");
+// 약력 연표: 연도를 아는 것은 책 출간(home.json date)뿐 — 같은 해끼리 묶고, 연도 모르는 이력은 맨 앞에 연도 없이
+const dated = home.books.filter((b) => b.date).sort((a, b) => a.date!.localeCompare(b.date!));
+const years = [...new Set(dated.map((b) => b.date!.slice(0, 4)))].map((y) => ({ y, items: dated.filter((b) => b.date!.startsWith(y)) }));
+// 서가: 33칸 중 제목을 아는 책(home.json books)은 그 표지색 책등, 나머지는 빈 책등
+const spines = shelfSpines(home.books.map((b) => b.color), home.booksTotal);
+let k = 0;
+const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k++ } : s));
 ---
-<Base title="전문가 소개" description={`${site.repTitle} ${site.rep} — ${site.column}. 인사말과 약력.`}>
-  <PageHead title="전문가 소개" crumbs={[{ name: "전문가 소개" }]} />
-  <section class="gut" style="padding-bottom:64px">
-    <div class="wrap about">
-      <figure class="pic">
-        <img src="/img/profile.webp" srcset="/img/profile-360.webp 360w, /img/profile.webp 591w" sizes="(min-width: 900px) 300px, 60vw" width="591" height="827" alt={`${site.repTitle} ${site.rep}`} />
-        <figcaption><b>{site.rep}</b>{site.repTitle}</figcaption>
+<Base title="전문가 소개" description={`${site.repTitle} ${site.rep} — ${site.column}. 인사말과 약력, 저서 ${home.booksTotal}권.`}>
+  <section class="ab-head gut plusgrid">
+    <div class="wrap ab-in">
+      <div class="ab-text">
+        <nav aria-label="현재 위치"><ol class="crumb"><li><a href="/">홈</a></li><li><span aria-current="page">전문가 소개</span></li></ol></nav>
+        <p class="ph-tag">전문가 소개</p>
+        <h1 class="ab-name page-h">{site.rep}</h1>
+        <p class="ab-role">{site.repTitle} · {site.column}</p>
+        <p class="ab-lead">상속·증여, 법인, 부동산 세금을 다룬 책을 쓰고, 직접 만든 계산기로 먼저 숫자를 맞춰 봅니다.</p>
+      </div>
+      <figure class="ab-pic">
+        <img src="/img/profile.webp" srcset="/img/profile-360.webp 360w, /img/profile.webp 591w" sizes="(min-width: 900px) 380px, 70vw" width="591" height="827" alt={`${site.repTitle} ${site.rep}`} fetchpriority="high" />
       </figure>
-      <div class="prose">
+    </div>
+  </section>
+
+  <section class="gut stats-sec" aria-label="숫자로 보는 하나 더 세무회계">
+    <dl class="wrap stats">
+      {stats.map((x) => <div><dt>{x.label}</dt><dd><Odometer n={x.n} cls="stat-n" /><span class="u">{x.unit}</span></dd></div>)}
+    </dl>
+  </section>
+
+  <section class="sec gut" aria-labelledby="h-hello">
+    <div class="wrap two">
+      <div>
         <span class="tag">인사말</span>
-        <h2 class="sec-h">진심을 담은 전략적 파트너</h2>
+        <h2 class="sec-h" id="h-hello">진심을 담은 전략적 파트너</h2>
+      </div>
+      <div class="prose hello">
         <p><strong>단순한 세무 대리를 넘어, 고객님의 든든한 파트너가 되겠습니다.</strong></p>
         <p>세금은 단순히 납부해야 할 의무가 아닙니다. 올바른 전략 하나가 사업의 미래를 바꾸고, 소중하게 일군 자산을 온전히 지키는 힘이 됩니다. 저는 수많은 고객과 함께하며 그 사실을 누구보다 깊이 체감해 왔습니다.</p>
         <p>하나 더 세무회계는 단순 신고 대행에 머물지 않습니다. 사업 초기 법인 설립부터 기장, 절세 설계, 상속·증여 컨설팅, 세무조사 대응까지—고객님의 세금 이야기에 처음부터 끝까지 함께합니다. 매번 달라지는 담당자 걱정 없이, 언제나 같은 얼굴의 전담 세무전문가가 곁에 있습니다.</p>
         <p>특히 이코노미조선 칼럼리스트로서 쌓아온 세무 지식과 33권의 저서를 통해 검증된 노하우를, 한 분 한 분의 상황에 맞춰 실질적인 해법으로 제안드립니다. 이론이 아닌 현장에서 통하는 절세 전략을 경험하실 수 있습니다.</p>
         <p>세금 문제로 고민하고 계신다면 혼자 짊어지지 마세요. 편안한 상담 한 번으로 최선의 방향을 함께 찾아드리겠습니다. 고객님의 성공이 곧 저의 성공입니다.</p>
-        <blockquote>"고객의 세금 걱정을 덜어드리는 것이 저의 사명입니다."<cite>— {site.name} {site.rep}</cite></blockquote>
-        <dl class="stats" aria-label="숫자로 보는 하나 더 세무회계">
-          {stats.map((x) => <div><dt>{x.label}</dt><dd><b class="stat-n">{x.n}</b>{x.unit}</dd></div>)}
-        </dl>
-        <span class="tag" style="margin-top:12px">약력</span>
-        <ul class="cv">
-          <li>{site.column}</li>
-          <li>연세대학교 경영학과 졸업</li>
-          <li>방송통신대학교 법학과 석사</li>
-          <li>『알면 돈 버는 상속증여 오늘부터 시작』, 『알면 돈 버는 법인컨설팅』 등 저서 <a href={site.booksUrl} target="_blank" rel="noopener">전체 보기 ↗</a></li>
-        </ul>
-        <span class="tag" style="margin-top:28px">영상</span>
-        <div class="vids">
-          <VideoCard id="portfolio" />
-          <VideoCard id="tonghap22" />
+        <blockquote><span class="q-t">"고객의 세금 걱정을 덜어드리는 것이 저의 사명입니다."</span><cite>— {site.name} {site.rep}</cite></blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-cv">
+    <div class="wrap two">
+      <div>
+        <span class="tag">약력</span>
+        <h2 class="sec-h" id="h-cv">걸어온 길</h2>
+        <p class="sec-sub">연도를 확인한 것은 책 출간뿐이라, 다른 이력은 연도 없이 적었습니다.</p>
+      </div>
+      <ol class="tl">
+        <li class="tl-y"><span class="tl-k">학력·활동</span>
+          <ul>
+            <li>연세대학교 경영학과 졸업</li>
+            <li>방송통신대학교 법학과 석사</li>
+            <li>{site.column}</li>
+          </ul>
+        </li>
+        {years.map((g) => (
+          <li class="tl-y"><span class="tl-k tl-num">{g.y}</span>
+            <ul>{g.items.map((b) => <li><span class="tl-m">{Number(b.date!.slice(5))}월</span>『{b.title}』 출간</li>)}</ul>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-shelf">
+    <div class="wrap">
+      <span class="tag">저서 {home.booksTotal}권</span>
+      <h2 class="sec-h" id="h-shelf">책장에 꽂힌 {home.booksTotal}권</h2>
+      <p class="sec-sub">제목이 적힌 책등을 누르면 표지가 열립니다. 전체 목록은 교보문고에서 볼 수 있습니다.</p>
+      <div class="shelf-wrap">
+        <div class="shelf" role="group" aria-label={`책 ${home.booksTotal}권 중 제목이 있는 ${home.books.length}권`}>
+          {shelf.map((s: any) => s.book
+            ? <button type="button" class="sp sp-t" style={`background:${s.c};color:${inkFor(s.c)};--h:${Math.round(s.h * 100)}`} aria-pressed={s.i === 0 ? "true" : "false"} aria-controls="shelf-pv" data-i={s.i}><span>{short(s.book.title)}</span></button>
+            : <span class="sp" style={`background:${s.c};--h:${Math.round(s.h * 100)}`} aria-hidden="true"></span>)}
         </div>
-        <div class="tool">
-          <a class="more-link" href={site.taxSearch.url} target="_blank" rel="noopener">{site.taxSearch.name} 열기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a>
-          <p>{site.taxSearch.note} 서비스입니다. 세무 저서 22권·판례·계산을 한곳에서 찾습니다.</p>
+        <div class="pv" id="shelf-pv" aria-live="polite">
+          {home.books.map((b, i) => (
+            <div class="pv-one" data-pv={i} hidden={i !== 0}>
+              <BookCover book={b} width={150} />
+              <div>
+                <p class="pv-t">『{b.title}』</p>
+                <p class="pv-m">{site.rep}{b.title === "병·의원 세무 관리" ? " · 조성식" : ""} 지음{b.date && ` · ${b.date.replace("-", ". ")}.`}</p>
+              </div>
+            </div>
+          ))}
+          <a class="more-link" href={site.booksUrl} target="_blank" rel="noopener">{home.booksTotal}권 전체 · 교보문고 ↗<span class="sr-only">(새 창)</span></a>
         </div>
+      </div>
+      <figure class="store">
+        <img src="/img/photos/own-store-1600.webp" srcset="/img/photos/own-store-800.webp 800w, /img/photos/own-store-1600.webp 1600w" sizes="(min-width: 1080px) 1080px, 100vw" width="1600" height="456" alt="서점 세금 서가 매대에 놓인 「병·의원 세무 관리」" loading="lazy" decoding="async" />
+        <figcaption>서점 세금 서가 매대의 『병·의원 세무 관리』</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-vid">
+    <div class="wrap">
+      <span class="tag">영상</span>
+      <h2 class="sec-h" id="h-vid">직접 만든 것들</h2>
+      <div class="vids">
+        <VideoCard id="portfolio" />
+        <VideoCard id="tonghap22" />
+      </div>
+      <div class="tool">
+        <a class="more-link" href={site.taxSearch.url} target="_blank" rel="noopener">{site.taxSearch.name} 열기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a>
+        <p>{site.taxSearch.note} 서비스입니다. 세무 저서 22권·판례·계산을 한곳에서 찾습니다.</p>
       </div>
     </div>
   </section>
 </Base>
+
 <style>
-  .about { display: grid; gap: 28px; }
-  .pic { margin: 0; max-width: 240px; }
-  .pic img { border-radius: 4px; }
-  .pic figcaption { margin-top: 10px; font-size: 15.5px; color: var(--muted); }
-  .pic b { display: block; font-size: 20px; color: var(--ink); }
-  blockquote { margin: 6px 0 0; padding: 14px 18px; border-left: 3px solid var(--gold); background: var(--gold-soft); font-family: var(--f-display); font-size: 18px; line-height: 1.6; }
-  blockquote cite { display: block; margin-top: 6px; font-family: var(--f-body); font-style: normal; font-size: 15px; color: var(--muted); }
-  .stats { margin: 14px 0 6px; border-top: 1px solid var(--line2); }
-  .stats div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line2); }
-  .stats dt { font-size: 16px; color: var(--ink2); }
-  .stats dd { margin: 0; font-size: 17px; color: var(--ink2); font-weight: 600; }
-  .stat-n { font-family: var(--f-display); font-size: 44px; line-height: 1; color: var(--ink); margin-right: 4px; font-variant-numeric: tabular-nums; }
-  .cv { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
-  .cv li::marker { color: var(--gold); }
-  .cv a { color: var(--gold-text); }
-  .vids { display: grid; gap: 28px; }
-  .tool { margin-top: 24px; display: grid; gap: 10px; justify-items: start; }
+  .ab-head { padding-block: 22px 0; border-bottom: 1px solid var(--line); }
+  .ab-in { display: grid; gap: 24px; }
+  .ab-name { margin-top: 8px; font-size: clamp(48px, 14vw, 96px); letter-spacing: -.03em; line-height: 1.1; }
+  .ab-role { margin-top: 10px; font-size: 17px; font-weight: 600; }
+  .ab-lead { margin-top: 10px; color: var(--ink2); max-width: 30em; }
+  .ab-pic { margin: 0; justify-self: center; width: min(320px, 78vw); align-self: end; }
+  .ab-pic img { display: block; width: 100%; height: auto; border-radius: 10px 10px 0 0; }
+  .stats-sec { background: var(--moss); color: var(--on-moss); }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 auto; }
+  .stats div { padding: 22px 6px 24px; display: grid; gap: 4px; justify-items: center; text-align: center; }
+  .stats div + div { border-left: 1px solid rgba(243, 240, 231, .16); }
+  .stats dt { font-size: 14px; color: var(--on-moss2); order: 2; }
+  .stats dd { margin: 0; display: flex; align-items: baseline; gap: 2px; }
+  .stats :global(.stat-n) { font-family: "Hanadeo Num", "Noto Serif KR", serif; font-size: clamp(40px, 11vw, 64px); color: #fff; letter-spacing: -.03em; }
+  .stats .u { font-size: 17px; color: var(--gold-hi); font-weight: 600; }
+  .two { display: grid; gap: 20px; }
+  .two > * { min-width: 0; }
+  .hello p + p { margin-top: 14px; }
+  blockquote { margin: 22px 0 0; padding: 18px 20px; border-left: 3px solid var(--gold); background: var(--surface); border-radius: 0 10px 10px 0; }
+  .q-t { font-family: var(--f-display); font-size: 19px; line-height: 1.6; }
+  blockquote cite { display: block; margin-top: 6px; font-style: normal; font-size: 15px; color: var(--muted); }
+  /* 약력 연표: 숲색 점 + 세로선 */
+  .tl { list-style: none; margin: 0; padding: 0; }
+  .tl-y { position: relative; padding: 0 0 26px 30px; }
+  .tl-y::before { content: ""; position: absolute; left: 0; top: 7px; width: 13px; height: 13px; border-radius: 50%; background: var(--moss); box-shadow: 0 0 0 4px var(--paper); }
+  .tl-y::after { content: ""; position: absolute; left: 6px; top: 22px; bottom: 0; width: 1px; background: var(--line2); }
+  .tl-y:last-child::after { display: none; }
+  .tl-k { display: block; font-size: 15px; font-weight: 700; color: var(--gold-text); }
+  .tl-num { font-family: "Hanadeo Num", "Noto Serif KR", serif; font-weight: 400; font-size: 28px; line-height: 1.2; color: var(--ink); }
+  .tl ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; font-size: 16.5px; }
+  .tl-m { display: inline-block; min-width: 3.2em; color: var(--muted); font-variant-numeric: tabular-nums; }
+  /* 서가 */
+  .shelf-wrap { margin-top: 24px; display: grid; gap: 24px; }
+  .shelf { --row: 216px; display: grid; grid-template-columns: repeat(auto-fill, 30px); grid-auto-rows: var(--row); align-items: end; column-gap: 3px; justify-content: start;
+    background: repeating-linear-gradient(to bottom, transparent 0 calc(var(--row) - 8px), #6B4E2E calc(var(--row) - 8px) var(--row)); padding: 0 6px; border-radius: 4px; }
+  .sp { display: block; width: 30px; height: calc((var(--row) - 14px) * var(--h) / 100); margin-bottom: 8px; border-radius: 2px 2px 0 0; box-shadow: inset 2px 0 0 rgba(0, 0, 0, .18), inset 0 6px 0 -3px rgba(232, 196, 106, .55); }
+  .sp-t { height: calc(var(--row) - 14px); border: 0; padding: 10px 0; cursor: pointer; font: 600 14px/1.1 var(--f-body); writing-mode: vertical-rl; text-orientation: mixed; overflow: hidden; transition: transform .2s cubic-bezier(.2, .7, .2, 1); }
+  .sp-t span { display: block; white-space: nowrap; max-height: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .sp-t:hover, .sp-t[aria-pressed="true"] { transform: translateY(-8px); }
+  .sp-t[aria-pressed="true"] { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .pv { display: grid; gap: 16px; align-content: start; order: -1; } /* 휴대폰: 책장이 길어 표지를 위에 */
+  .pv-one { display: flex; gap: 18px; align-items: end; }
+  .pv-one[hidden] { display: none; }
+  .pv-t { font-family: var(--f-display); font-size: 19px; line-height: 1.45; }
+  .pv-m { margin-top: 4px; font-size: 15px; color: var(--muted); }
+  .store { margin: 36px 0 0; }
+  .store img { width: 100%; height: auto; border-radius: 10px; display: block; }
+  .store figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .vids { display: grid; gap: 28px; margin-top: 20px; }
+  .tool { margin-top: 28px; display: grid; gap: 10px; justify-items: start; }
   .tool .more-link { width: 100%; }
   .tool p { font-size: 15.5px; color: var(--muted); }
-  @media (min-width: 900px) { .tool .more-link { width: auto; } }
   @media (min-width: 640px) { .vids { grid-template-columns: repeat(2, minmax(0, 300px)); } }
-  @media (min-width: 900px) { .about { grid-template-columns: 300px 1fr; gap: 56px; align-items: start; } .pic { max-width: none; position: sticky; top: 90px; } }
+  @media (min-width: 900px) {
+    .ab-head { padding-top: 40px; }
+    .ab-in { grid-template-columns: minmax(0, 1fr) 380px; column-gap: 64px; align-items: end; }
+    .ab-text { padding-bottom: 72px; }
+    .ab-pic { width: 100%; }
+    .stats div { padding-block: 30px 32px; }
+    .two { grid-template-columns: 340px minmax(0, 1fr); gap: 64px; }
+    .shelf-wrap { grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; align-items: start; }
+    .pv { order: 0; position: sticky; top: calc(var(--header-h) + 24px); }
+    .tool .more-link { width: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { .sp-t { transition: none; } }
 </style>
+
+<script>
+  // 책등을 누르면 그 책 표지를 보인다(자바스크립트가 없으면 첫 책 표지만)
+  const btns = [...document.querySelectorAll<HTMLButtonElement>(".sp-t")];
+  const pvs = [...document.querySelectorAll<HTMLElement>("[data-pv]")];
+  for (const b of btns) b.addEventListener("click", () => {
+    for (const o of btns) o.setAttribute("aria-pressed", String(o === b));
+    for (const p of pvs) p.hidden = p.dataset.pv !== b.dataset.i;
+  });
+</script>

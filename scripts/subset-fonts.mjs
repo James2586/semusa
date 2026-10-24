@@ -13,7 +13,7 @@ const require = createRequire(import.meta.url);
 const FONT_DIR = join(dirname(require.resolve("@fontsource/noto-serif-kr/package.json")), "files");
 
 export const SERIF_TAGS = ["h1", "h2", "blockquote"];
-export const SERIF_CLASSES = ["logo", "foot-lg", "sec-h", "page-h", "hero-h", "q", "closing-h", "feat-t", "tw", "stat-n", "th-l", "dl-date", "find-t", "book-t"];
+export const SERIF_CLASSES = ["logo", "foot-lg", "sec-h", "page-h", "hero-h", "q", "closing-h", "feat-t", "tw", "stat-n", "th-l", "dl-date", "find-t", "book-t", "q-t", "pv-t"];
 // 운영자가 글을 바꿔도 깨지지 않게 늘 넣는 글자
 const ALWAYS = " 0123456789.,·:;!?'\"()[]-–—…%/&+·「」『』세무회계하나더일월화수목금토";
 
