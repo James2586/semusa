@@ -1,0 +1,61 @@
+---
+// 상담 요청 글(2026-10-24 4차 C1): 쪽이 보내는 `consult:update`(상황·날짜·기한·챙긴 서류)로 카카오톡에 붙일 글을 만든다 — src/lib/consultMessage.js.
+// 글은 이 기기 메모리에만(저장소에도 남기지 않음 — 고친 글에 개인정보가 들어갈 수 있음), 서버로 보내지 않는다. 고친 글은 새 선택이 와도 덮어쓰지 않는다.
+import site from "../data/site.json";
+import KakaoIcon from "./KakaoIcon.astro";
+interface Props { open?: boolean }
+const { open = false } = Astro.props;
+---
+<details class="cn" data-cn open={open}>
+  <summary>상담 요청 글 만들기</summary>
+  <div class="cn-body">
+    <p class="cn-lead">고른 내용으로 첫 메시지를 만들었습니다. 「궁금한 점」을 채운 뒤 복사해 카카오톡에 붙여 보내세요.</p>
+    <label for="cn-text" class="sr-only">상담 요청 글</label>
+    <textarea id="cn-text" class="cn-text" rows="9" spellcheck="false" data-cn-text></textarea>
+    <div class="cn-acts">
+      <button type="button" class="btn btn-moss" data-cn-copy>글 복사</button>
+      <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 열기</a>
+      <button type="button" class="cn-reset" data-cn-reset hidden>고른 내용으로 다시 만들기</button>
+    </div>
+    <p class="cn-st" role="status" data-cn-st>이 글은 이 기기 안에서만 만들고 어디로도 보내지 않습니다. 이름·연락처·금액은 넣지 않았습니다.</p>
+  </div>
+</details>
+<script type="application/json" data-cn-site set:html={JSON.stringify({ siteName: site.name }).replace(/</g, "\\u003c")} />
+
+<style is:global>
+  .cn { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .cn > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 0 16px; font-size: 16.5px; font-weight: 700; color: var(--ink); }
+  .cn > summary::-webkit-details-marker { display: none; }
+  .cn > summary::after { content: ""; width: 9px; height: 9px; border-right: 2px solid var(--moss); border-bottom: 2px solid var(--moss); transform: rotate(45deg); margin-top: -4px; transition: transform .2s; }
+  .cn[open] > summary::after { transform: rotate(-135deg); margin-top: 4px; }
+  .cn > summary:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; border-radius: 10px; }
+  .cn-body { display: grid; gap: 10px; padding: 0 16px 16px; }
+  .cn-lead { font-size: 15.5px; color: var(--ink2); }
+  .cn-text { width: 100%; box-sizing: border-box; min-height: 200px; padding: 12px 14px; border: 1px solid var(--line2); border-radius: 8px; background: var(--paper); font: 15.5px/1.7 var(--f-body); color: var(--ink); resize: vertical; }
+  .cn-text:focus-visible { outline: 3px solid var(--moss); outline-offset: 1px; }
+  .cn-acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .cn-reset { min-height: 44px; border: 0; background: none; padding: 0 2px; font: 500 15.5px var(--f-body); color: var(--ink); text-decoration: underline; text-underline-offset: 5px; cursor: pointer; }
+  .cn-reset:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .cn-st { font-size: 14px; color: var(--ink2); }
+</style>
+
+<script>
+  import { buildConsultMessage } from "../lib/consultMessage.js";
+  const box = document.querySelector<HTMLDetailsElement>("[data-cn]");
+  if (box) {
+    const ta = box.querySelector<HTMLTextAreaElement>("[data-cn-text]")!, st = box.querySelector<HTMLElement>("[data-cn-st]")!;
+    const reset = box.querySelector<HTMLButtonElement>("[data-cn-reset]")!;
+    const { siteName } = JSON.parse(document.querySelector("[data-cn-site]")?.textContent || "{}");
+    let auto = "", dirty = false;
+    const set = (t: string) => { auto = t; if (!dirty) ta.value = t; reset.hidden = !dirty || ta.value === auto; };
+    addEventListener("consult:update", (e) => set(buildConsultMessage({ siteName, url: location.href, ...(e as CustomEvent).detail })));
+    ta.addEventListener("input", () => { dirty = ta.value !== auto; reset.hidden = !dirty; });
+    reset.addEventListener("click", () => { dirty = false; ta.value = auto; reset.hidden = true; ta.focus(); });
+    box.querySelector("[data-cn-copy]")!.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(ta.value); st.textContent = "복사했습니다. 카카오톡을 열어 대화창에 붙여 넣으세요."; }
+      catch { ta.focus(); ta.select(); st.textContent = "복사하지 못했습니다. 글이 선택되어 있으니 길게 눌러 복사해 주세요."; }
+    });
+    const last = (globalThis as any).__consultLast;
+    if (!ta.value) set(buildConsultMessage({ siteName, url: location.href, ...(last || {}) }));
+  }
+</script>

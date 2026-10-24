@@ -5,6 +5,7 @@
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
 import KakaoIcon from "../components/KakaoIcon.astro";
+import ConsultNote from "../components/ConsultNote.astro";
 import data from "../data/deadlines.json";
 import site from "../data/site.json";
 import { fetchHolidayRows } from "../lib/holidays.js";
@@ -64,6 +65,7 @@ const evs = data.events;
         <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 기한으로 상담하기</a>
         <p class="dc-note" role="status" data-status>보내는 것은 일 종류와 날짜가 담긴 주소뿐입니다. 결과는 참고용입니다.</p>
       </div>
+      <div class="dc-cn" data-cn-wrap hidden><ConsultNote /></div>
       <p class="dc-print-note"><span data-print-day></span>상담 때 이 종이를 가져오세요. 결과는 참고용이며, 사정마다 다를 수 있으니 상담 때 함께 확인합니다. {site.name} · {site.siteUrl}</p>
     </div>
     <script type="application/json" data-dc-data set:html={JSON.stringify({ events: evs, holidays }).replace(/</g, "\\u003c")} />
@@ -168,7 +170,7 @@ const evs = data.events;
   @media (prefers-reduced-motion: reduce) { .dc-stage.play * { animation: none !important; } .dc-reel > span { transition: none; } }
   /* 인쇄 한 장: 머리글·버튼은 빼고 흰 종이에 */
   @media print {
-    .hdr, .bbar, .foot, .closing, .totop, .page-head, .dc-form, .dc-acts, .dc-replay, .dc-fold button, .skip-link { display: none !important; }
+    .hdr, .bbar, .foot, .closing, .totop, .page-head, .dc-form, .dc-acts, .dc-cn, .dc-replay, .dc-fold button, .skip-link { display: none !important; }
     body { background: #fff; }
     .dc-sec { padding: 0; }
     .dc-stage { background: #fff; color: #000; border: 1px solid #000; }
@@ -188,6 +190,7 @@ const evs = data.events;
   import { computeDeadline } from "../lib/deadlineCalc.js";
   import { buildHolidayIndex, toIso, parseIso, unknownYearNote } from "../lib/ntsDeadline.js";
   import { planCalendar, deadlineIcs } from "../lib/deadlineCalendar.js";
+  import { sendConsult } from "../lib/consultMessage.js";
 
   const root = document.querySelector<HTMLElement>("[data-dc]")!;
   const q = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
@@ -330,6 +333,8 @@ const evs = data.events;
     if (!r) return; // 날짜를 치는 중이면 지난 달력을 그대로 둔다
     cur = { ev, r };
     if (push) history.replaceState(null, "", shareUrl());
+    // 상담 요청 글(4차 C1) — 일 종류·날짜·기한만(이 기기 안에서만)
+    sendConsult({ situation: ev.chip, dateLabel: ev.dateLabel, dateText: dot(r.startIso), deadlineName: ev.name, deadlineText: `${dot(r.deadlineIso)}(${r.weekday})` });
     draw(animate);
   }
   function shareUrl() {
@@ -366,7 +371,7 @@ const evs = data.events;
   });
   q("[data-print]").addEventListener("click", () => window.print());
   // 처음: 판이 화면에 들어왔을 때 한 번 재생
-  for (const sel of ["[data-stage]", "[data-fact-box]", "[data-acts]"]) q(sel).hidden = false;
+  for (const sel of ["[data-stage]", "[data-fact-box]", "[data-acts]", "[data-cn-wrap]"]) q(sel).hidden = false;
   run(false);
   if (!reduce && "IntersectionObserver" in window) {
     const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); play(); } }, { threshold: 0.3 });

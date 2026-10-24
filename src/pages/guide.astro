@@ -6,6 +6,7 @@ import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
 import KakaoIcon from "../components/KakaoIcon.astro";
 import PrepareKit from "../components/PrepareKit.astro";
+import ConsultNote from "../components/ConsultNote.astro";
 import guide from "../data/guide.json";
 import dl from "../data/deadlines.json";
 import svcData from "../data/services.json";
@@ -125,6 +126,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
           <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 상황으로 상담하기</a>
           <p class="gd-st" role="status" data-status>보내는 것은 고른 상황과 날짜가 담긴 주소뿐입니다.</p>
         </div>
+        <ConsultNote open />
       </div>
     </div>
     <script type="application/json" data-gd-data set:html={JSON.stringify({ situations: guide.situations, events: dl.events, yearly: dl.yearly, holidays }).replace(/</g, "\\u003c")} />
@@ -190,6 +192,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
 <script>
   import { computeDeadline, nextYearly } from "../lib/deadlineCalc.js";
   import { buildHolidayIndex, parseIso } from "../lib/ntsDeadline.js";
+  import { sendConsult } from "../lib/consultMessage.js";
 
   const root = document.querySelector<HTMLElement>("[data-gd]")!;
   const q = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => el.querySelector<T>(s)!;
@@ -253,6 +256,21 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
     const live = q("[data-res-live]"), msg = `아래에 「${g.label}」 안내가 있습니다.${big ? ` 마감 ${big}.` : ""}`;
     if (live.textContent !== msg) live.textContent = msg;
     history.replaceState(null, "", shareUrl());
+    consult(g, ev, panel, big);
+  }
+  // 상담 요청 글(4차 C1): 고른 상황·날짜·기한·챙긴 서류를 ConsultNote로 — 이 기기 안에서만
+  function consult(g: any, ev: any, panel: HTMLElement, big?: string | null) {
+    const who = val("gd-w"), boxes = [...panel.querySelectorAll<HTMLInputElement>(".pk input[type=checkbox]")];
+    const d = dateIn.value;
+    // 체크를 하나도 안 했으면 준비 여부를 모르는 것 — 「아직 없는 것」으로 단정하지 않고 두 줄 다 뺀다
+    const touched = boxes.some((b) => b.checked);
+    sendConsult({
+      situation: g.label,
+      who: who && who !== "me" ? root.querySelector(`#gd-w-${CSS.escape(who)} + span`)?.textContent || "" : "",
+      dateLabel: ev ? g.dateLabel || ev.dateLabel : "", dateText: ev && okDate(d) ? dot(d) : "",
+      deadlineName: ev?.name, deadlineText: big || "",
+      prepared: boxes.filter((b) => b.checked).map((b) => b.value), notYet: touched ? boxes.filter((b) => !b.checked).map((b) => b.value) : [],
+    });
   }
   function shareUrl() {
     const u = new URL(location.href);
@@ -265,6 +283,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
     return u.toString();
   }
   form.addEventListener("change", () => render());
+  res.addEventListener("change", (e) => { if ((e.target as HTMLElement).closest(".pk")) render(); }); // 챙긴 서류 표시가 바뀌면 상담 글도
   dateIn.addEventListener("input", () => render());
   q("[data-share]").addEventListener("click", async () => {
     const url = shareUrl(), g = sits.find((x) => x.id === val("gd-s"));

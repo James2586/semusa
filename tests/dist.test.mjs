@@ -228,3 +228,12 @@ test("주제 모아 보기: 주제마다 기한·용어·계산기·서비스 ·
   assert.equal(j.items.filter((i) => i.k === "주제").length, T.length);
   assert.match(readFileSync(join(DIST, "topics.html"), "utf8"), /href="\/topics\/appeal"/);
 });
+
+test("상담 요청 글: 길잡이·기한 달력에 붙고, 이 기기 안에서만이라는 안내 · 저장소에 쓰지 않음", { skip: !has }, () => {
+  for (const f of ["guide.html", "deadline.html"]) {
+    const h = readFileSync(join(DIST, f), "utf8");
+    assert.match(h, /data-cn-text/, f);
+    assert.match(h, /이 글은 이 기기 안에서만 만들고 어디로도 보내지 않습니다/, f);
+  }
+  assert.doesNotMatch(readFileSync("src/components/ConsultNote.astro", "utf8"), /localStorage|sessionStorage|fetch\(/);
+});
