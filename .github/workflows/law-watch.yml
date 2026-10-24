@@ -1,0 +1,42 @@
+# 법조문 원문 감시(2026-10-24 5차 A3): 매주 월요일 아침, 택스 서치가 법제처에서 받아 둔 최신 원문과
+# 이 사이트가 옮겨 둔 원문(docs/glossary-sources.json·docs/rates-sources.json)을 대조한다. 바뀐 곳이 있으면 실패(GitHub이 알림 메일)하고
+# 요약에 어느 조문이 바뀌었는지 적는다 — 사이트 글은 사람이 확인한 뒤 스크립트를 --check 없이 돌려 옮긴다.
+# 택스 서치 저장소는 비공개라 읽기 전용 토큰(저장소 비밀 값 TAX_SEARCH_TOKEN)이 있어야 돈다. 없으면 경고만 남기고 건너뛴다.
+name: law-watch
+on:
+  schedule:
+    - cron: "17 0 * * 1" # 월요일 09:17(한국 시각)
+  workflow_dispatch:
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 토큰 확인
+        id: tok
+        env:
+          TOKEN: ${{ secrets.TAX_SEARCH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::TAX_SEARCH_TOKEN 비밀 값이 없어 법조문 원문 감시를 건너뜁니다."
+            echo "### 법조문 원문 감시를 건너뜀 — 저장소 비밀 값 TAX_SEARCH_TOKEN(택스 서치 읽기 전용 토큰)이 없습니다." >> "$GITHUB_STEP_SUMMARY"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.tok.outputs.skip != '1'
+        uses: actions/checkout@v4
+        with:
+          repository: James2586/tax-search
+          token: ${{ secrets.TAX_SEARCH_TOKEN }}
+          path: tax-search
+          sparse-checkout: tests/fixtures
+      - if: steps.tok.outputs.skip != '1'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 원문 대조
+        if: steps.tok.outputs.skip != '1'
+        run: |
+          s=0
+          node scripts/make-glossary-sources.mjs tax-search/tests/fixtures --check || s=1
+          node scripts/make-rates-sources.mjs tax-search/tests/fixtures --check || s=1
+          exit $s

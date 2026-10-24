@@ -1,0 +1,72 @@
+---
+// 이번 달 마감 띠(2026-10-24 5차 C1): 모든 쪽 머리글 아래 한 줄 — 가장 가까운 매년 기한과 남은 날, 누르면 올해 세금 달력.
+// 기한은 빌드 때 deadlines.json yearly를 yearOccurrences(공휴일 연장 포함)로 앞으로 1년치만 펼쳐 심고, 고르기·남은 날은 보는 날 기준으로 화면에서.
+// 닫으면 이 기기(localStorage `band:<연-월>`)에서 그달엔 다시 안 보인다. 자바스크립트가 없으면 보이지 않는다(날짜가 보는 날 기준이라).
+import dl from "../data/deadlines.json";
+import { fetchHolidayRows } from "../lib/holidays.js";
+import { buildHolidayIndex, toIso } from "../lib/ntsDeadline.js";
+import { yearOccurrences } from "../lib/deadlineCalendar.js";
+const holidays = buildHolidayIndex((await fetchHolidayRows()) || []);
+const now = new Date(), y = now.getFullYear();
+const from = toIso(new Date(y, now.getMonth(), now.getDate() - 1)), to = toIso(new Date(y + 1, now.getMonth(), now.getDate() + 31));
+const occ = [...yearOccurrences(dl.yearly, y, holidays), ...yearOccurrences(dl.yearly, y + 1, holidays)]
+  .filter((o) => o.deadlineIso >= from && o.deadlineIso <= to).map((o) => [o.deadlineIso, o.weekday, o.name, o.knownYear ? 1 : 0]);
+---
+<aside class="mband gut" data-mband hidden aria-label="다가오는 신고·납부 기한">
+  <div class="wrap mband-in">
+    <a class="mband-a" href="/tax-calendar" data-mband-link><span class="mband-k" data-mband-k>이번 달 마감</span><span class="mband-t" data-mband-t></span><span class="mband-u" data-mband-u hidden>공휴일 자료 없음</span><span class="mband-d"><span data-mband-d></span><span class="mband-go" aria-hidden="true"> ›</span></span></a>
+    <button type="button" class="mband-x" data-mband-x aria-label="이번 달 마감 안내 닫기(이 기기에서 이번 달 동안)">✕</button>
+  </div>
+  <script type="application/json" data-mband-data set:html={JSON.stringify(occ).replace(/</g, "\\u003c")} />
+</aside>
+
+<style is:global>
+  .mband { background: var(--moss); color: var(--on-moss); }
+  .mband[hidden] { display: none; }
+  .mband-in { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+  .mband-a { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; padding: 8px 0; color: var(--on-moss); text-decoration: none; font-size: 15px; line-height: 1.4; }
+  .mband-k { font-weight: 700; color: var(--gold-hi); font-size: 14px; white-space: nowrap; }
+  .mband-t, .mband-d, .mband-u { white-space: nowrap; }
+  .mband-u { font-size: 14px; color: var(--on-moss2); }
+  .mband-t { font-weight: 600; }
+  .mband-d { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mband-go { color: var(--gold-hi); }
+  .mband-a:hover .mband-t { text-decoration: underline; text-underline-offset: 4px; }
+  .mband-a:focus-visible, .mband-x:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+  .mband-x { flex: none; width: 44px; height: 44px; margin-right: -12px; border: 0; background: none; color: var(--on-moss2); font-size: 17px; cursor: pointer; }
+  .mband-x:hover { color: var(--on-moss); }
+  @media print { .mband { display: none !important; } }
+</style>
+
+{/* 그리기 전에 바로 채운다(모듈 스크립트로 하면 띠가 나중에 끼어들어 쪽이 44px 밀림) */}
+<script is:inline>
+(function () {
+  var band = document.querySelector("[data-mband]");
+  if (!band) return;
+  var occ = JSON.parse((band.querySelector("[data-mband-data]") || {}).textContent || "[]");
+  // 「오늘」은 한국 날짜(기한이 한국 날짜라 — 다른 나라에서 보면 하루 어긋났다)
+  var today;
+  try { today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+  catch (e) { var t0 = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; }; today = t0.getFullYear() + "-" + p(t0.getMonth() + 1) + "-" + p(t0.getDate()); }
+  var ym = today.slice(0, 7), key = "band:" + ym, closed = false, ta = today.split("-").map(Number);
+  try { closed = localStorage.getItem(key) === "1"; } catch (e) {}
+  var next = null;
+  for (var i = 0; i < occ.length; i++) if (occ[i][0] >= today) { next = occ[i]; break; }
+  if (next && !closed) {
+    var same = occ.filter(function (o) { return o[0] === next[0]; }).map(function (o) { return o[2]; });
+    var a = next[0].split("-").map(Number);
+    var dday = Math.round((Date.UTC(a[0], a[1] - 1, a[2]) - Date.UTC(ta[0], ta[1] - 1, ta[2])) / 864e5);
+    band.querySelector("[data-mband-k]").textContent = next[0].slice(0, 7) === ym ? "이번 달 마감" : "다가오는 마감";
+    band.querySelector("[data-mband-t]").textContent = same.join(" · ") + " " + a[1] + ". " + a[2] + ".(" + next[1] + ")";
+    band.querySelector("[data-mband-d]").textContent = dday === 0 ? "오늘 마감" : "D-" + dday;
+    // 빌드 때 그해 공휴일 자료가 없었으면 토·일만 넘긴 날짜 — 알린다(CLAUDE.md 「공휴일 자료 없음」)
+    if (!next[3]) band.querySelector("[data-mband-u]").hidden = false;
+    band.hidden = false;
+  }
+  band.querySelector("[data-mband-x]").addEventListener("click", function () {
+    try { localStorage.setItem(key, "1"); } catch (e) {}
+    band.hidden = true;
+    var m = document.getElementById("main"); if (m) m.focus({ preventScroll: true }); // 닫힌 단추에 포커스가 남지 않게
+  });
+})();
+</script>

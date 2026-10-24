@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 41개(색인 37 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 41);
+test("페이지 43개(색인 39 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 43);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 37);
+  assert.equal((sm.match(/<loc>/g) || []).length, 39);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -254,4 +254,83 @@ test("세금 생애 지도: 정거장마다 펼침 단추·내용(기한 근거�
   assert.equal((h.match(/class="lm-panel"[^>]*hidden/g) || []).length, L.stops.length + L.anytime.length - 1); // 처음엔 하나만 펼침
   const home = readFileSync(join(DIST, "index.html"), "utf8");
   for (const s of L.stops) assert.match(home, new RegExp(`href="/life#${s.id}"`));
+});
+
+test("세율·공제 한눈에: 고른 조문마다 원문 줄·표 칸이 그대로 · 출처 · 계산기·주제 쪽에서 잇기", { skip: !has }, () => {
+  const R = JSON.parse(readFileSync("src/data/rates.json", "utf8"));
+  const S = JSON.parse(readFileSync("docs/rates-sources.json", "utf8")).items;
+  const h = readFileSync(join(DIST, "rates.html"), "utf8");
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  for (const sec of R.sections) {
+    assert.match(h, new RegExp(`id="r-${sec.id}"`));
+    for (const g of sec.groups) for (const it of g.items) {
+      const a = S[it.src];
+      assert.ok(h.includes(`법률 제${a.promulgationNo}호`), it.src);
+      for (const c of sec.calculators) assert.match(readFileSync(join(DIST, `calculators/${c}.html`), "utf8"), new RegExp(`href="/rates#r-${sec.id}"`), `${c} → ${sec.id}`);
+    }
+  }
+  for (const cell of ["과세표준의 100분의 10", "10억4천만원 + (30억원을 초과하는 금액의 100분의 50)", "3억8,406만원 + (10억원을 초과하는 금액의 45퍼센트)", "1억5천200만원+(94억원을 초과하는 금액의 1천분의 27)", "과세표준의 100분의 9"]) assert.ok(h.includes(esc(cell)), cell);
+  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/상속세및증여세법\/\(21065,20251001\)\/제26조/);
+  assert.doesNotMatch(h, /┌|│|┘/); // 선 문자가 그대로 남지 않음
+  assert.match(readFileSync(join(DIST, "topics/transfer.html"), "utf8"), /href="\/rates#r-transfer"/);
+});
+
+test("구조화 데이터: 모든 JSON-LD가 읽히고, 위치 표시가 있는 쪽엔 BreadcrumbList · 서비스·책·칼럼 · RSS", { skip: !has }, () => {
+  for (const f of htmlFiles(DIST)) {
+    const h = readFileSync(f, "utf8");
+    const blocks = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+    const types = blocks.flatMap((b) => (Array.isArray(b) ? b : [b])).map((b) => b["@type"]);
+    assert.ok(types.includes("AccountingService"), f);
+    if (/class="crumb"/.test(h)) {
+      const bc = blocks.flat().find((b) => b["@type"] === "BreadcrumbList");
+      assert.ok(bc, `${f}: BreadcrumbList`);
+      assert.equal(bc.itemListElement[0].item, "https://semusatax.vercel.app/");
+      bc.itemListElement.forEach((e, i) => { assert.equal(e.position, i + 1); assert.match(e.item, /^https:\/\/semusatax\.vercel\.app\//); });
+    }
+  }
+  assert.match(readFileSync(join(DIST, "services/appeal.html"), "utf8"), /"@type":"Service"/);
+  const col = readFileSync(join(DIST, "columns.html"), "utf8");
+  assert.match(col, /"@type":"Book"/);
+  assert.match(col, /"@type":"Article"/);
+  const rss = readFileSync(join(DIST, "rss.xml"), "utf8");
+  const press = JSON.parse(readFileSync("src/data/press.json", "utf8")).articles;
+  assert.equal((rss.match(/<item>/g) || []).length, press.length);
+  assert.match(rss, /<pubDate>[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} 00:00:00 GMT<\/pubDate>/);
+  assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /rel="alternate" type="application\/rss\+xml"/);
+});
+
+test("이번 달 마감 띠: 모든 쪽에(머리글 바로 아래) · 기한은 deadlines.json yearly 이름 그대로 · 그리기 전 채우는 작은 스크립트", { skip: !has }, () => {
+  const names = new Set(JSON.parse(readFileSync("src/data/deadlines.json", "utf8")).yearly.map((y) => y.name));
+  for (const f of htmlFiles(DIST)) {
+    const h = readFileSync(f, "utf8");
+    const iH = h.indexOf("</header>"), iB = h.indexOf("data-mband hidden"), iM = h.indexOf("<main");
+    assert.ok(iH > 0 && iH < iB && iB < iM, `${f}: 머리글 뒤·본문 앞`);
+    const occ = JSON.parse(h.match(/data-mband-data>([^<]*)</)[1]);
+    assert.ok(occ.length >= 12, f); // 매달 원천세만으로도 1년 12번
+    for (const [iso, wd, name, known] of occ) { assert.match(iso, /^\d{4}-\d{2}-\d{2}$/); assert.match(wd, /^[월화수목금]$/, `${iso} ${wd}`); assert.ok(names.has(name), name); assert.ok(known === 0 || known === 1); }
+  }
+});
+
+test("원문 기준일: 옮겨 둔 원문마다 법률 번호·받은 날 · 기한 근거 조문 · 감시 작업은 --check로 둘 다 대조", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "sources.html"), "utf8");
+  for (const f of ["docs/glossary-sources.json", "docs/rates-sources.json"]) for (const a of Object.values(JSON.parse(readFileSync(f, "utf8")).items)) {
+    assert.ok(h.includes(`법률 제${a.promulgationNo}호`), `${a.law} ${a.article}`);
+    assert.ok(h.includes(a.fetchedAt.split("-").map(Number).join(". ") + "."), a.fetchedAt);
+  }
+  for (const y of JSON.parse(readFileSync("src/data/deadlines.json", "utf8")).yearly) assert.ok(h.includes(y.law), y.law);
+  const wf = readFileSync(".github/workflows/law-watch.yml", "utf8");
+  assert.match(wf, /make-glossary-sources\.mjs tax-search\/tests\/fixtures --check/);
+  assert.match(wf, /make-rates-sources\.mjs tax-search\/tests\/fixtures --check/);
+  assert.match(wf, /TAX_SEARCH_TOKEN/);
+});
+
+test("세율 쪽: 법제처 링크는 그 판으로 · 판 이름표는 원문 메타 · 빠진 항 알림 · 부칙은 같은 판", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "rates.html"), "utf8");
+  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/법인세법\/\(21065,20251001\)\/제55조/);
+  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/법인세법\/\(21217,20251223\)\/제55조/);
+  assert.match(h, /법률 제21217호\(2025\. 12\. 23\. 공포\) 판 — 지금 판/);
+  assert.match(h, /법률 제21065호\(2025\. 10\. 1\. 공포\) 판</);
+  assert.doesNotMatch(h, /20613/); // 바로 앞 판엔 그 판 세율의 적용례가 아닌 부칙을 붙이지 않음
+  assert.match(h, /같은 조 ②은\(는\) 이 쪽에 옮기지 않았습니다/); // 상증법 §22②
+  assert.doesNotMatch(h, /부칙\(법률 제\d+호, \d{8}\)/); // 날짜는 읽는 꼴로
 });

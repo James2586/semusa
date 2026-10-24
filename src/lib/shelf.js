@@ -20,3 +20,8 @@ export function shelfSpines(featured = [], n = 14) {
     return { c: f || CLOTH[Math.floor(rnd() * CLOTH.length)], w: f ? 1.35 : 0.8 + rnd() * 0.5, h: f ? 0.96 : 0.68 + rnd() * 0.26, featured: !!f };
   });
 }
+
+// 책 지은이 줄: 대표 + 공저자(home.json books coauthors — 표지에 적힌 이름 그대로)
+export function bookAuthors(rep, book) {
+  return [rep, ...((book && book.coauthors) || [])].join(" · ");
+}

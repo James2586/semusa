@@ -1,6 +1,7 @@
 ---
 // 서비스 상세(2026-10-24 2차 개편): 머리에 핵심 기한 칩 → 기한(계산 카드 또는 매년 돌아오는 기한 + 근거 조문 목록) → 이런 상황이라면(체크) →
 // 맡겨 주시면 | 진행 순서(세로 연표) → 관련 계산기 → 준비할 것 + 관련 책 → 그 분야 질문 → 마무리 띠(Base)
+import { bookAuthors } from "../../lib/shelf.js";
 import Base from "../../layouts/Base.astro";
 import PageHead from "../../components/PageHead.astro";
 import PlusList from "../../components/PlusList.astro";
@@ -25,9 +26,12 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
 // 그 분야 질문이 하나뿐이면 구역을 만들지 않는다(질문 한 줄짜리 구역은 비어 보임)
 const faqMods = Object.values(import.meta.glob("../../content/faq/*.md", { eager: true })) as any[];
 const faqCount = svc.faq ? faqMods.filter((m) => svc.faq.includes(m.frontmatter.category)).length : 0;
+// 검색 노출(5차 B1): 서비스 — 제공자는 Base의 사무소(@id)
+const svcLd = { "@context": "https://schema.org", "@type": "Service", name: svc.name, description: svc.short, serviceType: svc.name,
+  provider: { "@id": `${site.siteUrl}/#org` }, areaServed: "KR", url: new URL(`/services/${svc.slug}`, site.siteUrl).href };
 const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : undefined;
 ---
-<Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"}>
+<Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"} jsonLd={[svcLd]}>
   <PageHead tag="서비스" vt={`svc-${svc.slug}`} title={svc.name} lead={svc.short} chips={svc.keyDeadlines} photo={photo}
     crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
 
@@ -120,7 +124,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
           <div>
             <span class="tag">관련 책</span>
             <p class="book-t">『{book.title}』</p>
-            <p class="book-by">{site.rep} 지음</p>
+            <p class="book-by">{bookAuthors(site.rep, book)} 지음</p>
             <a class="more-link" href={site.booksUrl} target="_blank" rel="noopener">교보문고에서 보기 ↗<span class="sr-only">(새 창)</span></a>
           </div>
         </div>

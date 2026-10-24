@@ -4,7 +4,7 @@ import PageHead from "../components/PageHead.astro";
 import VideoCard from "../components/VideoCard.astro";
 import Thumb from "../components/Thumb.astro";
 import { topicOf } from "../lib/thumbTopic.js";
-import { inkFor } from "../lib/shelf.js";
+import { inkFor, bookAuthors } from "../lib/shelf.js";
 import site from "../data/site.json";
 import home from "../data/home.json";
 import videoData from "../data/videos.json";
@@ -17,20 +17,27 @@ const posts = await fetchBlogPosts("https://rss.blog.naver.com/semusatax.xml", 7
 const [featured, ...restPosts] = posts;
 const ch = Object.fromEntries(site.channels.map((c) => [c.name, c.url]));
 
+// 그린 표지(사진 없는 책): 제목 앞 머리말("알면 돈 버는" 등)은 작은 글자로 따로
+const KICKER = /^(알면 돈 버는|알면 돈이 되는|알아두면 돈이 되는) /;
+const kickerOf = (t: string) => t.match(KICKER)?.[1] || "";
 type Card = { kind: string; title: string; text?: string; date?: string; href: string; external: boolean; go: string; thumb: "art" | "book" | "video"; topic?: { id: string; label: string }; image?: string; color?: string; poster?: string; cover?: string };
 const cards: Card[] = [
   ...restPosts.map((p) => ({ kind: "블로그", title: p.title, text: p.excerpt, date: p.date, href: p.link, external: true, go: "블로그에서 읽기", thumb: "art" as const, topic: topicOf(p.title), image: p.image })),
   { kind: "칼럼", title: "이코노미조선 칼럼 모아 보기", text: "이코노미조선에 연재한 세금 칼럼을 한곳에서 읽어 보세요.", href: ch["이코노미조선 칼럼"], external: true, go: "칼럼 읽기", thumb: "art", topic: { id: "column", label: "이코노미조선 칼럼" } },
-  ...home.books.map((b) => ({ kind: "책", title: b.title, text: `${site.rep} 지음`, href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "book" as const, color: b.color, cover: (b as any).cover })),
+  ...home.books.map((b) => ({ kind: "책", title: b.title, text: `${bookAuthors(site.rep, b)} 지음`, href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "book" as const, color: b.color, cover: (b as any).cover })),
   { kind: "책", title: `책 ${home.booksTotal}권 전체 보기`, text: "상속·증여, 법인, 부동산, 업종별 세무관리까지 직접 쓴 책 목록입니다.", href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "art", topic: { id: "books", label: `책 ${home.booksTotal}권` } },
   ...videoData.videos.map((v) => ({ kind: "영상", title: v.title, text: v.note, href: `/about#video-${v.id}`, external: false, go: "영상 보기", thumb: "video" as const, poster: v.poster })),
 ];
 const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼럼");
+// 검색 노출(5차 B1): 저서(Book — 제목·출간 연월은 home.json 그대로)와 지면 칼럼(Article — 지면 제목·날짜 그대로)
+const author = { "@type": "Person", name: site.rep, jobTitle: site.repTitle };
+const booksLd = home.books.map((b: any) => ({ "@context": "https://schema.org", "@type": "Book", name: b.title, author: b.coauthors ? [author, ...b.coauthors.map((n: string) => ({ "@type": "Person", name: n }))] : author, ...(b.date ? { datePublished: b.date } : {}), url: site.booksUrl }));
+const articlesLd = (press.articles || []).map((a: any) => ({ "@context": "https://schema.org", "@type": "Article", headline: a.title, datePublished: a.date, url: a.url, author, publisher: { "@type": "Organization", name: "이코노미조선" } }));
 const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
 // 지면에 실린 칼럼(src/data/press.json) — 지면 그림 + 제목 그대로, 이코노미조선 기사로. 연재 목록은 articles(제목·날짜 그대로)
 const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
 ---
-<Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그, 영상.`}>
+<Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그, 영상.`} jsonLd={[...booksLd, ...articlesLd]}>
   <PageHead tag="칼럼·책" photo={{ name: "own-face", w: [600, 900], ratio: "6 / 5" }} title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead={`상속·증여, 법인, 부동산 세금을 다룬 책 ${home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.`} />
 
   <section class="gut feat-sec" aria-label="대표 글">
@@ -106,7 +113,7 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
             <a class="card-a" href={c.href} {...(c.external ? { target: "_blank", rel: "noopener" } : {})}>
               <span class:list={["thumb", `thumb-${c.thumb}`]} aria-hidden="true">
                 {c.thumb === "art" && <Thumb topic={c.topic!.id} label={c.topic!.label} image={c.image} books={home.books.slice(0, 2).map((b) => b.color)} />}
-                {c.thumb === "book" && (c.cover ? <img class="tbi" src={c.cover} alt="" width="400" height="571" loading="lazy" decoding="async" /> : <span class="tb" style={`--c:${c.color};color:${inkFor(c.color || "#1E3A2A")}`}><i class="tb-k">알면 돈 버는</i><b>{c.title.replace(/^알면 돈 버는 /, "")}</b><small>{site.rep}</small></span>)}
+                {c.thumb === "book" && (c.cover ? <img class="tbi" src={c.cover} alt="" width="400" height="571" loading="lazy" decoding="async" /> : <span class="tb" style={`--c:${c.color};color:${inkFor(c.color || "#1E3A2A")}`}>{kickerOf(c.title) && <i class="tb-k">{kickerOf(c.title)}</i>}<b>{c.title.replace(KICKER, "")}</b><small>{site.rep}</small></span>)}
                 {c.thumb === "video" && <img src={c.poster} alt="" loading="lazy" width="540" height="960" />}
               </span>
               <span class="chip">{c.kind}</span>

@@ -6,6 +6,7 @@ import Footer from "../components/Footer.astro";
 import BottomBar from "../components/BottomBar.astro";
 import ClosingCta from "../components/ClosingCta.astro";
 import BackToTop from "../components/BackToTop.astro";
+import MonthBand from "../components/MonthBand.astro";
 import svcData from "../data/services.json";
 import calcData from "../data/calculators.json";
 import home from "../data/home.json";
@@ -37,6 +38,7 @@ const ogImage = new URL(ogPage ? `/og/${ogPage.file}.png` : "/og.png", site.site
 const org = {
   "@context": "https://schema.org",
   "@type": "AccountingService",
+  "@id": `${site.siteUrl}/#org`,
   name: site.name,
   url: site.siteUrl,
   email: site.email,
@@ -70,6 +72,7 @@ const org = {
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} 칼럼`} href="/rss.xml" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={fullTitle} />
@@ -86,6 +89,7 @@ const org = {
   <body class:list={[hideBar && "no-bar"]}>
     <a class="skip" href="#main">본문으로 건너뛰기</a>
     <Header />
+    <MonthBand />
     <main id="main" tabindex="-1">
       <slot />
       {cta && <ClosingCta urgent={cta === "urgent"} />}

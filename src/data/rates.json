@@ -1,0 +1,172 @@
+{
+  "_note": "세율·공제 한눈에(/rates, 2026-10-24 5차 A1): 어느 조문·항을 어떤 순서로 보일지만 적는다 — 글·숫자는 docs/rates-sources.json 원문 그대로(쪽이 선 문자 표를 풀어 그림). omitted는 옮기지 않은 조문 이름표(원문 링크로 안내). checkRates가 src·항·계산기·주제를 대조. version 무리는 판 이름표(법률 번호·공포일)를 쪽이 원문 메타로 붙이고 가장 늦은 공포일 판에 「지금 판」 — 손으로 「지금/앞」을 적지 않는다.",
+  "sections": [
+    {
+      "id": "inherit-gift",
+      "name": "상속세·증여세",
+      "topic": "inheritance-gift",
+      "calculators": [
+        "inheritance",
+        "gift"
+      ],
+      "groups": [
+        {
+          "label": "세율",
+          "items": [
+            {
+              "src": "inherit26"
+            },
+            {
+              "src": "inherit56"
+            }
+          ]
+        },
+        {
+          "label": "주요 공제",
+          "items": [
+            {
+              "src": "inherit18"
+            },
+            {
+              "src": "inherit21"
+            },
+            {
+              "src": "inherit22",
+              "marks": [
+                "①"
+              ]
+            },
+            {
+              "src": "inherit53"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transfer",
+      "name": "양도소득세",
+      "topic": "transfer",
+      "calculators": [
+        "transfer"
+      ],
+      "groups": [
+        {
+          "label": "세율",
+          "items": [
+            {
+              "src": "income104",
+              "marks": [
+                "①"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acquisition",
+      "name": "취득세",
+      "topic": "acquisition",
+      "calculators": [
+        "acquisition"
+      ],
+      "groups": [
+        {
+          "label": "표준세율",
+          "items": [
+            {
+              "src": "local11",
+              "marks": [
+                "①"
+              ]
+            }
+          ]
+        }
+      ],
+      "omitted": "제13조의2(법인의 주택 취득 등 중과)"
+    },
+    {
+      "id": "jongbu",
+      "name": "종합부동산세(주택)",
+      "topic": "holding",
+      "calculators": [
+        "jongbu"
+      ],
+      "groups": [
+        {
+          "label": "세율",
+          "items": [
+            {
+              "src": "jong9",
+              "marks": [
+                "①",
+                "②"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "income",
+      "name": "종합소득세",
+      "topic": "corporate",
+      "calculators": [
+        "ceo-pay"
+      ],
+      "groups": [
+        {
+          "label": "기본세율",
+          "items": [
+            {
+              "src": "income55",
+              "marks": [
+                "①"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "corp",
+      "name": "법인세",
+      "topic": "corporate",
+      "calculators": [
+        "ceo-pay",
+        "corp-gift"
+      ],
+      "groups": [
+        {
+          "version": true,
+          "items": [
+            {
+              "src": "corp55",
+              "marks": [
+                "①"
+              ]
+            },
+            {
+              "src": "corpAdd21217_1"
+            },
+            {
+              "src": "corpAdd21217"
+            }
+          ]
+        },
+        {
+          "version": true,
+          "items": [
+            {
+              "src": "corp55_2025",
+              "marks": [
+                "①"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
