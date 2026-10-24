@@ -47,7 +47,8 @@ export function searchItems(items, query, limit = 30) {
     if (!terms.every((w) => all.includes(w))) return;
     let score = 0;
     if (t.includes(whole)) score += 10;
-    if (t.startsWith(terms[0])) score += 2;
+    // 제목이나 줄임말(양도소득세 → 양도세)이 검색어로 시작하면 — 줄임말로 시작하는 칼럼 제목이 정식 이름 계산기를 앞지르지 않게
+    if ([norm(it.t), ...String(it.a || "").split(/\s+/).map(norm)].some((h) => h && h.startsWith(terms[0]))) score += 2;
     for (const w of terms) if (t.includes(w)) score += 3;
     if (it.ext) score -= 1; // 바깥 칼럼은 같은 점수면 사이트 안 쪽보다 뒤
     out.push({ it, score, i });

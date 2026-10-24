@@ -1,5 +1,5 @@
 {
-  "_note": "지면에 실린 칼럼(최신순). items: 운영자가 보낸 지면 PDF를 그림으로(public/img/press/). articles: 이코노미조선 「성광호의 세무 ABC」 온라인 기사(2026-10-24 이코노미조선 검색 '성광호'에서 읽은 제목·날짜·주소 그대로 — 고쳐 쓰지 말 것). topic·services·calculators는 제목을 보고 붙인 주제 칸(서비스·계산기 쪽 '관련 칼럼'에 씀) — 세법 내용이 아니라 분류.",
+  "_note": "지면에 실린 칼럼(최신순). items: 운영자가 보낸 지면 PDF를 그림으로(public/img/press/). articles: 이코노미조선 「성광호의 세무 ABC」 온라인 기사(2026-10-24 이코노미조선 검색 '성광호'에서 읽은(「더 보기」 다음 쪽까지 — 처음 쪽은 10건뿐) 제목·날짜·주소 그대로 — 고쳐 쓰지 말 것). topic·services·calculators는 제목을 보고 붙인 주제 칸(서비스·계산기 쪽 '관련 칼럼'에 씀) — 세법 내용이 아니라 분류.",
   "items": [
     {
       "outlet": "이코노미조선",
@@ -40,6 +40,18 @@
       "calculators": []
     },
     {
+      "date": "2026-08-24",
+      "title": "비과세 기대했다가 세금 폭탄? 상가주택, 놓치기 쉬운 함정",
+      "url": "https://economychosun.com/site/data/html_dir/2026/08/24/2026082400020.html",
+      "topic": "양도",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "transfer"
+      ]
+    },
+    {
       "date": "2026-07-27",
       "title": "사업 성공의 분기점… 법인 전환에도 골든타임이 있다",
       "url": "https://economychosun.com/site/data/html_dir/2026/07/27/2026072700024.html",
@@ -49,6 +61,70 @@
       ],
       "calculators": [
         "ceo-pay"
+      ]
+    },
+    {
+      "date": "2026-07-06",
+      "title": "정부가 손보는 1주택 양도소득세… 절세 전략도 달라진다",
+      "url": "https://economychosun.com/site/data/html_dir/2026/07/06/2026070600011.html",
+      "topic": "양도",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "transfer"
+      ]
+    },
+    {
+      "date": "2026-06-15",
+      "title": "양도세 0원 신고의 반전… 뒤늦게 드러난 수억원 세금",
+      "url": "https://economychosun.com/site/data/html_dir/2026/06/15/2026061500019.html",
+      "topic": "양도",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "transfer"
+      ]
+    },
+    {
+      "date": "2026-05-25",
+      "title": "6.7억 vs 0.3억, 상속·증여에 따라 달라지는 취득세·종부세·양도세",
+      "url": "https://economychosun.com/site/data/html_dir/2026/05/23/2026052300002.html",
+      "topic": "상속·증여",
+      "services": [
+        "inheritance-gift",
+        "real-estate"
+      ],
+      "calculators": [
+        "inheritance",
+        "gift",
+        "acquisition"
+      ]
+    },
+    {
+      "date": "2026-05-04",
+      "title": "부부 공동 명의, 섣불리 했다간 '세금 폭탄' 맞는다?",
+      "url": "https://economychosun.com/site/data/html_dir/2026/05/04/2026050400022.html",
+      "topic": "취득",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "acquisition",
+        "gift"
+      ]
+    },
+    {
+      "date": "2026-04-13",
+      "title": "강남 아파트 공시가 26% 올랐더니… 건보료·보유세 ‘연쇄 폭탄’",
+      "url": "https://economychosun.com/site/data/html_dir/2026/04/10/2026041000023.html",
+      "topic": "보유세",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "jongbu"
       ]
     },
     {
@@ -71,6 +147,18 @@
       "calculators": [
         "inheritance",
         "transfer"
+      ]
+    },
+    {
+      "date": "2026-02-02",
+      "title": "강남 55억원 아파트, 준비 없으면 상속세 17억… 반으로 줄이려면",
+      "url": "https://economychosun.com/site/data/html_dir/2026/01/30/2026013000026.html",
+      "topic": "상속·증여",
+      "services": [
+        "inheritance-gift"
+      ],
+      "calculators": [
+        "inheritance"
       ]
     },
     {
@@ -131,6 +219,16 @@
       "calculators": [
         "transfer"
       ]
+    },
+    {
+      "date": "2025-09-15",
+      "title": "가족 법인 설립… 상속 때 절세 최고 21%포인트 가능",
+      "url": "https://economychosun.com/site/data/html_dir/2025/09/12/2025091200024.html",
+      "topic": "법인",
+      "services": [
+        "corporate"
+      ],
+      "calculators": []
     }
   ]
 }

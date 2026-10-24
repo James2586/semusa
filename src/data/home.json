@@ -32,6 +32,7 @@
     { "title": "알면 돈이 되는 특정법인 증여플랜", "color": "#984807", "cover": "/img/books/specific-corp-gift.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "알아두면 돈이 되는 가업승계 실무", "color": "#C41CD2", "cover": "/img/books/family-business.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "알아두면 돈이 되는 가지급금 정리실무", "color": "#0B1D9D", "cover": "/img/books/provisional-payment.webp", "coauthors": ["한경식", "이영봉"] },
+    { "title": "알아두면 돈이 되는 부동산 절세전략", "color": "#70F626", "cover": "/img/books/real-estate-2025.webp" },
     { "title": "알아두면 돈이 되는 개인사업자 법인전환과 영업권 평가 실무", "color": "#7030A0", "cover": "/img/books/corp-conversion.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "알아두면 돈이 되는 비상장주식과 영업권 평가 실무", "color": "#15396F", "cover": "/img/books/unlisted-stock.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "병·의원 세무 관리", "color": "#2D55C8", "date": "2024-10", "cover": "/img/books/clinic-tax.webp", "coauthors": ["조성식"] },
