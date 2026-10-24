@@ -117,3 +117,9 @@ test("칼럼·책: 대표 글 + 카드(종류 칩·새 창 표시) + 거르기 �
   assert.match(h, /href="\/about#video-portfolio"/);
   assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /id="video-portfolio"/);
 });
+
+test("모든 페이지 바닥글과 전문가 소개에 통합검색 22로 가는 링크", { skip: !has }, () => {
+  const url = JSON.parse(readFileSync(new URL("../src/data/site.json", import.meta.url), "utf8")).taxSearch.url;
+  for (const f of htmlFiles(DIST)) assert.ok(readFileSync(f, "utf8").includes(`href="${url}"`), f);
+  assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /통합검색 22 열기/);
+});

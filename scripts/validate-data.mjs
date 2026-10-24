@@ -95,6 +95,7 @@ export function checkSite(text) {
   for (const k of ["name", "rep", "repTitle", "siteUrl", "email", "kakaoUrl", "hours"]) {
     if (!data[k]) errors.push(`site.json: ${k}가 비었습니다.`);
   }
+  if (!/^https:\/\//.test(data.taxSearch?.url || "")) errors.push("site.json: taxSearch.url(통합검색 22 주소)이 비었거나 https로 시작하지 않습니다.");
   return errors;
 }
 
