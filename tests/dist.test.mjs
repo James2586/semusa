@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 29개(색인 26 + 공지·개인정보 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 29);
+test("페이지 30개(색인 27 + 공지·개인정보 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 30);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 26);
+  assert.equal((sm.match(/<loc>/g) || []).length, 27);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -146,4 +146,11 @@ test("기한 달력(2026-10-24): 홈·서비스 계산 카드에서 이어지고
   for (const f of ["index.html", "services/inheritance-gift.html", "services/real-estate.html", "services/appeal.html"]) {
     assert.match(readFileSync(join(DIST, f), "utf8"), /href="\/deadline" data-cal/, f);
   }
+});
+
+test("올해 세금 달력(2026-10-24 3차): 12달 × 두 해, 근거 조문, 자바스크립트 없이도 달력이 보인다", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "tax-calendar.html"), "utf8");
+  assert.equal((h.match(/class="tc-mon"/g) || []).length, 24);
+  assert.match(h, /국세기본법 제5조 제1항/);
+  assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /href="\/tax-calendar"/);
 });
