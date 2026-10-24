@@ -213,6 +213,30 @@ export function checkLifemap(text, { guideIds, topicSlugs, glossaryIds }) {
   return errors;
 }
 
+// 세율·공제 한눈에(5차 A1): 보일 조문이 원문 파일에 있고, 고른 항이 실제로 있고, 계산기·주제가 있는지
+export function checkRates(text, srcText, { calcSlugs, topicSlugs }) {
+  const errors = [];
+  const { data, error } = parseJsonFile("rates.json", text);
+  if (error) return [error];
+  const src = JSON.parse(srcText).items || {};
+  const seen = new Set();
+  for (const s of data.sections || []) {
+    const at = `rates.json "${s.id}"`;
+    if (!/^[a-z][a-z-]*$/.test(s.id || "") || !s.name) errors.push(`${at}: id·name이 있어야 합니다.`);
+    if (seen.has(s.id)) errors.push(`${at}: id가 겹칩니다.`);
+    seen.add(s.id);
+    if (s.topic && !topicSlugs.has(s.topic)) errors.push(`${at}: topic "${s.topic}"는 topics.json에 없습니다.`);
+    for (const c of s.calculators || []) if (!calcSlugs.has(c)) errors.push(`${at}: calculators "${c}"는 calculators.json에 없습니다.`);
+    for (const g of s.groups || []) for (const it of g.items || []) {
+      const a = src[it.src];
+      if (!a) { errors.push(`${at}: src "${it.src}"는 docs/rates-sources.json에 없습니다 — scripts/make-rates-sources.mjs`); continue; }
+      for (const m of it.marks || []) if (!a.lines.some((l) => l.d === 1 && l.t.trim().startsWith(m))) errors.push(`${at}: ${it.src}에 "${m}"항이 없습니다.`);
+    }
+    if (/\d/.test(s.omitted || "") && /[0-9]+(%|퍼센트|분의|원)/.test(s.omitted)) errors.push(`${at}: omitted에 세율·금액을 적지 말 것(원문 링크로만).`);
+  }
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -282,13 +306,14 @@ export function validateAll(root = ROOT) {
       pressTopics: ids("src/data/press.json", (d) => d.articles.map((a) => a.topic)),
       bookTitles: ids("src/data/home.json", (d) => d.books.map((b) => b.title)),
     }));
+    errors.push(...checkRates(read("src/data/rates.json"), read("docs/rates-sources.json"), { calcSlugs, topicSlugs: ids("src/data/topics.json", (d) => d.topics.map((t) => t.slug)) }));
     errors.push(...checkLifemap(read("src/data/lifemap.json"), {
       guideIds: ids("src/data/guide.json", (d) => d.situations.map((s) => s.id)),
       topicSlugs: ids("src/data/topics.json", (d) => d.topics.map((t) => t.slug)),
       glossaryIds: ids("src/data/glossary.json", (d) => d.terms.map((t) => t.id)),
     }));
   }
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json", "src/data/topics.json", "src/data/lifemap.json"]) {
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json", "src/data/topics.json", "src/data/lifemap.json", "src/data/rates.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

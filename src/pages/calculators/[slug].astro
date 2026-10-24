@@ -7,6 +7,7 @@ import site from "../../data/site.json";
 import KakaoIcon from "../../components/KakaoIcon.astro";
 import PlusList from "../../components/PlusList.astro";
 import RelatedColumns from "../../components/RelatedColumns.astro";
+import rates from "../../data/rates.json";
 
 export function getStaticPaths() {
   return calcData.calculators.map((c) => ({ params: { slug: c.slug }, props: { calc: c } }));
@@ -15,6 +16,8 @@ const { calc } = Astro.props as { calc: any };
 const group = calcData.groups.find((g) => g.id === calc.group)!;
 const services = svcData.services.filter((s) => s.calculators.includes(calc.slug));
 const siblings = calcData.calculators.filter((c) => c.group === calc.group && c.slug !== calc.slug);
+// 이 계산기가 쓰는 세율의 원문(세율·공제 한눈에, 5차 A1)
+const rateSecs = rates.sections.filter((s) => s.calculators.includes(calc.slug));
 const hasGuide = calc.covers?.length || calc.notCovered?.length || calc.prepare?.length;
 const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc.short}. ${site.repTitle} ${site.rep}이 만든 모의 계산기.`;
 ---
@@ -80,6 +83,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
       <PlusList label="이어서 보기" items={[
         ...services.map((s) => ({ href: `/services/${s.slug}`, kicker: "서비스", title: `${s.name} 상담 안내`, desc: s.short })),
         ...siblings.map((c) => ({ href: `/calculators/${c.slug}`, kicker: group.name, title: c.name, desc: c.short })),
+        ...rateSecs.map((s) => ({ href: `/rates#r-${s.id}`, kicker: "법조문 원문", title: `${s.name} 세율·공제 원문`, desc: "세율표를 법조문 그대로" })),
         { href: "/calculators", title: `세금 계산기 전체 ${calcData.calculators.length}종` },
       ]} />
     </div>

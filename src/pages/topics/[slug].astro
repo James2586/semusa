@@ -10,6 +10,7 @@ import RelatedColumns from "../../components/RelatedColumns.astro";
 import UpcomingDeadlines from "../../components/UpcomingDeadlines.astro";
 import DeadlineCalc from "../../components/DeadlineCalc.astro";
 import topicData from "../../data/topics.json";
+import rates from "../../data/rates.json";
 import dl from "../../data/deadlines.json";
 import glossary from "../../data/glossary.json";
 import svcData from "../../data/services.json";
@@ -32,6 +33,7 @@ const faqMods = Object.values(import.meta.glob("../../content/faq/*.md", { eager
 const faqCount = faqMods.filter((m) => t.faq.includes(m.frontmatter.category)).length;
 const why = (e: any) => String(e.why || "").replace("{n}", e.rule.monthEnd ?? "");
 const others = topicData.topics.filter((x) => x.slug !== t.slug);
+const rateSecs = rates.sections.filter((s) => s.topic === t.slug);
 ---
 <Base title={`${t.name} 모아 보기`} description={t.lead}>
   <PageHead tag="주제 모아 보기" title={t.name} lead={t.lead} crumbs={[{ name: "주제 모아 보기", href: "/topics" }, { name: t.name }]} />
@@ -81,7 +83,7 @@ const others = topicData.topics.filter((x) => x.slug !== t.slug);
       <div class="wrap">
         <span class="tag">먼저 계산해 보기</span>
         <h2 class="sec-h" id="h-tcal">관련 계산기</h2>
-        <p class="sec-sub">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.</p>
+        <p class="sec-sub">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.{rateSecs.map((s) => <> <a class="tp-rate" href={`/rates#r-${s.id}`}>{s.name} 세율 원문 ›</a></>)}</p>
         <PlusList label="관련 계산기" items={calcs.map((c: any) => ({ href: `/calculators/${c.slug}`, kicker: groupName[c.group], title: c.name, desc: c.short }))} />
       </div>
     </section>
@@ -133,7 +135,7 @@ const others = topicData.topics.filter((x) => x.slug !== t.slug);
   .tp-rules p { color: var(--ink2); font-size: 16px; }
   .law { color: var(--muted); font-size: 14.5px; }
   .note { margin-top: 12px; font-size: 15px; color: var(--muted); }
-  .note a { color: var(--ink); font-weight: 600; }
+  .note a, .tp-rate { color: var(--ink); font-weight: 600; }
   .tp-terms { margin: 20px 0 0; display: grid; gap: 0; border-top: 1px solid var(--ink); }
   .tp-terms > div { display: grid; gap: 6px; padding: 16px 0; border-bottom: 1px solid var(--line); }
   .tp-terms dt a { font-size: 18px; font-weight: 700; color: var(--ink); text-underline-offset: 4px; display: inline-flex; align-items: center; min-height: 32px; }

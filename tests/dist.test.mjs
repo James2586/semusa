@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 41개(색인 37 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 41);
+test("페이지 42개(색인 38 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 42);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 37);
+  assert.equal((sm.match(/<loc>/g) || []).length, 38);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -254,4 +254,23 @@ test("세금 생애 지도: 정거장마다 펼침 단추·내용(기한 근거�
   assert.equal((h.match(/class="lm-panel"[^>]*hidden/g) || []).length, L.stops.length + L.anytime.length - 1); // 처음엔 하나만 펼침
   const home = readFileSync(join(DIST, "index.html"), "utf8");
   for (const s of L.stops) assert.match(home, new RegExp(`href="/life#${s.id}"`));
+});
+
+test("세율·공제 한눈에: 고른 조문마다 원문 줄·표 칸이 그대로 · 출처 · 계산기·주제 쪽에서 잇기", { skip: !has }, () => {
+  const R = JSON.parse(readFileSync("src/data/rates.json", "utf8"));
+  const S = JSON.parse(readFileSync("docs/rates-sources.json", "utf8")).items;
+  const h = readFileSync(join(DIST, "rates.html"), "utf8");
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  for (const sec of R.sections) {
+    assert.match(h, new RegExp(`id="r-${sec.id}"`));
+    for (const g of sec.groups) for (const it of g.items) {
+      const a = S[it.src];
+      assert.ok(h.includes(`법률 제${a.promulgationNo}호`), it.src);
+      for (const c of sec.calculators) assert.match(readFileSync(join(DIST, `calculators/${c}.html`), "utf8"), new RegExp(`href="/rates#r-${sec.id}"`), `${c} → ${sec.id}`);
+    }
+  }
+  for (const cell of ["과세표준의 100분의 10", "10억4천만원 + (30억원을 초과하는 금액의 100분의 50)", "3억8,406만원 + (10억원을 초과하는 금액의 45퍼센트)", "1억5천200만원+(94억원을 초과하는 금액의 1천분의 27)", "과세표준의 100분의 9"]) assert.ok(h.includes(esc(cell)), cell);
+  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/상속세및증여세법\/제26조/);
+  assert.doesNotMatch(h, /┌|│|┘/); // 선 문자가 그대로 남지 않음
+  assert.match(readFileSync(join(DIST, "topics/transfer.html"), "utf8"), /href="\/rates#r-transfer"/);
 });
