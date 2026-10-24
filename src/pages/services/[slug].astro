@@ -78,7 +78,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
         <span class="tag">먼저 계산해 보기</span>
         <h2 class="sec-h" id="h-cal">관련 계산기</h2>
         <div class="grid-cards" style="margin-top:16px">
-          {calcs.map((c: any) => <a class="calc-card" href={`/calculators/${c.slug}`}><b>{c.name}</b><span>{c.short}</span></a>)}
+          {calcs.map((c: any) => <a class="calc-card" href={`/calculators/${c.slug}`}><b>{c.name}</b><span>{c.short}</span><span class="go">계산하기 ›</span></a>)}
         </div>
       </div>
     </section>

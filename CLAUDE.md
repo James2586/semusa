@@ -1,7 +1,7 @@
 # semusa — 하나 더 세무회계 홈페이지
 
 - 배포: https://semusatax.vercel.app (main 병합 → Vercel). 작업 가지에서 만든 것은 단계가 끝나 운영자가 확인하기 전에는 main에 병합하지 않는다.
-- Astro 7 정적 사이트. `npm run build && npm test`(자료 검사·빌드·제목 글꼴 자르기·검사 19개).
+- Astro 7 정적 사이트. `npm run build && npm test`(자료 검사·빌드·제목 글꼴 자르기·검사 21개).
 
 ## 운영자 결정 (바꾸려면 운영자에게 먼저 묻는다)
 
@@ -14,6 +14,7 @@
 
 - 사무소 정보·계산기·서비스·FAQ는 `src/data/*.json`·`src/content/faq/*.md`에만. 페이지에 직접 적지 말 것.
 - 버튼은 두 가지뿐: 카카오톡 = 노랑(`btn-kakao`), 그 밖 = 숲색(`btn-moss`). 금색은 선·확인 표시에만(금색 #C4993C는 흰 바탕 대비 2.64:1). 금색 글자는 `--gold-text` #806020 — 금빛 바탕에서도 4.97:1.
+- 구역 끝 "전체 보기"는 숲색 테두리 둥근 링크 `more-link`(새 색 금지), 카드 맨 아래 할 일 한 줄은 `go`(금색 글자), 카드 제목 왼쪽 금색 세로 줄 — 2026-10-24 KPMG 참고.
 - 글자는 14px 이상, 본문 17px. 한글 기울임 금지.
 - 본문은 기기 글꼴(내려받기 0). 제목 글꼴은 빌드 뒤 `scripts/subset-fonts.mjs`가 쓰인 글자만 잘라 `dist/fonts/`에 만든다 — 제목 글꼴(`--f-display`)을 쓰는 새 클래스는 `SERIF_CLASSES`에 더한다(`tests/fonts.test.mjs`).
 - 세법 숫자·기한은 법조문 원문과 대조한 것만, 근거 조문을 같이 적는다(FAQ `law:` 칸).

@@ -19,7 +19,7 @@ const n = calcData.calculators.length;
             <h2 class="sec-h grp-h">{g.name}</h2>
             <div class="grid-cards">
               {calcData.calculators.filter((c) => c.group === g.id).map((c) => (
-                <a class="calc-card" href={`/calculators/${c.slug}`} data-q={`${c.name} ${c.short} ${g.name}`}><b>{c.name}</b><span>{c.short}</span></a>
+                <a class="calc-card" href={`/calculators/${c.slug}`} data-q={`${c.name} ${c.short} ${g.name}`}><b>{c.name}</b><span>{c.short}</span><span class="go">계산하기 ›</span></a>
               ))}
             </div>
           </div>

@@ -53,7 +53,7 @@ const calcCount = calcData.calculators.length;
           </li>
         ))}
       </ul>
-      <p class="more"><a class="tlink" href="/calculators">세금 계산기 {calcCount}종 전체 보기 ›</a></p>
+      <p class="more"><a class="more-link" href="/calculators">세금 계산기 {calcCount}종 전체 보기 ›</a></p>
     </div>
   </section>
 
@@ -124,7 +124,7 @@ const calcCount = calcData.calculators.length;
       <span class="tag">자주 묻는 질문</span>
       <h2 class="sec-h" id="h-faq">많이 물어보시는 것</h2>
       <div style="margin-top:18px"><FaqList limit={5} /></div>
-      <p class="more"><a class="tlink" href="/faq">자주 묻는 질문 더 보기 ›</a></p>
+      <p class="more"><a class="more-link" href="/faq">자주 묻는 질문 더 보기 ›</a></p>
     </div>
   </section>
 
@@ -173,7 +173,7 @@ const calcCount = calcData.calculators.length;
   .situ .row-link { height: 100%; min-height: 60px; font-size: 17.5px; }
   .situ .urgent { background: var(--gold-soft); border-color: rgba(160, 120, 40, .35); }
   .desk-only { display: none; }
-  .more { margin-top: 18px; font-size: 16px; }
+  .more { margin-top: 24px; }
 
   /* 3 */
   .books { display: grid; gap: 24px; }
