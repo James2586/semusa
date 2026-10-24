@@ -42,6 +42,7 @@ const first = evs[0];
       <span class="dl-why" data-why></span>
       <svg class="dl-tl" data-tl aria-hidden="true"></svg>
       <span class="dl-law" data-law>{first.law}</span>
+      <a class="dl-cal" href="/deadline" data-cal>달력으로 크게 보기 <span aria-hidden="true">›</span></a>
       <p class="sr-only" aria-live="polite" data-live></p>
     </div>
     <div class="dl-act">
@@ -93,6 +94,10 @@ const first = evs[0];
   .dl-reel > span > i { font-style: normal; height: var(--h); line-height: var(--h); display: block; text-align: center; }
   .dl-out.late .dl-num { color: #F4C0B2; }
   .dl-date { font-family: var(--f-display); font-weight: 700; font-size: clamp(21px, 5.8vw, 27px); line-height: 1.35; white-space: nowrap; }
+  /* 기한 달력(/deadline)으로 넘어갈 때 이 날짜가 큰 날짜로 이어진다(같은 전환 이름 — 한 쪽에 계산 카드는 하나) */
+  .dl-date { view-transition-name: dl-date; }
+  .dl-cal { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; margin-bottom: -6px; color: var(--gold-hi); font-weight: 700; font-size: 15.5px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(232, 196, 106, .45); }
+  .dl-cal:hover { text-decoration-color: currentColor; }
   .dl-date:not(:empty)::after { content: "까지"; font-family: var(--f-body); font-weight: 400; font-size: .62em; color: var(--on-moss2); margin-left: 6px; }
   .dl-why { margin-top: 6px; font-size: 15px; color: var(--on-moss2); }
   .dl-tl { display: block; width: 100%; height: 76px; margin-top: 6px; }
@@ -241,6 +246,7 @@ const first = evs[0];
       out.classList.remove("stale");
       last = r;
       q("[data-dt]").textContent = `${dotDate(r.deadlineIso)} (${r.weekday})`;
+      q<HTMLAnchorElement>("[data-cal]").href = `/deadline?e=${ev.id}&d=${r.startIso}${abroad?.checked && ev.rule.abroadMonths ? "&a=1" : ""}`;
       const unit = r.dday > 0 ? "일 남음" : r.dday === 0 ? "오늘 마감" : "일 지남";
       q("[data-num-l]").textContent = unit;
       out.classList.toggle("late", r.dday < 0);

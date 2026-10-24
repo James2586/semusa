@@ -8,6 +8,7 @@ import { inkFor } from "../lib/shelf.js";
 import site from "../data/site.json";
 import home from "../data/home.json";
 import videoData from "../data/videos.json";
+import press from "../data/press.json";
 import { fetchBlogPosts } from "../lib/blogFeed.js";
 
 // 네이버 블로그 최신 글: 빌드할 때 한 번 읽는다. 못 읽으면 블로그 카드만 빠지고 페이지는 그대로 만든다.
@@ -25,6 +26,8 @@ const cards: Card[] = [
 ];
 const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼럼");
 const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
+// 지면에 실린 칼럼(src/data/press.json) — 지면 그림 + 제목 그대로, 누르면 이코노미조선 칼럼 모아 보기
+const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
 ---
 <Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그, 영상.`}>
   <PageHead tag="칼럼·책" photo={{ name: "own-face", w: [600, 900], ratio: "6 / 5" }} title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead={`상속·증여, 법인, 부동산 세금을 다룬 책 ${home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.`} />
@@ -51,6 +54,27 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
       )}
     </div>
   </section>
+
+  {press.items.length > 0 && (
+    <section class="gut press-sec" aria-labelledby="h-press">
+      <div class="wrap">
+        <span class="tag">지면에 실린 칼럼</span>
+        <h2 class="sec-h" id="h-press">{press.items[0].outlet} 「{press.items[0].series}」</h2>
+        <div class="press-list">
+          {press.items.map((p) => (
+            <a class="press" href={ch["이코노미조선 칼럼"]} target="_blank" rel="noopener">
+              <img src={`/img/press/${p.image}-1600.webp`} srcset={`/img/press/${p.image}-800.webp 800w, /img/press/${p.image}-1600.webp 1600w`} sizes="(min-width: 1080px) 640px, 100vw" width={p.size[0]} height={p.size[1]} alt={`${p.outlet} ${pressDate(p.date)} ${p.pages} 「${p.series} <${p.no}>」 지면`} loading="lazy" decoding="async" />
+              <span class="press-meta">
+                <small>{p.outlet} · {pressDate(p.date)} · {p.pages} · 「{p.series} &lt;{p.no}&gt;」</small>
+                <b class="press-t">{p.title}</b>
+                <span class="go">이코노미조선에서 칼럼 모아 보기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
 
   <section class="gut list-sec" aria-labelledby="h-all" style="padding-bottom:64px">
     <div class="wrap">
@@ -96,6 +120,15 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
 
 <style>
   .feat-sec { padding-bottom: 40px; }
+  .press-sec { padding-bottom: 48px; }
+  .press-list { margin-top: 16px; display: grid; gap: 20px; }
+  .press { display: grid; gap: 14px; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; transition: border-color .2s; }
+  .press:hover { border-color: var(--moss); }
+  .press img { width: 100%; height: auto; display: block; border-radius: 4px; box-shadow: 0 10px 24px -18px rgba(21, 25, 21, .5); }
+  .press-meta { display: grid; gap: 6px; align-content: center; padding: 0 4px 4px; }
+  .press-meta small { font-size: 14px; color: var(--muted); }
+  .press-t { font-family: var(--f-display); font-size: 22px; line-height: 1.4; }
+  .press:hover .go { text-decoration: underline; text-underline-offset: 4px; }
   .feat { display: grid; gap: 12px; align-content: start; background: var(--moss); color: var(--on-moss); border-radius: 6px; padding: 28px 22px; text-decoration: none; }
   a.feat:hover .feat-go { text-decoration: underline; text-underline-offset: 4px; }
   .feat-t { font-family: var(--f-display); font-weight: 700; font-size: 26px; line-height: 1.35; }
@@ -165,6 +198,8 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
     .cards li:last-child:nth-child(odd) .chip { justify-self: start; }
     .cards.wall { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 32px 24px; }
     .wall li:last-child:nth-child(odd) .card-a { display: flex; }
+    .press { grid-template-columns: minmax(0, 640px) minmax(0, 1fr); gap: 32px; padding: 16px; }
+    .press-t { font-size: 28px; }
     .follow { grid-template-columns: 1fr auto; align-items: center; gap: 48px; padding: 44px 48px; }
     .follow ul { min-width: 300px; }
   }
