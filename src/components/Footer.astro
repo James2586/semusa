@@ -1,10 +1,11 @@
 ---
 import site from "../data/site.json";
+import Logo from "./Logo.astro";
 ---
 <footer class="foot gut">
   <div class="wrap foot-in">
     <div class="f-brand">
-      <p class="foot-lg"><svg class="lm" width="24" height="24" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#1E3A2A"/><path d="M13 7v12M7 13h12" stroke="#E8C46A" stroke-width="2.4" stroke-linecap="round"/></svg>{site.name}</p>
+      <p class="foot-lg"><Logo dark /></p>
       <p class="foot-c">© {site.copyrightYear} {site.name}.<br />All rights reserved.</p>
     </div>
     <div class="f-col">
@@ -34,8 +35,7 @@ import site from "../data/site.json";
 <style>
   .foot { background: var(--ink); color: #CFCABC; font-size: 15px; padding-block: 40px calc(40px + var(--bar-h) + env(safe-area-inset-bottom, 0px)); }
   .foot-in { display: grid; gap: 28px; }
-  .foot-lg { display: flex; align-items: center; gap: 9px; }
-  .foot-lg { font-family: var(--f-display); font-size: 20px; color: #F3F0E7; }
+  .foot-lg { display: flex; }
   .foot-c { margin-top: 8px; font-size: 14px; color: #A8A396; }
   .f-h { font-size: 14px; font-weight: 700; color: #E8C46A; margin-bottom: 8px; }
   .f-h2 { margin-top: 18px; }

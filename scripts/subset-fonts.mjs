@@ -13,7 +13,7 @@ const require = createRequire(import.meta.url);
 const FONT_DIR = join(dirname(require.resolve("@fontsource/noto-serif-kr/package.json")), "files");
 
 export const SERIF_TAGS = ["h1", "h2", "blockquote"];
-export const SERIF_CLASSES = ["logo", "foot-lg", "sec-h", "page-h", "hero-h", "q", "closing-h", "feat-t", "tw", "stat-n", "th-l", "dl-date"];
+export const SERIF_CLASSES = ["logo", "foot-lg", "sec-h", "page-h", "hero-h", "q", "closing-h", "feat-t", "tw", "stat-n", "th-l", "dl-date", "find-t", "book-t", "q-t", "pv-t"];
 // 운영자가 글을 바꿔도 깨지지 않게 늘 넣는 글자
 const ALWAYS = " 0123456789.,·:;!?'\"()[]-–—…%/&+·「」『』세무회계하나더일월화수목금토";
 
@@ -58,13 +58,17 @@ export async function buildSubsets() {
     out[name] = buf.length;
   }
   // 남은 날 큰 숫자(src/components/DeadlineCalc.astro "Hanadeo Num") — 400 굵기 숫자 열 개만
-  const num = await subsetFont(readFileSync(join(FONT_DIR, "noto-serif-kr-latin-400-normal.woff2")), "0123456789", { targetFormat: "woff2" });
+  const num = await subsetFont(readFileSync(join(FONT_DIR, "noto-serif-kr-latin-400-normal.woff2")), "0123456789+", { targetFormat: "woff2" });
   writeFileSync(join(DIST, "fonts", "serif-num-400.woff2"), num);
   out.num = num.length;
+  // 글자 로고 "하나 더"(src/components/Logo.astro) — 명조 900에서 그 글자만
+  const logo = await subsetFont(readFileSync(join(FONT_DIR, "noto-serif-kr-korean-900-normal.woff2")), "하나더", { targetFormat: "woff2" });
+  writeFileSync(join(DIST, "fonts", "serif-logo-900.woff2"), logo);
+  out.logo = logo.length;
   return { chars: chars.length, ...out };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const r = await buildSubsets();
-  console.log(`제목 글꼴 자르기: 글자 ${r.chars}개 → 한글 ${Math.round(r.ko / 1024)}KB, 영문 ${Math.round(r.la / 1024)}KB, 큰 숫자 ${Math.round(r.num / 1024)}KB`);
+  console.log(`제목 글꼴 자르기: 글자 ${r.chars}개 → 한글 ${Math.round(r.ko / 1024)}KB, 영문 ${Math.round(r.la / 1024)}KB, 큰 숫자 ${Math.round(r.num / 1024)}KB, 로고 ${Math.round(r.logo / 1024)}KB`);
 }

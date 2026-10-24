@@ -1,12 +1,13 @@
 ---
-interface Props { limit?: number }
-const { limit } = Astro.props;
+// categories: 서비스 쪽에서 그 분야 질문만(services.json faq — faq 파일의 category)
+interface Props { limit?: number; categories?: string[] }
+const { limit, categories } = Astro.props;
 const mods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
-const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
+const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).filter((f) => !categories || categories.includes(f.category)).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
 ---
 <div class="faq">
   {faqs.map((f) => (
-    <details>
+    <details data-cat={f.category}>
       <summary><span class="q" aria-hidden="true">Q</span><span>{f.q}</span><span class="pm" aria-hidden="true">+</span></summary>
       <div class="a prose"><f.Content />{f.law && <p class="law">{f.law}</p>}</div>
     </details>
@@ -14,7 +15,8 @@ const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).sort((a
 </div>
 <style>
   .faq details { border-bottom: 1px solid var(--line); }
-  .faq details:first-child { border-top: 1px solid var(--line); }
+  .faq { border-top: 1px solid var(--line); }
+  .faq details[hidden] { display: none; }
   .faq summary { display: flex; gap: 12px; align-items: flex-start; padding: 18px 0; cursor: pointer; list-style: none; font-size: 17.5px; font-weight: 600; }
   .faq summary::-webkit-details-marker { display: none; }
   .q { font-family: var(--f-display); color: var(--gold-text); flex: none; }

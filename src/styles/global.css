@@ -32,8 +32,10 @@
 /* 제목 글꼴: 빌드 뒤 scripts/subset-fonts.mjs가 쓰인 글자만 잘라 만든다 */
 @font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-la-700.woff2") format("woff2"); unicode-range: U+0000-024F, U+2000-206F, U+20AC, U+2190-21FF; }
 @font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-ko-700.woff2") format("woff2"); unicode-range: U+1100-11FF, U+3000-303F, U+3130-318F, U+AC00-D7AF, U+FF00-FFEF; }
-/* 남은 날 큰 숫자: 명조 숫자 열 개만(약 3KB) */
-@font-face { font-family: "Hanadeo Num"; font-weight: 400; font-display: swap; src: url("/fonts/serif-num-400.woff2") format("woff2"); unicode-range: U+0030-0039; }
+/* 남은 날 큰 숫자·로고의 가는 +: 명조 400 숫자 열 개와 + (약 3KB) */
+@font-face { font-family: "Hanadeo Num"; font-weight: 400; font-display: swap; src: url("/fonts/serif-num-400.woff2") format("woff2"); unicode-range: U+002B, U+0030-0039; }
+/* 글자 로고 "하나 더": 명조 900에서 로고 글자만 */
+@font-face { font-family: "Hanadeo Logo"; font-weight: 900; font-display: swap; src: url("/fonts/serif-logo-900.woff2") format("woff2"); unicode-range: U+AC00-D7AF; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -79,6 +81,15 @@ p { margin: 0; }
 /* 구역 */
 .sec { padding-block: 56px; }
 .sec-alt { background: var(--paper2); }
+.ruled { border-top: 1px solid var(--line); }
+/* 페이지 머리 꼬리표(금색 짧은 선) — PageHead·소개·404 */
+.ph-tag { margin-top: 14px; font-size: 15px; font-weight: 600; color: var(--ink2); display: flex; gap: 10px; align-items: center; }
+.ph-tag::before { content: ""; width: 20px; height: 1px; background: var(--gold); }
+/* 거르기 칩(계산기 분야·질문 분야·칼럼 종류) — 고른 것은 숲색 */
+.fchip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line2); background: var(--surface); color: var(--ink2); font: 600 15.5px var(--f-body); cursor: pointer; transition: background .2s, color .2s, border-color .2s, transform .12s; }
+.fchip:hover { border-color: var(--moss); }
+.fchip:active { transform: scale(.98); }
+.fchip[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: var(--on-moss); }
 .sec-dark { background: var(--moss); color: var(--on-moss); }
 .tag { display: block; font-size: 14px; font-weight: 700; color: var(--gold-text); margin-bottom: 6px; }
 .sec-dark .tag { color: var(--gold-hi); }
@@ -87,10 +98,9 @@ p { margin: 0; }
 .sec-dark .sec-sub { color: var(--on-moss2); }
 
 /* 페이지 머리 */
-.page-head { padding-block: 22px 32px; }
 .crumb { font-size: 15px; color: var(--muted); margin: 0 0 6px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 8px; }
 .crumb li + li::before { content: "›"; margin-right: 8px; color: var(--line2); }
-.crumb a { color: var(--gold-text); text-decoration: none; }
+.crumb a { color: var(--gold-text); text-decoration: none; display: inline-block; padding: 12px 6px; margin: -12px -6px; }
 .page-h { font-family: var(--f-display); font-size: 30px; line-height: 1.35; font-weight: 700; }
 .page-lead { margin-top: 10px; color: var(--ink2); }
 .sec-dark .crumb, .sec-dark .crumb a { color: var(--on-moss2); }
@@ -135,10 +145,41 @@ p { margin: 0; }
   .sec { padding-block: 80px; }
   .sec-h { font-size: 34px; }
   .page-h { font-size: 60px; line-height: 1.2; letter-spacing: -0.01em; }
-  .page-head { padding-block: 40px 48px; }
   .grid-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .more-link { display: inline-flex; }
 }
+/* ── 움직임(2026-10-24 2차 개편) — 짧게·한 번만·내용은 처음부터 보이게. 움직임 줄이기면 아래 reduce 규칙이 전부 끈다. ── */
+/* 페이지 넘김: 머리글·아래 막대는 그대로, 본문만 살짝(12px) 올라오며 0.3초. 지원하지 않는 브라우저는 바로 바뀜 */
+/* 전환 켜기(@view-transition)는 Base.astro 머리의 작은 style에 — 움직임 줄이기면 아래에서 애니메이션만 끈다 */
+@media (prefers-reduced-motion: no-preference) {
+  .hdr { view-transition-name: site-hdr; }
+  .bbar { view-transition-name: site-bar; }
+  ::view-transition-old(root) { animation: vt-out .18s ease-in both; }
+  ::view-transition-new(root) { animation: vt-in .3s cubic-bezier(.2, .7, .2, 1) both; }
+  /* 서비스 이름(첫 화면·서비스 목록 → 서비스 쪽 제목)은 글자가 그 자리로 이어져 커진다 — 이름은 svc-<slug> */
+  ::view-transition-group(*) { animation-duration: .32s; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
+}
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(12px); } }
+/* 구역 등장: 화면에 들어올 때 살짝 올라옴 — 스크롤 위치로 움직이는 기본 기능(자바스크립트 없음). 지원하지 않으면 처음부터 보임 */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .sec .sec-h, .sec .tag, .reveal > li, .reveal-1 {
+      animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 55%;
+    }
+    .reveal > li:nth-child(2) { animation-range: entry 6% entry 61%; }
+    .reveal > li:nth-child(3) { animation-range: entry 12% entry 67%; }
+    .reveal > li:nth-child(4) { animation-range: entry 18% entry 73%; }
+    .reveal > li:nth-child(n+5) { animation-range: entry 24% entry 79%; }
+  }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+/* 손에 닿는 반응: 누르면 살짝 눌림, 칸에 올리면 테두리 숲색 */
+.btn, .more-link { transition: transform .12s, background .2s, color .2s, border-color .2s; }
+.btn:active, .more-link:active { transform: scale(.98); }
+input:not([type="checkbox"]):not([type="radio"]):hover, select:hover, textarea:hover { border-color: var(--moss); }
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

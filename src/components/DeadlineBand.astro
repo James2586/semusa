@@ -1,0 +1,18 @@
+---
+// 첫 화면 기한 계산으로 보내는 숲색 띠(서비스 목록·계산기 목록 맨 아래)
+interface Props { kicker: string }
+const { kicker } = Astro.props;
+---
+<a class="dband" href="/#h-hero">
+  <span><small>{kicker}</small><b class="find-t">무슨 일이 있었는지 고르고 날짜만 넣어 보세요</b></span>
+  <span class="dband-go">기한 계산 <span aria-hidden="true">›</span></span>
+</a>
+<style>
+  .dband { margin-top: 36px; display: grid; gap: 12px; padding: 22px; background: var(--moss); color: var(--on-moss); border-radius: 10px; text-decoration: none; transition: transform .12s; }
+  .dband:active { transform: scale(.99); }
+  .dband small { display: block; font-size: 14px; color: var(--gold-hi); font-weight: 700; margin-bottom: 4px; }
+  .find-t { font-family: var(--f-display); font-size: 21px; line-height: 1.4; }
+  .dband-go { font-weight: 700; color: var(--gold-hi); }
+  .dband:hover .dband-go { text-decoration: underline; text-underline-offset: 4px; }
+  @media (min-width: 900px) { .dband { grid-template-columns: 1fr auto; align-items: center; padding: 28px 32px; } .find-t { font-size: 24px; } }
+</style>

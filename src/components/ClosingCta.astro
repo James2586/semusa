@@ -1,36 +1,43 @@
 ---
+// 마무리 띠(2026-10-24 2차 개편 — 첫 화면 "하나 더 물어보세요" 숲색 띠로 모든 쪽 통일). 불복 쪽(urgent)은 "기한이 있는 일입니다".
 import site from "../data/site.json";
 import KakaoIcon from "./KakaoIcon.astro";
 const mapQ = encodeURIComponent(site.address.full.replace(/^서울시/, "서울"));
 const tel = site.phone ? `tel:${site.phone.replace(/[^0-9+]/g, "")}` : null;
-interface Props { urgent?: boolean }
-const { urgent = false } = Astro.props;
+// compact: 바로 아래 오시는 길이 있는 쪽(홈·오시는 길)은 주소·운영 시간을 빼고 버튼만
+interface Props { urgent?: boolean; compact?: boolean }
+const { urgent = false, compact = false } = Astro.props;
 ---
 <section class="closing sec-dark gut" aria-labelledby="h-closing">
   <div class="wrap closing-in">
-    <h2 id="h-closing" class="closing-h">{urgent ? <>기한이<img class="ipic ipic-photo" src="/img/profile-360.webp" alt="" width="62" height="40" loading="lazy" />있는 일입니다.</> : <>상황을<img class="ipic ipic-photo" src="/img/profile-360.webp" alt="" width="62" height="40" loading="lazy" />먼저 알려 주세요.</>}</h2>
-    <p>카카오톡으로 상황을 적어 보내 주시면 확인 후 연락드립니다. 상담은 유료입니다.</p>
-    <div class="closing-info">
-      <a href={`https://map.kakao.com/link/search/${mapQ}`} target="_blank" rel="noopener">{site.address.full} <span aria-hidden="true">↗</span><span class="sr-only">(카카오맵)</span></a>
-      {tel && <a href={tel}>{site.phone}</a>}
+    <div>
+      <h2 class="closing-h" id="h-closing">{urgent ? "기한이 있는 일입니다" : "하나 더 물어보세요"}</h2>
+      <p class="closing-p">{urgent ? "통지서를 받은 날짜를 적어 두고 카카오톡으로 바로 알려 주세요." : "카카오톡으로 상황을 먼저 알려 주세요."} 방문 상담은 미리 예약하며, 상담은 유료입니다.</p>
     </div>
-    <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
+    <div class="closing-side">
+      {!compact && <dl class="closing-info">
+        <div><dt>주소</dt><dd><a href={`https://map.kakao.com/link/search/${mapQ}`} target="_blank" rel="noopener">{site.address.full} <span aria-hidden="true">↗</span><span class="sr-only">(카카오맵, 새 창)</span></a></dd></div>
+        <div><dt>운영 시간</dt><dd>{site.hours}</dd></div>
+        {tel && <div><dt>전화</dt><dd><a href={tel}>{site.phone}</a></dd></div>}
+      </dl>}
+      <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
+    </div>
   </div>
 </section>
 <style>
-  .closing { padding-block: 56px 60px; border-top: 1px solid rgba(243, 240, 231, .08); }
-  .closing-in { display: grid; gap: 14px; justify-items: start; }
-  .closing-h { font-family: var(--f-display); font-size: 30px; line-height: 1.3; }
-  .closing p { color: var(--on-moss2); }
-  .closing .btn { margin-top: 6px; width: 100%; }
-  .closing-info { display: grid; gap: 4px; margin-top: 6px; }
-  .closing-info a { color: var(--on-moss); font-size: 19px; font-weight: 700; text-decoration: none; }
-  .closing-info a:hover { text-decoration: underline; text-underline-offset: 5px; }
+  .closing { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 11v6M11 14h6' stroke='%23F3F0E7' stroke-opacity='.06' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E"); }
+  .closing-in { padding-block: 52px 56px; display: grid; gap: 24px; }
+  .closing-h { font-family: var(--f-display); font-size: clamp(28px, 7vw, 46px); line-height: 1.25; letter-spacing: -.02em; }
+  .closing-p { margin-top: 10px; color: var(--on-moss2); max-width: 30em; }
+  .closing-side { display: grid; gap: 18px; }
+  .closing-info { margin: 0; display: grid; gap: 6px; border-top: 1px solid rgba(243, 240, 231, .16); padding-top: 14px; }
+  .closing-info div { display: grid; grid-template-columns: 76px 1fr; gap: 10px; }
+  .closing-info dt { font-size: 14px; color: var(--on-moss2); padding-top: 2px; }
+  .closing-info dd { margin: 0; font-size: 16.5px; }
+  .closing-info a { color: var(--on-moss); text-underline-offset: 4px; display: inline-block; padding-block: 10px; margin-block: -10px; }
+  .closing .btn { width: 100%; }
   @media (min-width: 900px) {
-    .closing { padding-block: 96px 100px; }
-    .closing-in { justify-items: center; text-align: center; }
-    .closing-h { font-size: 56px; }
-    .closing .btn { width: auto; min-width: 260px; }
-    .closing-info a { font-size: 24px; }
+    .closing-in { padding-block: 80px; grid-template-columns: minmax(0, 1fr) 380px; column-gap: 64px; align-items: end; }
+    .closing .btn { width: auto; justify-self: start; min-width: 240px; }
   }
 </style>

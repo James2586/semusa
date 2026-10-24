@@ -1,0 +1,26 @@
+---
+// 책 표지(2026-10-24 2차 개편 공통 부품): 표지 사진(home.json books cover)이 있으면 사진, 없으면 표지색으로 그린 표지.
+// 서비스 쪽 관련 책·소개 쪽 서가·칼럼 쪽 표지 벽이 같이 쓴다. 장식이 아니라 책 자체라 사진엔 제목을 alt로.
+import site from "../data/site.json";
+import { inkFor } from "../lib/shelf.js";
+interface Props { book: { title: string; color?: string; cover?: string }; width?: number; link?: boolean }
+const { book, width = 120, link = false } = Astro.props;
+const Tag = link ? "a" : "span";
+const attrs = link ? { href: site.booksUrl, target: "_blank", rel: "noopener" } : {};
+---
+<Tag class:list={["bcov", book.cover ? "bcov-img" : "bcov-draw"]} style={`--w:${width}px;${book.cover ? "" : `background:${book.color};color:${inkFor(book.color || "#1E3A2A")}`}`} {...attrs}>
+  {book.cover
+    ? <img src={book.cover} width="400" height="571" alt={`『${book.title}』 표지`} loading="lazy" decoding="async" />
+    : <><b>{book.title}</b><small>{site.rep}</small></>}
+  {link && <span class="sr-only">(교보문고, 새 창)</span>}
+</Tag>
+<style>
+  .bcov { flex: none; display: flex; flex-direction: column; justify-content: space-between; width: var(--w); aspect-ratio: 400 / 571; padding: calc(var(--w) * .11) calc(var(--w) * .1); border-radius: 2px 6px 6px 2px; text-decoration: none; overflow: hidden;
+    box-shadow: inset 3px 0 0 rgba(0, 0, 0, .18), 0 14px 22px -16px rgba(0, 0, 0, .55); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
+  .bcov-img { padding: 0; background: var(--paper2); }
+  .bcov img { width: 100%; height: 100%; object-fit: cover; }
+  .bcov b { font-size: max(14px, calc(var(--w) * .115)); line-height: 1.4; }
+  .bcov small { font-size: 14px; }
+  a.bcov:hover, a.bcov:focus-visible { transform: translateY(-4px); }
+  @media (prefers-reduced-motion: reduce) { .bcov { transition: none; } }
+</style>

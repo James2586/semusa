@@ -112,14 +112,15 @@ test("5단계: '다음 단계에서 채웁니다' 자리가 남지 않고, 서�
   }
 });
 
-test("마무리 한 줄: 홈·404 말고 모든 페이지 끝에 하나, 불복 서비스는 기한 문구", { skip: !has }, () => {
+test("마무리 띠: 404 말고 모든 페이지에 하나(홈도 — 2026-10-24 2차 개편 \"하나 더 물어보세요\" 통일), 불복 서비스는 기한 문구", { skip: !has }, () => {
   for (const f of htmlFiles(DIST)) {
     const h = readFileSync(f, "utf8");
     const n = (h.match(/class="closing /g) || []).length;
-    const expect = /\/(index|404)\.html$/.test(f) ? 0 : 1;
+    const expect = /\/404\.html$/.test(f) ? 0 : 1;
     assert.equal(n, expect, f);
   }
-  assert.match(readFileSync(join(DIST, "services", "appeal.html"), "utf8"), /기한이<img[^>]*>있는 일입니다\./);
+  assert.match(readFileSync(join(DIST, "services", "appeal.html"), "utf8"), /id="h-closing"[^>]*>기한이 있는 일입니다</);
+  assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /id="h-closing"[^>]*>하나 더 물어보세요</);
 });
 
 test("칼럼·책: 대표 글 + 카드(종류 칩·새 창 표시) + 거르기 단추, 영상 카드는 소개 페이지 영상으로", { skip: !has }, () => {

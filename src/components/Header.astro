@@ -3,6 +3,7 @@ import site from "../data/site.json";
 import calcData from "../data/calculators.json";
 import svcData from "../data/services.json";
 import KakaoIcon from "./KakaoIcon.astro";
+import Logo from "./Logo.astro";
 
 const groups = calcData.groups.map((g) => ({
   ...g,
@@ -14,7 +15,7 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
 ---
 <header class="hdr gut">
   <div class="wrap hdr-in">
-    <a class="logo" href="/"><svg class="lm" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#1E3A2A"/><path d="M13 7v12M7 13h12" stroke="#E8C46A" stroke-width="2.4" stroke-linecap="round"/></svg>하나 더 <span>세무회계</span></a>
+    <Logo href="/" />
 
     <nav class="gnb" aria-label="주 메뉴">
       <ul>
@@ -58,7 +59,7 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
 
 <dialog class="drawer" id="drawer" aria-label="메뉴">
   <div class="drawer-top">
-    <span class="logo"><svg class="lm" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#1E3A2A"/><path d="M13 7v12M7 13h12" stroke="#E8C46A" stroke-width="2.4" stroke-linecap="round"/></svg>하나 더 <span>세무회계</span></span>
+    <Logo />
     <button class="drawer-close" type="button" aria-label="메뉴 닫기" data-close>✕</button>
   </div>
   <nav aria-label="휴대폰 메뉴">
@@ -87,10 +88,6 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
 <style>
   .hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: var(--surface); border-bottom: 1px solid var(--line); }
   .hdr-in { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); gap: 16px; }
-  .logo { font-family: var(--f-display); font-weight: 700; font-size: 19px; text-decoration: none; color: var(--ink); white-space: nowrap; }
-  .logo span { color: var(--gold-text); }
-  .logo { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; }
-  .lm { width: 26px; height: 26px; flex: none; }
   .gnb { display: none; align-items: center; gap: 8px; height: 100%; }
   .gnb > ul { display: flex; list-style: none; margin: 0; padding: 0; height: 100%; }
   .gnb li { position: relative; display: flex; align-items: center; }

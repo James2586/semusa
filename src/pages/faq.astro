@@ -7,6 +7,7 @@ import FaqList from "../components/FaqList.astro";
 const mods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
 const faqs = (await Promise.all(mods.map(async (m) => ({ ...m.frontmatter, Content: m.Content, text: String(await m.compiledContent()) }))))
   .sort((a, b) => Number(a.order) - Number(b.order));
+const cats = ["전체", ...new Set(faqs.map((f) => f.category))];
 const strip = (h: string) => h.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 const faqLd = {
   "@context": "https://schema.org",
@@ -15,11 +16,31 @@ const faqLd = {
 };
 ---
 <Base title="자주 묻는 질문" description="상속세 신고 기한, 증여재산공제, 법인 기장 등 자주 묻는 질문." jsonLd={[faqLd]}>
-  <PageHead title="자주 묻는 질문" crumbs={[{ name: "자주 묻는 질문" }]} />
-  <section class="gut" style="padding-bottom:64px">
+  <PageHead tag="자주 묻는 질문" title="많이 물어보시는 것" crumbs={[{ name: "자주 묻는 질문" }]} lead="답 아래에 근거 조문을 함께 적었습니다." />
+  <section class="gut faq-sec">
     <div class="wrap narrow">
+      {faqs.length >= 8 && <div class="chips" role="group" aria-label="분야로 거르기">
+        {cats.map((c, i) => <button type="button" class="fchip" aria-pressed={i === 0 ? "true" : "false"} data-cat={c}>{c}</button>)}
+      </div>}
+      <p class="sr-only" role="status" id="faq-status"></p>
       <FaqList />
       <p style="margin-top:24px"><a class="more-link" href={site.faqSiteUrl} target="_blank" rel="noopener">자주 묻는 질문 전체 보기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a></p>
     </div>
   </section>
 </Base>
+<style>
+  .faq-sec { padding-block: 28px 64px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+</style>
+<script>
+  const chips = [...document.querySelectorAll<HTMLButtonElement>(".fchip[data-cat]")];
+  const qs = [...document.querySelectorAll<HTMLDetailsElement>(".faq details")];
+  const st = document.getElementById("faq-status")!; // 질문이 8개 이상일 때만 칩이 있다
+  for (const c of chips) c.addEventListener("click", () => {
+    const k = c.dataset.cat!;
+    for (const o of chips) o.setAttribute("aria-pressed", String(o === c));
+    let n = 0;
+    for (const d of qs) { const show = k === "전체" || d.dataset.cat === k; d.hidden = !show; if (show) n++; }
+    st.textContent = `${k} 질문 ${n}개`;
+  });
+</script>

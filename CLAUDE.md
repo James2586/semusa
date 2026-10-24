@@ -26,9 +26,14 @@
   "말일부터 N개월"은 말일 다음 날을 기산일로 민법 제160조, "날부터 N일"은 초일 불산입. 공휴일 연장은 `src/lib/ntsDeadline.js`·`civilPeriod.js` — 택스 서치 `shared/`와 **같은 파일**(고치지 말고 그쪽에서 복사).
   공휴일은 빌드 때 통합검색 22 공개 자료(`/api/faq?resource=holidays`, `src/lib/holidays.js`)에서 읽고, 못 읽으면 토·일·노동절만 넘기며 화면에 "공휴일 자료 없음"을 적는다(빌드는 멈추지 않음) — 임시공휴일이 생기면 다시 배포해야 반영된다.
   남은 날 숫자는 자릿수 바퀴(움직임 줄이기면 바로), 화면 읽기용 글자(`data-num-sr`)를 빼지 말 것. JS가 만드는 칸에도 닿게 이 부품 스타일은 `dl-` 머리글자의 전역 스타일.
-- 종이색은 풀빛 도는 회색(#F2F3EE), + 기호는 로고·첫 화면 제목 끝 하나·마감 표시·서비스 목록 표시·옅은 모눈(`.plusgrid`)에만 — 장식으로 늘리지 말 것(2026-10-24 시안 1판에서 십자수처럼 보인다는 지적).
+- 종이색은 풀빛 도는 회색(#F2F3EE), + 기호는 로고·첫 화면 제목 끝 하나·마감 표시·목록 줄 오른쪽(`PlusList` — 2차 개편 계획 승인)·계산기 불러오는 중·옅은 모눈(`.plusgrid`)에만 — 제목·띠·틀 머리에 더하지 말 것(2026-10-24 시안 1판에서 십자수처럼 보인다는 지적, 같은 날 독립 검토에서 마무리 띠 제목·404·불복 띠·계산기 틀에 붙인 것을 뺐다).
 - 책 목록 `home.json` books는 최신순 — 홈은 앞에서 `homeBooks`(4)권만, 칼럼·책 페이지는 전부. 표지 사진은 `cover`(public/img/books/, PowerPoint에서 PNG로 내보낸 것 → webp 400px), 없으면 표지색(`color`)으로 그린 표지. 표지 PPTX를 이 환경에서 그림으로 바꾸면 글꼴이 없어 깨지니 쓰지 말 것.
 - 칼럼·책 카드 표지는 `src/components/Thumb.astro` — 블로그 글은 제목 낱말로 주제(`src/lib/thumbTopic.js`)를 골라 색·그림을 바꾸고, RSS에 네이버 사진(pstatic.net)이 있으면 사진을 쓴다(못 불러오면 그림).
-- 아이콘 PNG·`manifest.webmanifest`는 favicon.svg와 같은 그림(숲색 바탕 + 금색 십자) — `tests/icons.test.mjs`가 픽셀을 본다(예전 PNG에 깨진 그림 표시가 찍혀 바로가기 아이콘이 하얬다).
+- 로고는 글자 로고 A「하나 더+ │ 세무회계」(2026-10-24 운영자 선택) — `src/components/Logo.astro` 한 곳(머리글·메뉴·바닥글은 `dark`). "하나 더"는 명조 900을 그 세 글자만 잘라(`serif-logo-900`), +는 가는 금색(`Hanadeo Num` 400).
+  아이콘 PNG 5개·`og.png`는 같은 로고의 "더+"(숲색 바탕·크림색 더·금색 +) — `scripts/make-brand-images.mjs`로만 다시 만든다(손으로 고치지 말 것). `tests/icons.test.mjs`가 픽셀을 본다(예전 PNG에 깨진 그림 표시가 찍혀 바로가기 아이콘이 하얬다).
+- 안쪽 페이지 공통 부품(2026-10-24 2차 개편): 머리 `PageHead`(+ 모눈·`ph-tag` 꼬리표·핵심 기한 칩 `chips`·장식 사진 `photo` — 휴대폰에선 숨기고 받지도 않음), 목록 줄 `PlusList`(오른쪽 + 90° 회전), 책 표지 `BookCover`, 거르기 칩 `.fchip`(전역), 기한 계산으로 보내는 띠 `DeadlineBand`, 마무리 띠 `ClosingCta`("하나 더 물어보세요" — 404 말고 모든 쪽, 불복은 "기한이 있는 일입니다", 바로 아래 오시는 길이 있는 홈·오시는 길은 `compact`), 자릿수 바퀴 `Odometer`(소개 쪽 숫자). 새 쪽도 이 부품으로.
+  서비스 쪽 `services.json`의 `photo`(장식 사진 이름)·`yearly`(매년 기한 — deadlines.json yearly id)·`faq`(그 분야 질문 category)는 `scripts/validate-data.mjs`가 대조한다. 그린 표지 글자색은 `inkFor`(WCAG 대비가 큰 쪽).
+- 움직임(2026-10-24 2차 개편, `global.css` 맨 아래 한 곳): 페이지 넘김은 브라우저 기본 `@view-transition`(Base.astro 머리의 작은 `<style is:inline>`에만 — CSS 파일·`@media` 안에 두면 첫 화면으로 넘어갈 때 Chromium이 전환을 끊는다, 머리글·아래 막대 고정, 서비스 이름은 `view-transition-name: svc-<slug>` — 한 쪽에 같은 이름 둘 금지), 구역 등장은 `animation-timeline: view()`(`.reveal` 목록·구역 제목 — 지원 안 하면 처음부터 보임), 누름 0.98배. 끝없이 도는 장식·자동 재생·스크롤 붙잡기 금지, 움직임 줄이기면 전부 끔.
+- 사진은 `public/img/photos/`, 출처는 `docs/photo-sources.md` — 분위기 사진(mood-*)은 사람·장소·다른 저자 책 제목이 없는 것만 장식으로, 운영자 사진(own-*)은 우리 책만 선명하게 두고 다른 책은 흐리게.
 - 칼럼·책의 블로그 최신 글은 빌드 때 RSS를 읽고(`src/lib/blogFeed.js`), 못 읽으면 그 칸만 뺀다 — 빌드를 실패시키지 말 것.
 - 영상(`src/data/videos.json`)은 누를 때만 받는다(preload=none, 자동 재생 금지). 영상 속 "22권"은 통합검색 22가 검색하는 책 — 옆에 "저서 33권 중 22권" 설명을 빼지 말 것.

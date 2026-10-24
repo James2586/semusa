@@ -1,0 +1,25 @@
+# 사진 출처 (public/img/photos/)
+
+장식용 분위기 사진(mood-*)은 사람·장소가 없고 다른 저자의 책 제목이 읽히지 않는 것만 — Pexels License(무료·출처 표시 의무 없음, https://www.pexels.com/license/). 2026-10-24 내려받음.
+
+| 파일 | 내용 | 원본 |
+|---|---|---|
+| mood-pen-{1200,800}.webp | 흰 종이 위 만년필 | https://www.pexels.com/photo/7431849/ |
+| mood-pages-{1200,800}.webp | 쌓인 종이 가장자리 | https://www.pexels.com/photo/7233375/ |
+| mood-book-{1200,800}.webp | 펼친 책 | https://www.pexels.com/photo/415071/ |
+| mood-paper-{1200,800}.webp | 종이 질감 | https://www.pexels.com/photo/20899958/ |
+| mood-leaves-{1200,800}.webp | 책장 넘김 가까이 | https://www.pexels.com/photo/29391654/ |
+
+운영자 사진(own-*) — 운영자가 2026-10-24 보낸 서점·책장 사진. 대표 저서 「병·의원 세무 관리」(성광호·조성식, 삼일인포마인)만 선명하게 두고
+다른 저자의 책은 흐리게 처리했다(제목이 읽히지 않게 — 다른 책을 우리 책처럼 보이게 하지 않으려고). 원본은 저장소에 넣지 않는다.
+
+| 파일 | 내용 |
+|---|---|
+| own-store-{1600,800}.webp | 서점 C27-5·C27-6 서가 매대(같은 책 두 곳) |
+| own-face-{900,600}.webp | C27-6 세금일반 서가 매대 정면 |
+| own-shelf-{900,600}.webp | 책장 속 책등 |
+| own-angle-{900,600}.webp | 조명 아래 선반에 세운 책(비스듬히) |
+| own-e27-{900,600}.webp | 서점 E27-3 세금/경리 서가 속 책등 |
+| own-page-{900,600}.webp | 「병·의원 세무 관리」 83쪽(펼친 책, 손 잘라 냄) |
+
+책 표지 `public/img/books/clinic-tax.webp` — 운영자가 보낸 「병·의원 세무 관리」 표지 사진을 원근 보정해 400×571로(2026-10-24).

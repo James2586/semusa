@@ -4,15 +4,19 @@
 import data from "../data/deadlines.json";
 import { fetchHolidayRows } from "../lib/holidays.js";
 const holidays = await fetchHolidayRows();
+// only: 서비스 쪽에서 그 일과 관련된 것만(services.json yearly)
+interface Props { only?: string[] }
+const { only } = Astro.props;
+const items = only ? data.yearly.filter((i) => only.includes(i.id)) : data.yearly;
 ---
 <div data-up-wrap>
   <ul class="up-list" data-up>
-    {data.yearly.map((i) => (
+    {items.map((i) => (
       <li data-id={i.id}><span class="up-dd" data-dd></span><b>{i.name}</b><span class="up-when"><span data-date></span>{i.when}</span><span class="up-law">{i.law}</span></li>
     ))}
   </ul>
   <p class="up-note" data-up-note>기한이 토·일요일·공휴일이면 다음 날로 옮겼습니다.</p>
-  <script type="application/json" data-up-data set:html={JSON.stringify({ yearly: data.yearly, holidays }).replace(/</g, "\\u003c")} />
+  <script type="application/json" data-up-data set:html={JSON.stringify({ yearly: items, holidays }).replace(/</g, "\\u003c")} />
 </div>
 
 <style is:global>
