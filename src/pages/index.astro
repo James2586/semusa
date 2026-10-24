@@ -10,12 +10,14 @@ import LocationBlock from "../components/LocationBlock.astro";
 import VideoCard from "../components/VideoCard.astro";
 import DeadlineCalc from "../components/DeadlineCalc.astro";
 import UpcomingDeadlines from "../components/UpcomingDeadlines.astro";
-import { shelfSpines } from "../lib/shelf.js";
+import { shelfSpines, inkFor } from "../lib/shelf.js";
 import Pager from "../components/Pager.astro";
 
 const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]));
 const calcCount = calcData.calculators.length;
-const shelf = shelfSpines(home.books.map((b) => b.color), 9);
+// 홈은 최신 몇 권만(home.json homeBooks — books는 최신순), 칼럼·책 페이지는 전부
+const homeBooks = home.books.slice(0, home.homeBooks || 4);
+const shelf = shelfSpines(homeBooks.slice(0, 2).map((b) => b.color), 9);
 const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼럼");
 const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="#806020" stroke-width="1.6" stroke-linecap="round"/></svg>';
 ---
@@ -76,24 +78,24 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
 
   <!-- 4 칼럼·책 -->
   <section class="sec gut ruled" aria-labelledby="h-books">
-    <div class="wrap two">
-      <div>
-        <span class="tag">칼럼·책</span>
-        <h2 class="sec-h" id="h-books">책 {home.booksTotal}권을 직접 썼습니다</h2>
-        <p class="sec-sub">상속·증여, 법인, 부동산 세금을 다룬 책을 쓰고, 이코노미조선에 칼럼을 연재합니다.</p>
-        <div class="bks" id="home-bks" aria-label="책 목록">
-          {home.books.map((b) => b.cover
-            ? <a class="bk bk-img" href={site.booksUrl} target="_blank" rel="noopener"><img src={b.cover} width="400" height="571" alt={`『${b.title}』 표지`} loading="lazy" decoding="async" /></a>
-            : <a class="bk" style={`background:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><b>{b.title}</b><small>{site.rep}</small></a>)}
-          <a class="bk bk-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="shelf" aria-hidden="true">{shelf.map((b) => <i style={`--c:${b.c};--h:${Math.round(b.h * 100)}%;--w:${b.w}`}></i>)}</span><b>{home.booksTotal}권<br />전체 보기</b><small>교보문고 ↗</small></a>
-        </div>
-        <Pager target="home-bks" label="책 목록" />
+    <div class="wrap">
+      <span class="tag">칼럼·책</span>
+      <h2 class="sec-h" id="h-books">책 {home.booksTotal}권을 직접 썼습니다</h2>
+      <p class="sec-sub">상속·증여, 법인, 부동산 세금을 다룬 책을 쓰고, 이코노미조선에 칼럼을 연재합니다.</p>
+      <div class="bks" id="home-bks" aria-label="책 목록">
+        {homeBooks.map((b) => b.cover
+          ? <a class="bk bk-img" href={site.booksUrl} target="_blank" rel="noopener"><img src={b.cover} width="400" height="571" alt={`『${b.title}』 표지`} loading="lazy" decoding="async" /></a>
+          : <a class="bk" style={`background:${b.color};color:${inkFor(b.color)}`} href={site.booksUrl} target="_blank" rel="noopener"><b>{b.title}</b><small>{site.rep}</small></a>)}
+        <a class="bk bk-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="shelf" aria-hidden="true">{shelf.map((b) => <i style={`--c:${b.c};--h:${Math.round(b.h * 100)}%;--w:${b.w}`}></i>)}</span><b>{home.booksTotal}권<br />전체 보기</b><small>교보문고 ↗</small></a>
+      </div>
+      <Pager target="home-bks" label="책 목록" />
+      <div class="two books-2">
         <ul class="chan">
           {channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
           <li><a href="/columns"><span>칼럼·책 모두 보기</span><span aria-hidden="true">›</span></a></li>
         </ul>
+        <div class="vid"><VideoCard id="portfolio" /></div>
       </div>
-      <div class="vid"><VideoCard id="portfolio" /></div>
     </div>
   </section>
 
@@ -225,7 +227,8 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
   .shelf i { flex: var(--w) 1 0; min-width: 0; height: var(--h); background: var(--c); border-radius: 1px 1px 0 0; box-shadow: inset 1.5px 0 0 rgba(0, 0, 0, .18), inset 0 4px 0 -2.5px rgba(232, 196, 106, .6); }
   .bk-all b { margin-top: 6px; font-size: clamp(14.5px, 3.9vw, 17px); }
   .bk-all small { margin-top: auto; color: var(--gold-text); font-weight: 700; opacity: 1; }
-  .chan { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--line); max-width: 460px; }
+  .books-2 { margin-top: 28px; }
+  .chan { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .chan a { display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid var(--line); text-decoration: none; }
   .chan a span:last-child { color: var(--gold-text); }
   .vid { min-width: 0; }
@@ -276,8 +279,9 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
     .svc li + li a { padding-left: 20px; border-left: 1px solid var(--line); }
     .svc :global(svg) { grid-row: 1; grid-column: 1; }
     .two { grid-template-columns: 1fr 1fr; gap: 72px; }
-    .bks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; padding-bottom: 0; }
-    .bks > .bk { width: auto; padding: 12% 11%; }
+    .bks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; max-width: 820px; overflow: visible; padding-bottom: 0; }
+    .bks > .bk { width: auto; padding: 18px 16px; }
+    .books-2 { align-items: start; }
     .bks > .bk-img { padding: 0; }
     .cal { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .vid { justify-self: center; align-self: center; }

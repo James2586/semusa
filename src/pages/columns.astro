@@ -65,7 +65,7 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
           <li data-kind={c.kind}>
             <a class="card-a" href={c.href} {...(c.external ? { target: "_blank", rel: "noopener" } : {})}>
               <span class:list={["thumb", `thumb-${c.thumb}`]} aria-hidden="true">
-                {c.thumb === "art" && <Thumb topic={c.topic!.id} label={c.topic!.label} image={c.image} books={home.books.map((b) => b.color)} />}
+                {c.thumb === "art" && <Thumb topic={c.topic!.id} label={c.topic!.label} image={c.image} books={home.books.slice(0, 2).map((b) => b.color)} />}
                 {c.thumb === "book" && (c.cover ? <img class="tbi" src={c.cover} alt="" width="400" height="571" loading="lazy" decoding="async" /> : <span class="tb" style={`--c:${c.color}`}></span>)}
                 {c.thumb === "video" && <img src={c.poster} alt="" loading="lazy" width="540" height="960" />}
               </span>

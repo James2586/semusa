@@ -1,6 +1,11 @@
 // 책장 그림(2026-10-24): 가는 책등이 높이·색을 달리해 꽂힌 모습. 홈 "33권 전체 보기" 표지와 칼럼·책 "책 33권" 표지가 같이 쓴다.
 // 대표 저서 두 권(src/data/home.json 색)이 섞여 들어간다. 매번 같은 그림이 나오게 정해진 순서로 만든다(빌드 때만).
 const CLOTH = ["#1E3A2A", "#2C5040", "#6B4E2E", "#3A4A5C", "#5B2333", "#806020", "#2F2A24", "#4E5B4F", "#7A2E2A", "#33466B"];
+// 그린 표지의 글자색: 밝은 표지색(예: 부동산 절세전략 연두)이면 먹색, 아니면 크림색
+export function inkFor(hex) {
+  const n = parseInt(String(hex).slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? "#151915" : "#FFF6E4";
+}
 export function shelfSpines(featured = [], n = 14) {
   let seed = 11;
   const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;

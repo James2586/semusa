@@ -110,6 +110,7 @@ export function checkHome(text, svcSlugs, root = ROOT) {
   if (!Number.isInteger(data.booksTotal) || data.booksTotal < 1) errors.push("home.json: booksTotal은 책 권수(숫자)여야 합니다.");
   (data.books || []).forEach((b, i) => {
     if (!b.title || !/^#[0-9A-Fa-f]{6}$/.test(b.color || "")) errors.push(`home.json: ${i + 1}번째 책에 title과 color("#RRGGBB")가 있어야 합니다.`);
+    if (b.date !== undefined && !/^\d{4}-\d{2}$/.test(b.date)) errors.push(`home.json: ${i + 1}번째 책 date는 "YYYY-MM"이어야 합니다.`);
     // 표지 사진(선택): public/ 아래 실제 파일이어야 한다
     if (b.cover !== undefined && !(/^\/img\/books\/[a-z0-9-]+\.(webp|png|jpg)$/.test(b.cover) && existsSync(join(root, "public", b.cover)))) errors.push(`home.json: ${i + 1}번째 책 cover "${b.cover}" 파일이 public/img/books/에 없습니다.`);
   });
