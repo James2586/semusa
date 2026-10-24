@@ -98,3 +98,22 @@ test("5단계: '다음 단계에서 채웁니다' 자리가 남지 않고, 서�
     for (const d of s.deadlines) assert.ok(h.includes(d.law), `${s.slug}: ${d.law}`);
   }
 });
+
+test("마무리 한 줄: 홈·404 말고 모든 페이지 끝에 하나, 불복 서비스는 기한 문구", { skip: !has }, () => {
+  for (const f of htmlFiles(DIST)) {
+    const h = readFileSync(f, "utf8");
+    const n = (h.match(/class="closing /g) || []).length;
+    const expect = /\/(index|404)\.html$/.test(f) ? 0 : 1;
+    assert.equal(n, expect, f);
+  }
+  assert.match(readFileSync(join(DIST, "services", "appeal.html"), "utf8"), /기한이 있는 일입니다\./);
+});
+
+test("칼럼·책: 대표 글 + 카드(종류 칩·새 창 표시) + 거르기 단추, 영상 카드는 소개 페이지 영상으로", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "columns.html"), "utf8");
+  assert.match(h, /class="feat/);
+  assert.ok((h.match(/class="card-a"/g) || []).length >= 6);
+  assert.match(h, /aria-pressed="true"[^>]*data-kind="전체"/);
+  assert.match(h, /href="\/about#video-portfolio"/);
+  assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /id="video-portfolio"/);
+});

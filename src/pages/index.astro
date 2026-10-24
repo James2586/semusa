@@ -8,11 +8,12 @@ import KakaoIcon from "../components/KakaoIcon.astro";
 import FaqList from "../components/FaqList.astro";
 import LocationBlock from "../components/LocationBlock.astro";
 import VideoCard from "../components/VideoCard.astro";
+import Pager from "../components/Pager.astro";
 
 const svcName = Object.fromEntries(svcData.services.map((s) => [s.slug, s.name]));
 const calcCount = calcData.calculators.length;
 ---
-<Base>
+<Base cta={false}>
   <!-- 1 첫 화면 -->
   <section class="sec-dark gut hero" aria-labelledby="h-hero">
     <div class="wrap hero-in">
@@ -66,12 +67,13 @@ const calcCount = calcData.calculators.length;
         <div class="vid"><VideoCard id="portfolio" dark /></div>
       </div>
       <div class="books-r">
-        <ul class="covers" aria-label="책 목록">
+        <ul class="covers" id="home-covers" aria-label="책 목록">
           {home.books.map((b) => (
             <li><a class="cv" style={`--c:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-t">{b.title}</span><span class="cv-a">{site.rep}</span></a></li>
           ))}
           <li><a class="cv cv-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-t">{home.booksTotal}권<br />전체 보기</span><span class="cv-a">교보문고 ↗</span></a></li>
         </ul>
+        <Pager target="home-covers" label="책 목록" dark />
         <ul class="chan">
           {site.channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
         </ul>

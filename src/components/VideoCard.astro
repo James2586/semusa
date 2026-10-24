@@ -4,7 +4,7 @@ interface Props { id: string; dark?: boolean }
 const { id, dark = false } = Astro.props;
 const v = data.videos.find((x) => x.id === id)!;
 ---
-<figure class:list={["vcard", dark && "vdark"]}>
+<figure class:list={["vcard", dark && "vdark"]} id={`video-${v.id}`}>
   <video controls preload="none" playsinline poster={v.poster} width="540" height="960" aria-label={v.title}>
     <source src={v.src} type="video/mp4" />
   </video>

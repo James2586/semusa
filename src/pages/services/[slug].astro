@@ -5,7 +5,6 @@ import svcData from "../../data/services.json";
 import calcData from "../../data/calculators.json";
 import home from "../../data/home.json";
 import site from "../../data/site.json";
-import KakaoIcon from "../../components/KakaoIcon.astro";
 
 export function getStaticPaths() {
   return svcData.services.map((s) => ({ params: { slug: s.slug }, props: { svc: s } }));
@@ -14,7 +13,7 @@ const { svc } = Astro.props as { svc: any };
 const calcs = svc.calculators.map((slug: string) => calcData.calculators.find((c) => c.slug === slug)!);
 const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
 ---
-<Base title={svc.name} description={svc.short}>
+<Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"}>
   <PageHead dark title={svc.name} lead={svc.short} crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
 
   {svc.urgent && (
@@ -100,13 +99,6 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
     </div>
   </section>
 
-  <section class="sec-dark gut cta">
-    <div class="wrap narrow">
-      <h2 class="sec-h">{svc.urgent ? "기한이 있는 일입니다" : "상황을 먼저 알려 주세요"}</h2>
-      <p>카카오톡으로 상황을 적어 보내 주시면 확인 후 연락드립니다.</p>
-      <a class="btn btn-kakao btn-block" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
-    </div>
-  </section>
 </Base>
 
 <style>
@@ -145,7 +137,5 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
   .book small { display: block; font-size: 14px; color: var(--gold-text); font-weight: 600; }
   .book b { display: block; font-size: 17px; }
   .book > span:last-child > span { font-size: 15px; color: var(--muted); }
-  .cta { padding-block: 44px; }
-  .cta p { color: var(--on-moss2); margin: 6px 0 18px; }
   @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; gap: 48px; } .narrow.two > * { max-width: none; } }
 </style>

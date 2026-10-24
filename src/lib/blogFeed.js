@@ -9,8 +9,10 @@ export function parseRss(xml, limit = 6) {
   return items.slice(0, limit).map((b) => {
     const link = unescape(pick(b, "link"));
     const d = new Date(pick(b, "pubDate"));
+    const desc = unescape(unescape(pick(b, "description"))).replace(/<\/?(p|br|div|li|h\d)[^>]*>/gi, " ").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
     return {
       title: unescape(pick(b, "title")).replace(/<[^>]+>/g, ""),
+      excerpt: desc.length > 110 ? desc.slice(0, 110).trim() + "…" : desc,
       link,
       date: Number.isNaN(d.getTime()) ? "" : new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10),
     };

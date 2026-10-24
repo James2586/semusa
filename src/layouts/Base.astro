@@ -4,12 +4,14 @@ import site from "../data/site.json";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BottomBar from "../components/BottomBar.astro";
+import ClosingCta from "../components/ClosingCta.astro";
 
 interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
   hideBar?: boolean;
+  cta?: "default" | "urgent" | false;
   jsonLd?: Record<string, unknown>[];
 }
 const {
@@ -17,6 +19,7 @@ const {
   description = `상속·증여·부동산·법인 세금. 책을 쓴 ${site.repTitle} ${site.rep}이 직접 봅니다. 모의 세금 계산기 13종.`,
   noindex = false,
   hideBar = false,
+  cta = "default",
   jsonLd = [],
 } = Astro.props;
 const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | 상속·증여·부동산 세금 ${site.repTitle} ${site.rep}`;
@@ -69,6 +72,7 @@ const org = {
     <Header />
     <main id="main" tabindex="-1">
       <slot />
+      {cta && <ClosingCta urgent={cta === "urgent"} />}
     </main>
     <Footer />
     {!hideBar && <BottomBar />}
