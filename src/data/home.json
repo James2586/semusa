@@ -25,7 +25,7 @@
     { "title": "알면 돈 버는 비영리법인 세금의 정석", "color": "#0070C0", "cover": "/img/books/nonprofit-corp.webp" },
     { "title": "알면 돈 버는 사내근로복지기금 세금의 정석", "color": "#080DC8", "cover": "/img/books/welfare-fund.webp" },
     { "title": "알면 돈 버는 약국 세금의 정석", "color": "#7030A0", "cover": "/img/books/pharmacy.webp", "coauthors": ["조성식"] },
-    { "title": "알면 돈 버는 임대사업자 세금의 정석", "color": "#FF0000", "date": "2025-05" },
+    { "title": "알면 돈 버는 임대사업자 세금의 정석", "color": "#FF0000", "date": "2025-05", "cover": "/img/books/rental-business.webp" },
     { "title": "알면 돈 버는 보험설계사 세금의 정석", "color": "#7030A0", "cover": "/img/books/insurance-planner.webp" },
     { "title": "알면 돈 버는 강남부자가 절세하는 방법", "color": "#080DC8", "cover": "/img/books/gangnam-rich.webp" },
     { "title": "알면 돈이 되는 주식명의신탁 정리실무", "color": "#FFFF00", "cover": "/img/books/stock-trust.webp" },
