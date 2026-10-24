@@ -334,3 +334,13 @@ test("세율 쪽: 법제처 링크는 그 판으로 · 판 이름표는 원문 �
   assert.match(h, /같은 조 ②은\(는\) 이 쪽에 옮기지 않았습니다/); // 상증법 §22②
   assert.doesNotMatch(h, /부칙\(법률 제\d+호, \d{8}\)/); // 날짜는 읽는 꼴로
 });
+
+test("첫 화면 가벼움(6차 A): 그려 둔 요소 1,000개 이하 · 자릿수 바퀴 칸은 쉬는 상태에 그리지 않음", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "index.html"), "utf8").replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, "");
+  const n = (h.match(/<[a-zA-Z][^>]*>/g) || []).length;
+  assert.ok(n <= 1000, `첫 화면 요소 ${n}개`);
+  // 「매년 돌아오는 날」은 쉬는 상태에서 숫자 글자만 — 바퀴(20칸)는 화면에 들어올 때 잠깐만 만든다
+  const up = readFileSync(new URL("../src/components/UpcomingDeadlines.astro", import.meta.url), "utf8");
+  assert.match(up, /dd\.textContent = label/);
+  assert.match(up, /function spin\(\)/);
+});
