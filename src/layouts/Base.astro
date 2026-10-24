@@ -6,6 +6,7 @@ import Footer from "../components/Footer.astro";
 import BottomBar from "../components/BottomBar.astro";
 import ClosingCta from "../components/ClosingCta.astro";
 import BackToTop from "../components/BackToTop.astro";
+import MonthBand from "../components/MonthBand.astro";
 import svcData from "../data/services.json";
 import calcData from "../data/calculators.json";
 import home from "../data/home.json";
@@ -88,6 +89,7 @@ const org = {
   <body class:list={[hideBar && "no-bar"]}>
     <a class="skip" href="#main">본문으로 건너뛰기</a>
     <Header />
+    <MonthBand />
     <main id="main" tabindex="-1">
       <slot />
       {cta && <ClosingCta urgent={cta === "urgent"} />}

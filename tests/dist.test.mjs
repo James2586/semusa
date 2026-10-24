@@ -298,3 +298,15 @@ test("구조화 데이터: 모든 JSON-LD가 읽히고, 위치 표시가 있는 
   assert.match(rss, /<pubDate>[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} 00:00:00 GMT<\/pubDate>/);
   assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /rel="alternate" type="application\/rss\+xml"/);
 });
+
+test("이번 달 마감 띠: 모든 쪽에(머리글 바로 아래) · 기한은 deadlines.json yearly 이름 그대로 · 그리기 전 채우는 작은 스크립트", { skip: !has }, () => {
+  const names = new Set(JSON.parse(readFileSync("src/data/deadlines.json", "utf8")).yearly.map((y) => y.name));
+  for (const f of htmlFiles(DIST)) {
+    const h = readFileSync(f, "utf8");
+    const iH = h.indexOf("</header>"), iB = h.indexOf("data-mband hidden"), iM = h.indexOf("<main");
+    assert.ok(iH > 0 && iH < iB && iB < iM, `${f}: 머리글 뒤·본문 앞`);
+    const occ = JSON.parse(h.match(/data-mband-data>([^<]*)</)[1]);
+    assert.ok(occ.length >= 12, f); // 매달 원천세만으로도 1년 12번
+    for (const [iso, wd, name] of occ) { assert.match(iso, /^\d{4}-\d{2}-\d{2}$/); assert.match(wd, /^[월화수목금]$/, `${iso} ${wd}`); assert.ok(names.has(name), name); }
+  }
+});
