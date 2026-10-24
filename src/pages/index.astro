@@ -71,7 +71,7 @@ const calcCount = calcData.calculators.length;
           {home.books.map((b) => (
             <li><a class="cv" style={`--c:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-t">{b.title}</span><span class="cv-a">{site.rep}</span></a></li>
           ))}
-          <li><a class="cv cv-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-t">{home.booksTotal}권<br />전체 보기</span><span class="cv-a">교보문고 ↗</span></a></li>
+          <li><a class="cv cv-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-stack" aria-hidden="true">{[...home.books.map((b) => b.color), "#806020", "#1E3A2A", "#5F5A4C"].map((c, i) => <i style={`--c:${c};--h:${[78, 92, 70, 86, 64][i % 5]}%`}></i>)}</span><span class="cv-t">{home.booksTotal}권<br />전체 보기</span><span class="cv-a">교보문고 ↗</span></a></li>
         </ul>
         <Pager target="home-covers" label="책 목록" dark />
         <ul class="chan">
@@ -186,8 +186,12 @@ const calcCount = calcData.calculators.length;
   .cv:hover, .cv:focus-visible { transform: translateY(-6px); }
   .cv-t { font-family: var(--f-body); font-weight: 700; font-size: 15.5px; line-height: 1.4; }
   .cv-a { font-size: 14px; opacity: .9; }
-  .cv-all { background: transparent; border: 1.5px dashed rgba(232, 196, 106, .6); color: var(--on-moss); box-shadow: none; justify-content: center; gap: 10px; text-align: center; align-items: center; }
-  .cv-all .cv-t { font-size: 17px; }
+  /* 전체 보기 표지: 크림 바탕 + 책등이 꽂힌 책장 그림(예전엔 점선 테두리만 있어 빈 상자처럼 보였다) */
+  .cv-all { background: var(--on-moss); color: var(--ink); justify-content: flex-start; gap: 8px; }
+  .cv-stack { display: flex; align-items: flex-end; gap: 4px; height: 44%; padding-bottom: 4px; border-bottom: 2px solid var(--gold); }
+  .cv-stack i { flex: 1; height: var(--h); background: var(--c); border-radius: 2px 2px 0 0; box-shadow: inset 2px 0 0 rgba(0, 0, 0, .18); }
+  .cv-all .cv-t { margin-top: 6px; font-size: 17px; }
+  .cv-all .cv-a { margin-top: auto; color: var(--gold-text); font-weight: 700; opacity: 1; }
   .chan { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid rgba(243, 240, 231, .16); }
   .chan a { display: flex; justify-content: space-between; align-items: center; min-height: 58px; border-bottom: 1px solid rgba(243, 240, 231, .16); text-decoration: none; font-size: 17px; }
   .chan a span:last-child { color: var(--gold-hi); }
