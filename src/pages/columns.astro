@@ -1,18 +1,65 @@
 ---
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
-import Pending from "../components/Pending.astro";
+import VideoCard from "../components/VideoCard.astro";
 import site from "../data/site.json";
+import home from "../data/home.json";
+import { fetchBlogPosts } from "../lib/blogFeed.js";
+
+// 네이버 블로그 최신 글: 빌드할 때 한 번 읽는다. 못 읽으면 이 칸만 빼고 페이지는 그대로 만든다.
+const posts = await fetchBlogPosts("https://rss.blog.naver.com/semusatax.xml", 6);
 ---
-<Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책과 이코노미조선 칼럼, 블로그.`}>
-  <PageHead title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead="상속·증여, 법인, 부동산 세금을 다룬 책을 직접 썼고, 이코노미조선에 칼럼을 연재합니다." />
-  <section class="gut" style="padding-bottom:64px">
-    <div class="wrap narrow" style="display:grid;gap:24px">
-      <div class="rows">
-        <a class="row-link" href={site.booksUrl} target="_blank" rel="noopener"><span>책 전체 보기<small>교보문고</small></span><span class="arr">↗</span></a>
-        {site.channels.map((c) => <a class="row-link" href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span class="arr">↗</span></a>)}
+<Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그.`}>
+  <PageHead title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead={`상속·증여, 법인, 부동산 세금을 다룬 책 ${home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.`} />
+
+  <section class="gut" style="padding-bottom:24px" aria-labelledby="h-books">
+    <div class="wrap">
+      <h2 class="sec-h" id="h-books">책 {home.booksTotal}권</h2>
+      <ul class="covers">
+        {home.books.map((b) => (
+          <li><a class="cv" style={`--c:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><span class="t">{b.title}</span><span class="a">{site.rep}</span></a></li>
+        ))}
+        <li><a class="cv all" href={site.booksUrl} target="_blank" rel="noopener"><span class="t">{home.booksTotal}권<br />전체 보기</span><span class="a">교보문고 ↗</span></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec gut" aria-labelledby="h-col">
+    <div class="wrap two">
+      <div>
+        <h2 class="sec-h" id="h-col">칼럼과 글</h2>
+        <ul class="chan">
+          {site.channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
+        </ul>
+        {posts.length > 0 && (
+          <>
+            <h3 class="sub-h">블로그 최신 글</h3>
+            <ul class="posts">
+              {posts.map((p) => <li><a href={p.link} target="_blank" rel="noopener"><span>{p.title}</span>{p.date && <time datetime={p.date}>{p.date.replaceAll("-", ".")}</time>}</a></li>)}
+            </ul>
+          </>
+        )}
       </div>
-      <Pending label="책 표지 목록과 블로그 최신 글은 5단계에서 채웁니다." />
+      <div><VideoCard id="portfolio" /></div>
     </div>
   </section>
 </Base>
+<style>
+  .covers { list-style: none; margin: 14px 0 0; padding: 6px 2px 14px; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .covers li { flex: none; scroll-snap-align: start; }
+  .cv { width: 140px; aspect-ratio: 3 / 4.3; border-radius: 2px 4px 4px 2px; padding: 14px 12px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; background: var(--c); color: #FFF7E6; box-shadow: 0 10px 18px -12px rgba(0, 0, 0, .6), inset 4px 0 0 rgba(0, 0, 0, .18); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
+  .cv:hover, .cv:focus-visible { transform: translateY(-6px); }
+  .t { font-weight: 700; font-size: 15.5px; line-height: 1.4; }
+  .a { font-size: 14px; opacity: .9; }
+  .all { background: var(--surface); color: var(--ink); border: 1.5px dashed var(--gold); box-shadow: none; justify-content: center; align-items: center; text-align: center; gap: 10px; }
+  .all .a { color: var(--gold-text); opacity: 1; }
+  .two { display: grid; gap: 40px; }
+  .chan { list-style: none; margin: 14px 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .chan a { display: flex; justify-content: space-between; align-items: center; min-height: 58px; border-bottom: 1px solid var(--line); text-decoration: none; font-size: 17px; }
+  .chan a span:last-child { color: var(--gold-text); }
+  .sub-h { font-size: 18px; margin: 32px 0 8px; }
+  .posts { list-style: none; margin: 0; padding: 0; }
+  .posts a { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+  .posts time { flex: none; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  @media (min-width: 900px) { .two { grid-template-columns: 1.4fr .6fr; gap: 56px; align-items: start; } }
+</style>

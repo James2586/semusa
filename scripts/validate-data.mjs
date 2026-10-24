@@ -64,6 +64,9 @@ export function checkServices(text, calcSlugs) {
     }
     if (s.slug && seen.has(s.slug)) errors.push(`${at}: slug "${s.slug}"가 두 번 나옵니다.`);
     seen.add(s.slug);
+    if (!(s.deadlines || []).length) errors.push(`${at}: deadlines(기한)가 비었습니다.`);
+    for (const d of s.deadlines || []) if (!d.text || !d.law) errors.push(`${at}: 기한 "${d.title || "?"}"에 text와 law(근거 조문)가 둘 다 있어야 합니다.`);
+    for (const k of ["forWho", "does", "prepare", "steps"]) if (!(s[k] || []).length) errors.push(`${at}: ${k}가 비었습니다.`);
     for (const c of s.calculators || []) {
       if (!calcSlugs.has(c)) errors.push(`${at}: 계산기 "${c}"는 calculators.json에 없습니다.`);
     }

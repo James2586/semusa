@@ -88,3 +88,13 @@ test("영상: 누를 때만 받고(preload=none), 33권·22권 설명과 글로 
     assert.match(h, /영상 내용 글로 보기/, p);
   }
 });
+
+test("5단계: '다음 단계에서 채웁니다' 자리가 남지 않고, 서비스 5페이지마다 기한과 근거 조문", { skip: !has }, () => {
+  for (const f of htmlFiles(DIST)) assert.ok(!readFileSync(f, "utf8").includes("다음 단계에서 채웁니다"), f);
+  const svcs = JSON.parse(readFileSync(new URL("../src/data/services.json", import.meta.url), "utf8")).services;
+  for (const s of svcs) {
+    const h = readFileSync(join(DIST, "services", `${s.slug}.html`), "utf8");
+    assert.ok(s.deadlines.length > 0, s.slug);
+    for (const d of s.deadlines) assert.ok(h.includes(d.law), `${s.slug}: ${d.law}`);
+  }
+});
