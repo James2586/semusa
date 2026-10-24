@@ -23,7 +23,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
 const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : undefined;
 ---
 <Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"}>
-  <PageHead tag="서비스" title={svc.name} lead={svc.short} chips={svc.keyDeadlines} photo={photo}
+  <PageHead tag="서비스" vt={`svc-${svc.slug}`} title={svc.name} lead={svc.short} chips={svc.keyDeadlines} photo={photo}
     crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
 
   {svc.urgent && (
@@ -47,7 +47,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
         </div>
         <div class="dl-rules">
           <h3 class="sub-h">기한 규칙과 근거</h3>
-          <ol class="dls">
+          <ol class="dls reveal">
             {svc.deadlines.map((d: any) => (
               <li>
                 <b>{d.title}</b>
@@ -66,7 +66,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
     <div class="wrap narrow">
       <span class="tag">이런 분께</span>
       <h2 class="sec-h" id="h-who">이런 상황이라면</h2>
-      <ul class="checks">{svc.forWho.map((t: string) => <li>{t}</li>)}</ul>
+      <ul class="checks reveal">{svc.forWho.map((t: string) => <li>{t}</li>)}</ul>
     </div>
   </section>
 
@@ -81,7 +81,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
       <div>
         <span class="tag">진행 순서</span>
         <h2 class="sec-h" id="h-steps">이렇게 진행합니다</h2>
-        <ol class="vsteps" aria-labelledby="h-steps">{svc.steps.map((s: any) => <li><b>{s.title}</b><span>{s.text}</span></li>)}</ol>
+        <ol class="vsteps reveal" aria-labelledby="h-steps">{svc.steps.map((s: any) => <li><b>{s.title}</b><span>{s.text}</span></li>)}</ol>
       </div>
     </div>
   </section>
@@ -102,7 +102,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
       <div>
         <span class="tag">상담 전에</span>
         <h2 class="sec-h" id="h-prep">가져오시면 좋은 것</h2>
-        <ul class="checks checks-sm">{svc.prepare.map((t: string) => <li>{t}</li>)}</ul>
+        <ul class="checks checks-sm reveal">{svc.prepare.map((t: string) => <li>{t}</li>)}</ul>
         <p class="note">상담을 빠르게 하려는 목록이며, 법에서 정한 신고 첨부서류 목록은 아닙니다. 없는 것이 있어도 괜찮습니다.</p>
       </div>
       {book && (

@@ -2,8 +2,8 @@
 // 안쪽 페이지 머리(2026-10-24 2차 개편): 옅은 + 모눈 바탕, 위치 표시, 금색 짧은 선 꼬리표, 명조 제목, 한 줄 설명.
 // chips: 그 일의 핵심 기한(서비스 쪽 — services.json keyDeadlines), photo: 컴퓨터 화면 오른쪽 장식 사진(public/img/photos — 휴대폰에선 숨김).
 interface Photo { name: string; w: number[]; ratio?: string; pos?: string }
-interface Props { title: string; lead?: string; crumbs?: { name: string; href?: string }[]; tag?: string; chips?: [string, string][]; photo?: Photo }
-const { title, lead, crumbs = [], tag, chips, photo } = Astro.props;
+interface Props { vt?: string; title: string; lead?: string; crumbs?: { name: string; href?: string }[]; tag?: string; chips?: [string, string][]; photo?: Photo }
+const { title, lead, crumbs = [], tag, chips, photo, vt } = Astro.props;
 const src = photo ? `/img/photos/${photo.name}-${photo.w[photo.w.length - 1]}.webp` : "";
 const srcset = photo ? photo.w.map((w) => `/img/photos/${photo.name}-${w}.webp ${w}w`).join(", ") : "";
 ---
@@ -15,7 +15,7 @@ const srcset = photo ? photo.w.map((w) => `/img/photos/${photo.name}-${w}.webp $
         {crumbs.map((c) => <li>{c.href ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>)}
       </ol></nav>
       {tag && <p class="ph-tag">{tag}</p>}
-      <h1 class="page-h">{title}</h1>
+      <h1 class="page-h" style={vt ? `view-transition-name:${vt}` : undefined}>{title}</h1>
       {lead && <p class="page-lead">{lead}</p>}
       {chips && chips.length > 0 && (
         <ul class="ph-chips" aria-label="핵심 기한">

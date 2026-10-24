@@ -61,7 +61,7 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
         </div>
       </div>
       <p class="sr-only" role="status" id="flt-status"></p>
-      <ul class="cards">
+      <ul class="cards reveal">
         {cards.map((c) => (
           <li data-kind={c.kind}>
             <a class="card-a" href={c.href} {...(c.external ? { target: "_blank", rel: "noopener" } : {})}>

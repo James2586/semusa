@@ -47,9 +47,9 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
     <div class="wrap">
       <span class="tag">서비스</span>
       <h2 class="sec-h" id="h-svc">일마다 먼저 볼 기한이 다릅니다</h2>
-      <ul class="svc">
+      <ul class="svc reveal">
         {svcData.services.map((s) => (
-          <li><a href={`/services/${s.slug}`}><Fragment set:html={PLUS} /><b>{s.name}</b><span class="k">{(s.keyDeadlines || []).map(([l, v], i) => <>{i > 0 && " · "}<span class="kp">{l} <em>{v}</em></span></>)}</span></a></li>
+          <li><a href={`/services/${s.slug}`}><Fragment set:html={PLUS} /><b style={`view-transition-name:svc-${s.slug}`}>{s.name}</b><span class="k">{(s.keyDeadlines || []).map(([l, v], i) => <>{i > 0 && " · "}<span class="kp">{l} <em>{v}</em></span></>)}</span></a></li>
         ))}
       </ul>
     </div>
@@ -68,7 +68,7 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
         <span class="tag">세금 계산기 {calcCount}종</span>
         <h2 class="sec-h">직접 만든 계산기로 먼저</h2>
         <p class="sec-sub">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.</p>
-        <ul class="cal">
+        <ul class="cal reveal">
           {calcData.calculators.map((c) => <li><a href={`/calculators/${c.slug}`}><small>{groupName[c.group]}</small><b>{c.name}</b></a></li>)}
           <li class="all"><a href="/calculators"><small>전체</small><b>{calcCount}종 모두 보기</b></a></li>
         </ul>

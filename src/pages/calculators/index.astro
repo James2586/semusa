@@ -22,7 +22,7 @@ const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]))
         </div>
       </div>
       <p class="find-msg" role="status" id="calc-msg">{n}개 모두 보는 중</p>
-      <ul class="cards">
+      <ul class="cards reveal">
         {calcData.calculators.map((c) => (
           <li data-g={c.group} data-q={`${c.name} ${c.short} ${groupName[c.group]}`}>
             <a href={`/calculators/${c.slug}`}><small>{groupName[c.group]}</small><b>{c.name}</b><span>{c.short}</span><span class="go">계산하기 ›</span></a>

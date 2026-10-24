@@ -1,17 +1,17 @@
 ---
 // 목록 줄(2026-10-24 2차 개편 공통 부품): 굵은 이름 + 설명 + 오른쪽 작은 +(올리면 90° 회전). 서비스·계산기·관련 글이 같은 모양.
 // meta: 이름 아래 [이름, 값] 짝(서비스 핵심 기한 — 짝 하나는 줄바꿈되지 않음), side: 컴퓨터에서 오른쪽 단 글(이런 분께 등)
-interface Item { href: string; title: string; kicker?: string; desc?: string; meta?: [string, string][]; side?: string; ext?: boolean }
+interface Item { href: string; title: string; vt?: string; kicker?: string; desc?: string; meta?: [string, string][]; side?: string; ext?: boolean }
 interface Props { items: Item[]; label?: string }
 const { items, label } = Astro.props;
 ---
-<ul class:list={["plist", items.some((i) => i.side) && "plist-2"]} aria-label={label}>
+<ul class:list={["plist reveal", items.some((i) => i.side) && "plist-2"]} aria-label={label}>
   {items.map((i) => (
     <li>
       <a href={i.href} target={i.ext ? "_blank" : undefined} rel={i.ext ? "noopener" : undefined}>
         <span class="pl-main">
           {i.kicker && <small>{i.kicker}</small>}
-          <b>{i.title}{i.ext && <span class="sr-only">(새 창)</span>}</b>
+          <b style={i.vt ? `view-transition-name:${i.vt}` : undefined}>{i.title}{i.ext && <span class="sr-only">(새 창)</span>}</b>
           {i.meta && <span class="pl-meta">{i.meta.map(([l, v], n) => <>{n > 0 && " · "}<span class="kp">{l} <em>{v}</em></span></>)}</span>}
           {i.desc && <span class="pl-desc">{i.desc}</span>}
         </span>
