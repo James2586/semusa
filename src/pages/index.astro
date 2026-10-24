@@ -24,7 +24,7 @@ const calcCount = calcData.calculators.length;
         </div>
         <h1 class="hero-h" id="h-hero">
           상속·증여·부동산 세금,<br />
-          <em>책을 쓴 {site.repTitle}<svg class="sig" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C40 2, 90 12, 140 5 S190 6, 198 4" /></svg></em>가<br />
+          책을 쓴<span class="ipic ipic-books" aria-hidden="true">{home.books.map((b) => <i style={`--c:${b.color}`}></i>)}</span><em>{site.repTitle}<svg class="sig" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C40 2, 90 12, 140 5 S190 6, 198 4" /></svg></em>가<br />
           직접 봅니다.
         </h1>
         <p class="hero-lead">계산기로 먼저 확인하고, 필요할 때 상담하세요.</p>

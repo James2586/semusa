@@ -5,6 +5,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BottomBar from "../components/BottomBar.astro";
 import ClosingCta from "../components/ClosingCta.astro";
+import BackToTop from "../components/BackToTop.astro";
 
 interface Props {
   title?: string;
@@ -76,6 +77,7 @@ const org = {
     </main>
     <Footer />
     {!hideBar && <BottomBar />}
+    <BackToTop />
   </body>
 </html>
 <style is:global>

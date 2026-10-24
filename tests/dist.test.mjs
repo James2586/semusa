@@ -106,7 +106,7 @@ test("마무리 한 줄: 홈·404 말고 모든 페이지 끝에 하나, 불복 
     const expect = /\/(index|404)\.html$/.test(f) ? 0 : 1;
     assert.equal(n, expect, f);
   }
-  assert.match(readFileSync(join(DIST, "services", "appeal.html"), "utf8"), /기한이 있는 일입니다\./);
+  assert.match(readFileSync(join(DIST, "services", "appeal.html"), "utf8"), /기한이<img[^>]*>있는 일입니다\./);
 });
 
 test("칼럼·책: 대표 글 + 카드(종류 칩·새 창 표시) + 거르기 단추, 영상 카드는 소개 페이지 영상으로", { skip: !has }, () => {
