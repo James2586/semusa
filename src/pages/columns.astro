@@ -1,0 +1,18 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import Pending from "../components/Pending.astro";
+import site from "../data/site.json";
+---
+<Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책과 이코노미조선 칼럼, 블로그.`}>
+  <PageHead title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead="상속·증여, 법인, 부동산 세금을 다룬 책을 직접 썼고, 이코노미조선에 칼럼을 연재합니다." />
+  <section class="gut" style="padding-bottom:64px">
+    <div class="wrap narrow" style="display:grid;gap:24px">
+      <div class="rows">
+        <a class="row-link" href={site.booksUrl} target="_blank" rel="noopener"><span>책 전체 보기<small>교보문고</small></span><span class="arr">↗</span></a>
+        {site.channels.map((c) => <a class="row-link" href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span class="arr">↗</span></a>)}
+      </div>
+      <Pending label="책 표지 목록과 블로그 최신 글은 5단계에서 채웁니다." />
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,41 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import site from "../data/site.json";
+
+const mods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
+const faqs = (await Promise.all(mods.map(async (m) => ({ ...m.frontmatter, Content: m.Content, text: String(await m.compiledContent()) }))))
+  .sort((a, b) => Number(a.order) - Number(b.order));
+const strip = (h: string) => h.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: strip(f.text) } })),
+};
+---
+<Base title="자주 묻는 질문" description="상속세 신고 기한, 증여재산공제, 법인 기장 등 자주 묻는 질문." jsonLd={[faqLd]}>
+  <PageHead title="자주 묻는 질문" crumbs={[{ name: "자주 묻는 질문" }]} />
+  <section class="gut" style="padding-bottom:64px">
+    <div class="wrap narrow">
+      <div class="faq">
+        {faqs.map((f) => (
+          <details>
+            <summary><span class="q" aria-hidden="true">Q</span><span>{f.q}</span><span class="pm" aria-hidden="true">+</span></summary>
+            <div class="a prose"><f.Content />{f.law && <p class="law">{f.law}</p>}</div>
+          </details>
+        ))}
+      </div>
+      <p style="margin-top:22px"><a class="tlink" href={site.faqSiteUrl} target="_blank" rel="noopener">자주 묻는 질문 전체 보기 ↗</a></p>
+    </div>
+  </section>
+</Base>
+<style>
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq details:first-child { border-top: 1px solid var(--line); }
+  .faq summary { display: flex; gap: 12px; align-items: flex-start; padding: 18px 0; cursor: pointer; list-style: none; font-size: 17.5px; font-weight: 600; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .q { font-family: var(--f-display); color: var(--gold-text); flex: none; }
+  .pm { margin-left: auto; color: var(--gold-text); font-size: 22px; line-height: 1.2; transition: transform .2s; flex: none; }
+  .faq details[open] .pm { transform: rotate(45deg); }
+  .a { padding: 0 0 20px 26px; font-size: 16.5px; }
+</style>

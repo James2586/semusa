@@ -1,0 +1,9 @@
+{
+  "services": [
+    { "slug": "inheritance-gift", "name": "상속·증여", "short": "복잡한 상속·증여세 계산과 신고를 정확하게 처리하여 최적의 세금 계획을 세워드립니다.", "calculators": ["inheritance", "inheritance-pro", "gift", "burden-gift"] },
+    { "slug": "real-estate", "name": "부동산 세금", "short": "집이나 땅을 사고팔고 보유할 때 내는 세금을 미리 계산하고 신고합니다.", "calculators": ["transfer", "acquisition", "jongbu"] },
+    { "slug": "corporate", "name": "법인 컨설팅", "short": "개인사업자 법인 전환부터 신규 법인 설립까지 전 과정을 원스톱으로 지원합니다.", "calculators": ["ceo-pay", "exec-retirement", "corp-gift", "corp-loan", "corp-dividend"] },
+    { "slug": "bookkeeping", "name": "기장·세무신고", "short": "법인세·소득세·부가세 신고대리부터 월별 기장 관리까지 체계적으로 처리합니다.", "calculators": [] },
+    { "slug": "appeal", "name": "세무조사·불복", "short": "부당한 과세에 대한 권리 구제 및 세무 조사 시 납세자를 보호합니다.", "calculators": [] }
+  ]
+}

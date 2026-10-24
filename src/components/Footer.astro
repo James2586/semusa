@@ -1,0 +1,28 @@
+---
+import site from "../data/site.json";
+---
+<footer class="foot gut">
+  <div class="wrap foot-in">
+    <p class="foot-lg">{site.name}</p>
+    <p class="foot-biz">
+      대표 {site.rep}{site.bizNo && <> · 사업자등록번호 {site.bizNo}</>}<br />
+      {site.address.full} · {site.email}
+    </p>
+    <ul class="foot-links">
+      <li><a href="/notice">공지사항</a></li>
+      <li><a href="/privacy">개인정보처리방침</a></li>
+      {site.usefulSites.map((s) => <li><a href={s.url} target="_blank" rel="noopener">{s.name}</a></li>)}
+    </ul>
+    <p class="foot-c">© {site.copyrightYear} {site.name}. All rights reserved.</p>
+  </div>
+</footer>
+<style>
+  .foot { background: var(--ink); color: #CFCABC; font-size: 15px; padding-block: 36px calc(36px + var(--bar-h) + env(safe-area-inset-bottom, 0px)); }
+  .foot-in { display: grid; gap: 16px; }
+  .foot-lg { font-family: var(--f-display); font-size: 18px; color: #F3F0E7; }
+  .foot-biz { color: #BDB8A9; line-height: 1.9; }
+  .foot-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; }
+  .foot-links a { color: #E9E4D6; display: inline-block; padding: 6px 0; text-underline-offset: 4px; text-decoration-color: rgba(233, 228, 214, .4); }
+  .foot-c { font-size: 14px; color: #A8A396; }
+  @media (min-width: 900px) { .foot { padding-bottom: 36px; } }
+</style>

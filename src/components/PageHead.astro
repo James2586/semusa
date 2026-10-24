@@ -1,0 +1,15 @@
+---
+interface Props { title: string; lead?: string; crumbs?: { name: string; href?: string }[]; dark?: boolean }
+const { title, lead, crumbs = [], dark = false } = Astro.props;
+---
+<section class:list={["page-head gut", dark && "sec-dark"]}>
+  <div class="wrap">
+    <nav aria-label="현재 위치"><ol class="crumb">
+      <li><a href="/">홈</a></li>
+      {crumbs.map((c) => <li>{c.href ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>)}
+    </ol></nav>
+    <h1 class="page-h">{title}</h1>
+    {lead && <p class="page-lead">{lead}</p>}
+    <slot />
+  </div>
+</section>

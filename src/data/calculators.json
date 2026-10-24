@@ -1,0 +1,23 @@
+{
+  "groups": [
+    { "id": "inherit-gift", "name": "상속·증여" },
+    { "id": "real-estate", "name": "부동산" },
+    { "id": "corporate", "name": "특정법인·대표" },
+    { "id": "retirement", "name": "퇴직" }
+  ],
+  "calculators": [
+    { "slug": "inheritance", "group": "inherit-gift", "name": "상속세 계산기", "short": "상속 재산에 따른 예상 세액", "url": "https://inheritance-tax8.vercel.app/" },
+    { "slug": "inheritance-pro", "group": "inherit-gift", "name": "상속세 계산기 (전문가용)", "short": "전문가용 상세 상속세 계산", "url": "https://inheritance-tax-1.vercel.app/" },
+    { "slug": "gift", "group": "inherit-gift", "name": "증여세 계산기", "short": "증여 금액에 따른 예상 세액", "url": "https://gift-tax-2.vercel.app/" },
+    { "slug": "burden-gift", "group": "inherit-gift", "name": "부담부증여 계산기", "short": "채무를 함께 넘기는 증여의 세금 분석", "url": "https://budambu.vercel.app/" },
+    { "slug": "transfer", "group": "real-estate", "name": "양도소득세 계산기", "short": "부동산 양도 차익 세액", "url": "https://yangdo-tax-13.vercel.app/" },
+    { "slug": "acquisition", "group": "real-estate", "name": "취득세 계산기", "short": "부동산 취득 시 납부할 취득세 계산", "url": "https://buytax.vercel.app/" },
+    { "slug": "jongbu", "group": "real-estate", "name": "종합부동산세 계산기", "short": "보유 부동산 종부세", "url": "https://james2586.github.io/jongbuse_1/" },
+    { "slug": "corp-gift", "group": "corporate", "name": "특정법인 부동산 증여 계산기", "short": "특정법인에 부동산 증여 시 세금 분석", "url": "https://special-corporate-gift-299j.vercel.app/" },
+    { "slug": "corp-loan", "group": "corporate", "name": "특정법인 증여 가수금 계산기", "short": "가수금을 활용한 특정법인 증여 세금 계산", "url": "https://gasugeum.vercel.app/" },
+    { "slug": "corp-dividend", "group": "corporate", "name": "특정법인 증여 초과배당 계산기", "short": "초과배당을 활용한 특정법인 증여 세금 계산", "url": "https://chokwa-baedang.vercel.app/" },
+    { "slug": "ceo-pay", "group": "corporate", "name": "법인 대표자 급여·배당 세금계산기", "short": "법인 대표자 급여·배당 구조 세금 분석", "url": "https://ceo-salary-tax.vercel.app/" },
+    { "slug": "retirement", "group": "retirement", "name": "DC형 퇴직금 계산기", "short": "확정기여형 퇴직연금 퇴직소득세 계산", "url": "https://retirement-tax.vercel.app/" },
+    { "slug": "exec-retirement", "group": "retirement", "name": "임원 퇴직금 계산기", "short": "임원 퇴직 시 퇴직소득세 및 한도 계산", "url": "https://ceo-retirment-tax.vercel.app/" }
+  ]
+}

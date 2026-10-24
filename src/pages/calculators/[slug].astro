@@ -1,0 +1,27 @@
+---
+import Base from "../../layouts/Base.astro";
+import PageHead from "../../components/PageHead.astro";
+import Pending from "../../components/Pending.astro";
+import calcData from "../../data/calculators.json";
+import site from "../../data/site.json";
+import KakaoIcon from "../../components/KakaoIcon.astro";
+
+export function getStaticPaths() {
+  return calcData.calculators.map((c) => ({ params: { slug: c.slug }, props: { calc: c } }));
+}
+const { calc } = Astro.props;
+const group = calcData.groups.find((g) => g.id === calc.group)!;
+---
+<Base title={calc.name} description={`${calc.short}. ${site.repTitle} ${site.rep}이 만든 모의 계산기.`} hideBar>
+  <PageHead title={calc.name} lead={calc.short} crumbs={[{ name: "세금 계산기", href: "/calculators" }, { name: calc.name }]}>
+    <p class="meta">검토 {site.repTitle} {site.rep} · {group.name}</p>
+  </PageHead>
+  <section class="gut" style="padding-bottom:64px">
+    <div class="wrap narrow" style="display:grid;gap:18px">
+      <a class="btn btn-moss btn-block" href={calc.url} target="_blank" rel="noopener">계산기 열기 ↗</a>
+      <Pending label="계산기를 이 페이지 안에 넣기(높이 자동)와 설명 글은 4단계에서 채웁니다." />
+      <a class="btn btn-kakao btn-block" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 결과로 상담하기</a>
+    </div>
+  </section>
+</Base>
+<style>.meta { margin-top: 10px; font-size: 14.5px; color: var(--muted); }</style>

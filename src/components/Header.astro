@@ -1,0 +1,175 @@
+---
+import site from "../data/site.json";
+import calcData from "../data/calculators.json";
+import svcData from "../data/services.json";
+import KakaoIcon from "./KakaoIcon.astro";
+
+const groups = calcData.groups.map((g) => ({
+  ...g,
+  items: calcData.calculators.filter((c) => c.group === g.id),
+}));
+const services = svcData.services;
+const path = Astro.url.pathname;
+const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : undefined);
+---
+<header class="hdr gut">
+  <div class="wrap hdr-in">
+    <a class="logo" href="/">하나 더 <span>세무회계</span></a>
+
+    <nav class="gnb" aria-label="주 메뉴">
+      <ul>
+        <li class="has-menu">
+          <button type="button" class="gnb-btn" aria-expanded="false" aria-controls="mm-services" aria-current={on("/services")}>서비스</button>
+          <div class="mega" id="mm-services">
+            <ul class="mega-list">
+              {services.map((s) => (
+                <li><a href={`/services/${s.slug}`}><b>{s.name}</b><span>{s.short}</span></a></li>
+              ))}
+            </ul>
+          </div>
+        </li>
+        <li class="has-menu">
+          <button type="button" class="gnb-btn" aria-expanded="false" aria-controls="mm-calcs" aria-current={on("/calculators")}>세금 계산기</button>
+          <div class="mega mega-calc" id="mm-calcs">
+            <div class="mega-cols">
+              {groups.map((g) => (
+                <div>
+                  <p class="mega-h">{g.name}</p>
+                  <ul>{g.items.map((c) => <li><a href={`/calculators/${c.slug}`}>{c.name.replace(/\s?(세금)?계산기/, "")}</a></li>)}</ul>
+                </div>
+              ))}
+            </div>
+            <p class="mega-foot"><span>결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.</span><a href="/calculators">계산기 전체 보기 →</a></p>
+          </div>
+        </li>
+        <li><a class="gnb-a" href="/columns" aria-current={on("/columns")}>칼럼·책</a></li>
+        <li><a class="gnb-a" href="/about" aria-current={on("/about")}>전문가 소개</a></li>
+        <li><a class="gnb-a" href="/faq" aria-current={on("/faq")}>자주 묻는 질문</a></li>
+        <li><a class="gnb-a" href="/location" aria-current={on("/location")}>오시는 길</a></li>
+      </ul>
+      <a class="btn btn-kakao gnb-cta" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
+    </nav>
+
+    <button class="menu-btn" type="button" aria-label="메뉴 열기" aria-haspopup="dialog" aria-controls="drawer" id="menuBtn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<dialog class="drawer" id="drawer" aria-label="메뉴">
+  <div class="drawer-top">
+    <span class="logo">하나 더 <span>세무회계</span></span>
+    <button class="drawer-close" type="button" aria-label="메뉴 닫기" data-close>✕</button>
+  </div>
+  <nav aria-label="휴대폰 메뉴">
+    <details>
+      <summary>서비스<span aria-hidden="true">+</span></summary>
+      <div class="drawer-sub">{services.map((s) => <a href={`/services/${s.slug}`}>{s.name}</a>)}</div>
+    </details>
+    <details>
+      <summary>세금 계산기<span aria-hidden="true">+</span></summary>
+      <div class="drawer-sub">
+        {groups.map((g) => (<>
+          <p class="drawer-h">{g.name}</p>
+          {g.items.map((c) => <a href={`/calculators/${c.slug}`}>{c.name}</a>)}
+        </>))}
+        <a href="/calculators">계산기 전체 보기</a>
+      </div>
+    </details>
+    <a href="/columns">칼럼·책<span aria-hidden="true">›</span></a>
+    <a href="/about">전문가 소개<span aria-hidden="true">›</span></a>
+    <a href="/faq">자주 묻는 질문<span aria-hidden="true">›</span></a>
+    <a href="/location">오시는 길<span aria-hidden="true">›</span></a>
+  </nav>
+  <a class="btn btn-kakao btn-block drawer-cta" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
+</dialog>
+
+<style>
+  .hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .hdr-in { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); gap: 16px; }
+  .logo { font-family: var(--f-display); font-weight: 700; font-size: 19px; text-decoration: none; color: var(--ink); white-space: nowrap; }
+  .logo span { color: var(--gold-text); }
+  .gnb { display: none; align-items: center; gap: 8px; height: 100%; }
+  .gnb > ul { display: flex; list-style: none; margin: 0; padding: 0; height: 100%; }
+  .gnb li { position: relative; display: flex; align-items: center; }
+  .gnb-btn, .gnb-a { font: 500 15.5px var(--f-body); color: var(--ink2); background: none; border: none; padding: 8px 11px; text-decoration: none; cursor: pointer; height: 100%; display: flex; align-items: center; }
+  .gnb-btn::after { content: ""; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); margin: -4px 0 0 7px; opacity: .6; }
+  .gnb-btn:hover, .gnb-a:hover, [aria-current="page"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--gold); }
+  .gnb-cta { min-height: 42px; padding: 0 16px; font-size: 15.5px; margin-left: 6px; }
+  .mega { display: none; position: absolute; top: 100%; left: -12px; background: var(--surface); border: 1px solid var(--line); border-top: 2px solid var(--gold); box-shadow: 0 20px 40px -24px rgba(26, 23, 16, .4); padding: 18px; z-index: 60; }
+  .has-menu.open .mega { display: block; }
+  @media (hover: hover) { .has-menu:hover .mega { display: block; } }
+  .mega-list { list-style: none; margin: 0; padding: 0; width: 420px; display: grid; gap: 2px; }
+  .mega-list a { display: grid; gap: 2px; padding: 10px 12px; text-decoration: none; border-radius: 4px; }
+  .mega-list a:hover, .mega-list a:focus-visible { background: var(--gold-soft); }
+  .mega-list b { font-size: 16px; }
+  .mega-list span { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .mega-calc { left: -160px; width: 720px; }
+  .mega-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .mega-h { font-size: 14px; font-weight: 700; color: var(--gold-text); margin-bottom: 6px; }
+  .mega-cols ul { list-style: none; margin: 0; padding: 0; display: grid; }
+  .mega-cols a { display: block; padding: 5px 0; font-size: 15px; color: var(--ink2); text-decoration: none; line-height: 1.5; }
+  .mega-cols a:hover, .mega-cols a:focus-visible { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+  .mega-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted); }
+  .mega-foot a { color: var(--gold-text); font-weight: 600; white-space: nowrap; }
+  .menu-btn { width: 48px; height: 48px; border: none; background: none; display: grid; place-items: center; cursor: pointer; margin-right: -10px; }
+  .menu-btn svg { width: 26px; height: 26px; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+
+  .drawer { margin: 0 0 0 auto; height: 100%; max-height: 100%; width: min(88vw, 380px); max-width: 100%; border: none; padding: calc(env(safe-area-inset-top, 0px) + 8px) var(--gutter-r) calc(env(safe-area-inset-bottom, 0px) + 20px) 20px; background: var(--surface); color: var(--ink); }
+  .drawer[open] { display: flex; flex-direction: column; animation: slide .22s cubic-bezier(.2, .7, .2, 1); }
+  .drawer::backdrop { background: rgba(17, 21, 17, .45); }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .drawer-top { display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 8px; }
+  .drawer-close { width: 48px; height: 48px; border: none; background: none; font-size: 24px; cursor: pointer; margin-right: -10px; color: var(--ink); }
+  .drawer nav > a, .drawer summary { display: flex; justify-content: space-between; align-items: center; min-height: 56px; border-bottom: 1px solid var(--line); text-decoration: none; font-size: 18px; color: var(--ink); cursor: pointer; list-style: none; }
+  .drawer summary::-webkit-details-marker { display: none; }
+  .drawer summary span, .drawer nav > a span { color: var(--gold-text); font-size: 22px; transition: transform .2s; }
+  .drawer details[open] summary span { transform: rotate(45deg); }
+  .drawer-sub { display: grid; padding: 4px 0 10px 14px; border-bottom: 1px solid var(--line); }
+  .drawer-sub a { min-height: 46px; display: flex; align-items: center; font-size: 16px; color: var(--ink2); text-decoration: none; }
+  .drawer-h { font-size: 14px; font-weight: 700; color: var(--gold-text); margin-top: 8px; }
+  .drawer-cta { margin-top: 20px; }
+
+  @media (min-width: 900px) {
+    .gnb { display: flex; }
+    .menu-btn { display: none; }
+  }
+</style>
+
+<script>
+  // 펼침 메뉴: 버튼으로 열고 닫음, Esc·바깥 누르기로 닫음
+  const items = document.querySelectorAll<HTMLLIElement>(".has-menu");
+  const closeAll = (except?: Element) => items.forEach((li) => {
+    if (li === except) return;
+    li.classList.remove("open");
+    li.querySelector("button")?.setAttribute("aria-expanded", "false");
+  });
+  items.forEach((li) => {
+    const btn = li.querySelector("button")!;
+    btn.addEventListener("click", () => {
+      const open = !li.classList.contains("open");
+      closeAll(li);
+      li.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    li.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && li.classList.contains("open")) { closeAll(); btn.focus(); }
+    });
+    li.addEventListener("focusout", (e) => {
+      if (!li.contains(e.relatedTarget as Node)) { li.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
+    });
+  });
+  document.addEventListener("click", (e) => {
+    if (!(e.target as Element).closest(".has-menu")) closeAll();
+  });
+
+  // 휴대폰 서랍 메뉴: <dialog>로 열어 바깥은 눌리지 않고 Esc로 닫힘, 닫으면 메뉴 버튼으로 포커스
+  const drawer = document.getElementById("drawer") as HTMLDialogElement;
+  const menuBtn = document.getElementById("menuBtn")!;
+  menuBtn.addEventListener("click", () => drawer.showModal());
+  drawer.addEventListener("click", (e) => {
+    const t = e.target as Element;
+    if (t === drawer || t.closest("[data-close]")) drawer.close();
+  });
+  drawer.addEventListener("close", () => menuBtn.focus());
+</script>

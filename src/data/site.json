@@ -1,0 +1,38 @@
+{
+  "name": "하나 더 세무회계",
+  "rep": "성광호",
+  "repTitle": "세무전문가",
+  "column": "이코노미조선 칼럼리스트",
+  "siteUrl": "https://semusatax.vercel.app",
+  "email": "semusatax@kakao.com",
+  "kakaoUrl": "https://open.kakao.com/me/semusa",
+  "phone": null,
+  "bizNo": null,
+  "consultFee": null,
+  "replyTime": null,
+  "address": {
+    "full": "서울시 강남구 삼성로 151",
+    "region": "서울특별시",
+    "locality": "강남구",
+    "street": "삼성로 151"
+  },
+  "transit": null,
+  "parking": null,
+  "hours": "평일 09:00 – 18:00",
+  "hoursSchema": "Mo-Fr 09:00-18:00",
+  "copyrightYear": 2027,
+  "channels": [
+    { "name": "이코노미조선 칼럼", "url": "https://economychosun.com/svc/news/search.html?query=%EC%84%B1%EA%B4%91%ED%98%B8&sort=0" },
+    { "name": "네이버 블로그", "url": "https://blog.naver.com/semusatax" },
+    { "name": "네이버 세금 인플루언서", "url": "https://in.naver.com/sungtax" },
+    { "name": "인스타그램", "url": "https://www.instagram.com/semusatax" }
+  ],
+  "booksUrl": "https://search.kyobobook.co.kr/search?keyword=%EC%84%B1%EA%B4%91%ED%98%B8",
+  "faqSiteUrl": "https://semusafaq.vercel.app/",
+  "usefulSites": [
+    { "name": "국세청", "url": "https://www.nts.go.kr/" },
+    { "name": "홈택스", "url": "https://hometax.go.kr/" },
+    { "name": "국세법령정보시스템", "url": "https://taxlaw.nts.go.kr/index.do" },
+    { "name": "이택스코리아", "url": "https://www.etaxkorea.net/" }
+  ]
+}

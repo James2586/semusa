@@ -1,0 +1,46 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import site from "../data/site.json";
+---
+<Base title="전문가 소개" description={`${site.repTitle} ${site.rep} — ${site.column}. 인사말과 약력.`}>
+  <PageHead title="전문가 소개" crumbs={[{ name: "전문가 소개" }]} />
+  <section class="gut" style="padding-bottom:64px">
+    <div class="wrap about">
+      <figure class="pic">
+        <img src="/img/profile.webp" srcset="/img/profile-360.webp 360w, /img/profile.webp 591w" sizes="(min-width: 900px) 300px, 60vw" width="591" height="827" alt={`${site.repTitle} ${site.rep}`} />
+        <figcaption><b>{site.rep}</b>{site.repTitle}</figcaption>
+      </figure>
+      <div class="prose">
+        <span class="tag">인사말</span>
+        <h2 class="sec-h">진심을 담은 전략적 파트너</h2>
+        <p><strong>단순한 세무 대리를 넘어, 고객님의 든든한 파트너가 되겠습니다.</strong></p>
+        <p>세금은 단순히 납부해야 할 의무가 아닙니다. 올바른 전략 하나가 사업의 미래를 바꾸고, 소중하게 일군 자산을 온전히 지키는 힘이 됩니다. 저는 수많은 고객과 함께하며 그 사실을 누구보다 깊이 체감해 왔습니다.</p>
+        <p>하나 더 세무회계는 단순 신고 대행에 머물지 않습니다. 사업 초기 법인 설립부터 기장, 절세 설계, 상속·증여 컨설팅, 세무조사 대응까지—고객님의 세금 이야기에 처음부터 끝까지 함께합니다. 매번 달라지는 담당자 걱정 없이, 언제나 같은 얼굴의 전담 세무전문가가 곁에 있습니다.</p>
+        <p>특히 이코노미조선 칼럼리스트로서 쌓아온 세무 지식과 33권의 저서를 통해 검증된 노하우를, 한 분 한 분의 상황에 맞춰 실질적인 해법으로 제안드립니다. 이론이 아닌 현장에서 통하는 절세 전략을 경험하실 수 있습니다.</p>
+        <p>세금 문제로 고민하고 계신다면 혼자 짊어지지 마세요. 편안한 상담 한 번으로 최선의 방향을 함께 찾아드리겠습니다. 고객님의 성공이 곧 저의 성공입니다.</p>
+        <blockquote>"고객의 세금 걱정을 덜어드리는 것이 저의 사명입니다."<cite>— {site.name} {site.rep}</cite></blockquote>
+        <span class="tag" style="margin-top:12px">약력</span>
+        <ul class="cv">
+          <li>{site.column}</li>
+          <li>연세대학교 경영학과 졸업</li>
+          <li>방송통신대학교 법학과 석사</li>
+          <li>『알면 돈 버는 상속증여 오늘부터 시작』, 『알면 돈 버는 법인컨설팅』 등 저서 <a href={site.booksUrl} target="_blank" rel="noopener">전체 보기 ↗</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .about { display: grid; gap: 28px; }
+  .pic { margin: 0; max-width: 240px; }
+  .pic img { border-radius: 4px; }
+  .pic figcaption { margin-top: 10px; font-size: 15.5px; color: var(--muted); }
+  .pic b { display: block; font-size: 20px; color: var(--ink); }
+  blockquote { margin: 6px 0 0; padding: 14px 18px; border-left: 3px solid var(--gold); background: var(--gold-soft); font-family: var(--f-display); font-size: 18px; line-height: 1.6; }
+  blockquote cite { display: block; margin-top: 6px; font-family: var(--f-body); font-style: normal; font-size: 15px; color: var(--muted); }
+  .cv { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+  .cv li::marker { color: var(--gold); }
+  .cv a { color: var(--gold-text); }
+  @media (min-width: 900px) { .about { grid-template-columns: 300px 1fr; gap: 56px; align-items: start; } .pic { max-width: none; position: sticky; top: 90px; } }
+</style>

@@ -1,0 +1,33 @@
+---
+import Base from "../../layouts/Base.astro";
+import PageHead from "../../components/PageHead.astro";
+import Pending from "../../components/Pending.astro";
+import svcData from "../../data/services.json";
+import calcData from "../../data/calculators.json";
+import site from "../../data/site.json";
+import KakaoIcon from "../../components/KakaoIcon.astro";
+
+export function getStaticPaths() {
+  return svcData.services.map((s) => ({ params: { slug: s.slug }, props: { svc: s } }));
+}
+const { svc } = Astro.props;
+const calcs = svc.calculators.map((slug) => calcData.calculators.find((c) => c.slug === slug)!);
+---
+<Base title={svc.name} description={svc.short}>
+  <PageHead dark title={svc.name} lead={svc.short} crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
+  <section class="sec gut">
+    <div class="wrap narrow" style="display:grid;gap:28px">
+      <Pending label="기한 · 이런 분께 · 진행 순서 · 준비 서류는 5단계에서 채웁니다." />
+      {calcs.length > 0 && (
+        <div>
+          <span class="tag">먼저 계산해 보기</span>
+          <h2 class="sec-h" style="font-size:24px">관련 계산기</h2>
+          <div class="grid-cards" style="margin-top:14px">
+            {calcs.map((c) => <a class="calc-card" href={`/calculators/${c.slug}`}><b>{c.name}</b><span>{c.short}</span></a>)}
+          </div>
+        </div>
+      )}
+      <a class="btn btn-kakao btn-block" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
+    </div>
+  </section>
+</Base>

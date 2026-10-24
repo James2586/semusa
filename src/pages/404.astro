@@ -1,0 +1,17 @@
+---
+import Base from "../layouts/Base.astro";
+import site from "../data/site.json";
+---
+<Base title="페이지를 찾을 수 없어요" noindex>
+  <section class="sec gut">
+    <div class="wrap narrow" style="display:grid;gap:18px">
+      <h1 class="page-h">찾는 페이지가 없어요</h1>
+      <p class="page-lead">주소가 바뀌었거나 지워진 페이지입니다.</p>
+      <div class="rows">
+        <a class="row-link" href="/"><span>홈으로</span><span class="arr">›</span></a>
+        <a class="row-link" href="/calculators"><span>세금 계산기 13종</span><span class="arr">›</span></a>
+        <a class="row-link" href={site.kakaoUrl} target="_blank" rel="noopener"><span>카카오톡 상담</span><span class="arr">↗</span></a>
+      </div>
+    </div>
+  </section>
+</Base>

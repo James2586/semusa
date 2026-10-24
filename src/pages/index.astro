@@ -1,0 +1,40 @@
+---
+import Base from "../layouts/Base.astro";
+import site from "../data/site.json";
+import svcData from "../data/services.json";
+import KakaoIcon from "../components/KakaoIcon.astro";
+---
+<Base>
+  <section class="sec-dark gut hero">
+    <div class="wrap hero-in">
+      <p class="who"><b>{site.rep}</b>{site.repTitle} · {site.column}</p>
+      <h1 class="hero-h">상속·증여·부동산 세금,<br />책을 쓴 {site.repTitle}가<br />직접 봅니다.</h1>
+      <p class="hero-lead">계산기로 먼저 확인하고, 필요할 때 상담하세요.</p>
+      <div class="hero-acts">
+        <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
+        <a class="tlink" href="/calculators">내 세금 먼저 계산해 보기 ›</a>
+      </div>
+    </div>
+  </section>
+  <section class="sec gut">
+    <div class="wrap">
+      <span class="tag">2단계 뼈대</span>
+      <h2 class="sec-h">홈 화면은 3단계에서 채웁니다</h2>
+      <p class="sec-sub">지금은 메뉴와 페이지 연결을 확인하는 뼈대입니다.</p>
+      <div class="rows" style="margin-top:20px">
+        {svcData.services.map((s) => <a class="row-link" href={`/services/${s.slug}`}><span>{s.name}<small>{s.short}</small></span><span class="arr">›</span></a>)}
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .hero { padding-block: 40px 48px; }
+  .hero-in { display: grid; gap: 20px; }
+  .who { color: var(--on-moss2); font-size: 15.5px; }
+  .who b { display: block; color: var(--on-moss); font-size: 20px; }
+  .hero-h { font-family: var(--f-display); font-size: 30px; line-height: 1.38; }
+  .hero-lead { color: var(--on-moss2); }
+  .hero-acts { display: grid; gap: 14px; justify-items: start; }
+  .hero-acts .btn { width: 100%; }
+  @media (min-width: 900px) { .hero-h { font-size: 46px; } .hero-acts { grid-template-columns: auto auto; align-items: center; gap: 24px; } .hero-acts .btn { width: auto; } }
+</style>

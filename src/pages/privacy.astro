@@ -1,0 +1,14 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import Pending from "../components/Pending.astro";
+---
+<Base title="개인정보처리방침" noindex>
+  <PageHead title="개인정보처리방침" crumbs={[{ name: "개인정보처리방침" }]} />
+  <section class="gut" style="padding-bottom:64px">
+    <div class="wrap narrow prose">
+      <p>이 홈페이지는 회원 가입이나 상담 신청 양식을 받지 않습니다. 상담은 카카오톡으로 이루어집니다.</p>
+      <Pending label="방문 통계를 켜거나 수집 항목이 생기면 운영자 확인을 거쳐 전문을 게시합니다." />
+    </div>
+  </section>
+</Base>
