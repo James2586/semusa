@@ -1,6 +1,7 @@
 ---
 // 서비스 상세(2026-10-24 2차 개편): 머리에 핵심 기한 칩 → 기한(계산 카드 또는 매년 돌아오는 기한 + 근거 조문 목록) → 이런 상황이라면(체크) →
 // 맡겨 주시면 | 진행 순서(세로 연표) → 관련 계산기 → 준비할 것 + 관련 책 → 그 분야 질문 → 마무리 띠(Base)
+import { bookAuthors } from "../../lib/shelf.js";
 import Base from "../../layouts/Base.astro";
 import PageHead from "../../components/PageHead.astro";
 import PlusList from "../../components/PlusList.astro";
@@ -123,7 +124,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
           <div>
             <span class="tag">관련 책</span>
             <p class="book-t">『{book.title}』</p>
-            <p class="book-by">{site.rep} 지음</p>
+            <p class="book-by">{bookAuthors(site.rep, book)} 지음</p>
             <a class="more-link" href={site.booksUrl} target="_blank" rel="noopener">교보문고에서 보기 ↗<span class="sr-only">(새 창)</span></a>
           </div>
         </div>

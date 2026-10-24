@@ -10,14 +10,14 @@ import Odometer from "../components/Odometer.astro";
 import home from "../data/home.json";
 import calcData from "../data/calculators.json";
 import svcData from "../data/services.json";
-import { shelfSpines, inkFor } from "../lib/shelf.js";
+import { shelfSpines, inkFor, bookAuthors } from "../lib/shelf.js";
 // 숫자는 자료 파일에서 센 것만(지어내지 않음)
 const stats = [
   { label: "직접 쓴 세무 저서", n: home.booksTotal, unit: "권" },
   { label: "모의 세금 계산기", n: calcData.calculators.length, unit: "종" },
   { label: "상담 분야", n: svcData.services.length, unit: "개" },
 ];
-const short = (t: string) => t.replace(/^알면 돈 버는 /, "");
+const short = (t: string) => t.replace(/^(알면 돈 버는|알면 돈이 되는|알아두면 돈이 되는) /, "");
 // 약력 연표: 연도를 아는 것은 책 출간(home.json date)뿐 — 같은 해끼리 묶고, 연도 모르는 이력은 맨 앞에 연도 없이
 const dated = home.books.filter((b) => b.date).sort((a, b) => a.date!.localeCompare(b.date!));
 const years = [...new Set(dated.map((b) => b.date!.slice(0, 4)))].map((y) => ({ y, items: dated.filter((b) => b.date!.startsWith(y)) }));
@@ -107,7 +107,7 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
               <BookCover book={b} width={150} />
               <div>
                 <p class="pv-t">『{b.title}』</p>
-                <p class="pv-m">{[site.rep, ...((b as any).coauthors || [])].join(" · ")} 지음{b.date && <span class="nw"> · {b.date.replace("-", ". ")}.</span>}</p>
+                <p class="pv-m">{bookAuthors(site.rep, b)} 지음{b.date && <span class="nw"> · {b.date.replace("-", ". ")}.</span>}</p>
               </div>
             </div>
           ))}

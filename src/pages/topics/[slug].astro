@@ -1,6 +1,7 @@
 ---
 // 주제 모아 보기(2026-10-24 4차 A1): src/data/topics.json이 잇는 이미 있는 자료를 한 쪽에 — 기한(계산 카드·매년 기한·규칙과 근거)·용어·계산기·질문·서비스·칼럼·책.
 // 세법 글을 새로 쓰지 않는다(기한 글은 deadlines.json, 용어 풀이는 glossary.json 그대로).
+import { bookAuthors } from "../../lib/shelf.js";
 import Base from "../../layouts/Base.astro";
 import PageHead from "../../components/PageHead.astro";
 import PlusList from "../../components/PlusList.astro";
@@ -115,7 +116,7 @@ const rateSecs = rates.sections.filter((s) => s.topic === t.slug);
         <span class="tag">더 깊이</span>
         <h2 class="sec-h" id="h-tbook">관련 책</h2>
         <ul class="tp-books">
-          {books.map((b: any) => <li><BookCover book={b} width={112} link /><span class="tp-bt">『{b.title}』<small>{site.rep} 지음</small></span></li>)}
+          {books.map((b: any) => <li><BookCover book={b} width={112} link /><span class="tp-bt">『{b.title}』<small>{bookAuthors(site.rep, b)} 지음</small></span></li>)}
         </ul>
       </div>
     </section>
