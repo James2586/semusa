@@ -13,7 +13,6 @@ const { calc } = Astro.props as { calc: any };
 const group = calcData.groups.find((g) => g.id === calc.group)!;
 const services = svcData.services.filter((s) => s.calculators.includes(calc.slug));
 const siblings = calcData.calculators.filter((c) => c.group === calc.group && c.slug !== calc.slug);
-const origin = new URL(calc.url).origin;
 const hasGuide = calc.covers?.length || calc.notCovered?.length || calc.prepare?.length;
 const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc.short}. ${site.repTitle} ${site.rep}이 만든 모의 계산기.`;
 ---
@@ -35,7 +34,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
     </div>
   </section>
 
-  <section class="gut calc-sec">
+  <section class="gut calc-sec" id="calc">
     <div class="wrap">
       <div class="frame-hd">
         <span>{calc.name}</span>
@@ -45,11 +44,10 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
         class="calc-frame"
         src={calc.url}
         title={`${calc.name} — 계산 화면`}
-        data-origin={origin}
         allow="clipboard-write"
         referrerpolicy="strict-origin-when-cross-origin"
       ></iframe>
-      <p class="note">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다. 계산 화면이 잘 안 보이면 "새 창에서 열기"를 눌러 주세요.</p>
+      <p class="note">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다. 계산 화면은 안에서 위아래로 움직입니다. 크게 보려면 "새 창에서 열기"를 눌러 주세요.</p>
     </div>
   </section>
 
@@ -93,7 +91,9 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
   .calc-sec { padding-block: 28px 8px; }
   .frame-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; background: var(--moss); color: var(--on-moss); font-size: 15.5px; font-weight: 600; border-radius: 6px 6px 0 0; }
   .frame-hd a { color: var(--gold-hi); font-weight: 500; white-space: nowrap; }
-  .calc-frame { display: block; width: 100%; height: max(560px, 85vh); border: 1px solid var(--line2); border-top: none; background: var(--surface); }
+  /* 계산기 결과·보고서 창이 화면에 고정되어 뜨므로, 계산 화면은 휴대폰 화면 한 장 높이로 두고 안에서 스크롤한다(높이를 내용에 맞추면 그 창이 화면 밖에 뜰 수 있음) */
+  .calc-sec { scroll-margin-top: var(--header-h); }
+  .calc-frame { display: block; width: 100%; height: max(560px, calc(100svh - var(--header-h) - 48px)); border: 1px solid var(--line2); border-top: none; background: var(--surface); }
   .note { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
   .after { padding-block: 24px 64px; }
   .acts { display: grid; gap: 10px; }
@@ -103,19 +103,6 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
 </style>
 
 <script>
-  // 계산기가 높이를 알려 오면 그 높이로 맞춘다(계산기 쪽 ?embed=1 작업 뒤). 알려 오지 않으면 화면 높이의 85%.
-  const frame = document.querySelector<HTMLIFrameElement>(".calc-frame");
-  if (frame) {
-    const origin = frame.dataset.origin;
-    addEventListener("message", (e) => {
-      if (e.origin !== origin || e.source !== frame.contentWindow) return;
-      const h = (e.data as { type?: string; h?: number })?.h;
-      if ((e.data as { type?: string })?.type === "semusa:height" && typeof h === "number" && h > 0) {
-        frame.style.height = Math.max(480, Math.round(h)) + "px";
-      }
-    });
-  }
-
   // 가족에게 보내기: 휴대폰 공유 창(카카오톡 등)으로 페이지 주소만 보낸다. 공유 창이 없으면 주소 복사.
   document.querySelectorAll<HTMLButtonElement>("[data-share]").forEach((btn) => {
     const ok = document.querySelector("[data-share-ok]")!;
