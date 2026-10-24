@@ -7,7 +7,7 @@
 | mood-pen-{1200,800}.webp | 흰 종이 위 만년필 | https://www.pexels.com/photo/7431849/ |
 | mood-pages-{1200,800}.webp | 쌓인 종이 가장자리 | https://www.pexels.com/photo/7233375/ |
 | mood-book-{1200,800}.webp | 펼친 책 | https://www.pexels.com/photo/415071/ |
-| mood-paper-{1200,800}.webp | 종이 질감 | https://www.pexels.com/photo/20899958/ |
+| mood-receipts-{1200,800}.webp | 책상 위 영수증·서류(왼쪽 3/4을 잘라 채도를 0.72로 낮춰 씀 — 2026-10-24 기장·세무신고, 빈 종이 질감 mood-paper가 빈 상자처럼 보여 바꿈) | https://www.pexels.com/photo/7680681/ |
 | mood-leaves-{1200,800}.webp | 책장 넘김 가까이 | https://www.pexels.com/photo/29391654/ |
 
 운영자 사진(own-*) — 운영자가 2026-10-24 보낸 서점·책장 사진. 대표 저서 「병·의원 세무 관리」(성광호·조성식, 삼일인포마인)만 선명하게 두고

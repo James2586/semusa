@@ -246,7 +246,7 @@
     },
     {
       "slug": "bookkeeping",
-      "photo": "mood-paper",
+      "photo": "mood-receipts",
       "yearly": ["vat2", "income", "vat1", "withholding"],
       "faq": ["법인·기장"],
       "name": "기장·세무신고",
