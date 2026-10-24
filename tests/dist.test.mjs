@@ -270,7 +270,7 @@ test("세율·공제 한눈에: 고른 조문마다 원문 줄·표 칸이 그�
     }
   }
   for (const cell of ["과세표준의 100분의 10", "10억4천만원 + (30억원을 초과하는 금액의 100분의 50)", "3억8,406만원 + (10억원을 초과하는 금액의 45퍼센트)", "1억5천200만원+(94억원을 초과하는 금액의 1천분의 27)", "과세표준의 100분의 9"]) assert.ok(h.includes(esc(cell)), cell);
-  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/상속세및증여세법\/제26조/);
+  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/상속세및증여세법\/\(21065,20251001\)\/제26조/);
   assert.doesNotMatch(h, /┌|│|┘/); // 선 문자가 그대로 남지 않음
   assert.match(readFileSync(join(DIST, "topics/transfer.html"), "utf8"), /href="\/rates#r-transfer"/);
 });
@@ -307,7 +307,7 @@ test("이번 달 마감 띠: 모든 쪽에(머리글 바로 아래) · 기한은
     assert.ok(iH > 0 && iH < iB && iB < iM, `${f}: 머리글 뒤·본문 앞`);
     const occ = JSON.parse(h.match(/data-mband-data>([^<]*)</)[1]);
     assert.ok(occ.length >= 12, f); // 매달 원천세만으로도 1년 12번
-    for (const [iso, wd, name] of occ) { assert.match(iso, /^\d{4}-\d{2}-\d{2}$/); assert.match(wd, /^[월화수목금]$/, `${iso} ${wd}`); assert.ok(names.has(name), name); }
+    for (const [iso, wd, name, known] of occ) { assert.match(iso, /^\d{4}-\d{2}-\d{2}$/); assert.match(wd, /^[월화수목금]$/, `${iso} ${wd}`); assert.ok(names.has(name), name); assert.ok(known === 0 || known === 1); }
   }
 });
 
@@ -322,4 +322,15 @@ test("원문 기준일: 옮겨 둔 원문마다 법률 번호·받은 날 · 기
   assert.match(wf, /make-glossary-sources\.mjs tax-search\/tests\/fixtures --check/);
   assert.match(wf, /make-rates-sources\.mjs tax-search\/tests\/fixtures --check/);
   assert.match(wf, /TAX_SEARCH_TOKEN/);
+});
+
+test("세율 쪽: 법제처 링크는 그 판으로 · 판 이름표는 원문 메타 · 빠진 항 알림 · 부칙은 같은 판", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "rates.html"), "utf8");
+  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/법인세법\/\(21065,20251001\)\/제55조/);
+  assert.match(h, /https:\/\/www\.law\.go\.kr\/법령\/법인세법\/\(21217,20251223\)\/제55조/);
+  assert.match(h, /법률 제21217호\(2025\. 12\. 23\. 공포\) 판 — 지금 판/);
+  assert.match(h, /법률 제21065호\(2025\. 10\. 1\. 공포\) 판</);
+  assert.doesNotMatch(h, /20613/); // 바로 앞 판엔 그 판 세율의 적용례가 아닌 부칙을 붙이지 않음
+  assert.match(h, /같은 조 ②은\(는\) 이 쪽에 옮기지 않았습니다/); // 상증법 §22②
+  assert.doesNotMatch(h, /부칙\(법률 제\d+호, \d{8}\)/); // 날짜는 읽는 꼴로
 });

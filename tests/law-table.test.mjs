@@ -37,3 +37,10 @@ test("계산식 그림(열 없음)은 풀지 않는다 · 항 고르기 · 삭�
   assert.ok(p.every((l) => !/삭제</.test(l.t)));
   assert.ok(!p.some((l) => l.t.startsWith("②")));
 });
+test("고른 항 밖으로 빠진 항 표시(쪽이 「옮기지 않았습니다」로 알림) · 삭제 항은 세지 않음", async () => {
+  const { droppedParagraphs } = await import("../src/lib/lawTable.js");
+  assert.deepEqual(droppedParagraphs(S.inherit22.lines, ["①"]), ["②"]);
+  assert.deepEqual(droppedParagraphs(S.jong9.lines, ["①", "②"]), ["③", "④", "⑤", "⑥", "⑦", "⑧", "⑨"]);
+  assert.deepEqual(droppedParagraphs(S.inherit26.lines, undefined), []);
+  assert.ok(!droppedParagraphs(S.income104.lines, ["①"]).includes("①"));
+});

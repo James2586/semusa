@@ -45,3 +45,10 @@ export function pickParagraphs(lines, marks) {
   }
   return keep;
 }
+
+// 고른 항(marks) 밖으로 빠진 항 표시(①②…) — 쪽이 「옮기지 않은 항」을 알리도록. 「삭제」 항은 세지 않는다.
+export function droppedParagraphs(lines, marks) {
+  if (!marks?.length) return [];
+  return lines.filter((l) => l.d === 1).map((l) => l.t.trim()).filter((t) => !/^[①-⑳]\s*삭제\s*</.test(t))
+    .map((t) => t.match(/^[①-⑳]/)?.[0]).filter((m) => m && !marks.includes(m));
+}

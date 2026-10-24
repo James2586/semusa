@@ -8,23 +8,34 @@ import rates from "../data/rates.json";
 import sources from "../../docs/rates-sources.json";
 import calcData from "../data/calculators.json";
 import topicData from "../data/topics.json";
-import { splitLawLine, pickParagraphs } from "../lib/lawTable.js";
+import { splitLawLine, pickParagraphs, droppedParagraphs } from "../lib/lawTable.js";
 
 const S: Record<string, any> = (sources as any).items;
 const cBy = Object.fromEntries(calcData.calculators.map((c) => [c.slug, c]));
 const tBy = Object.fromEntries(topicData.topics.map((t) => [t.slug, t]));
 const ymd = (s: string | null) => (s ? `${Number(s.slice(0, 4))}. ${Number(s.slice(4, 6))}. ${Number(s.slice(6, 8))}.` : "");
 const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
-const lawUrl = (a: any) => /^제\d/.test(a.article) ? `https://www.law.go.kr/법령/${a.law.replace(/\s/g, "")}/${a.article}` : `https://www.law.go.kr/법령/${a.law.replace(/\s/g, "")}`;
+// 법제처 주소는 그 판으로(/(법률번호,공포일)/제N조) — 지금 법이 열려 다른 숫자가 보이지 않게. 부칙은 그 판의 법령 쪽.
+const lawUrl = (a: any) => {
+  const base = `https://www.law.go.kr/법령/${a.law.replace(/\s/g, "")}/(${a.promulgationNo},${a.promulgationDate})`;
+  return /^제\d/.test(a.article) ? `${base}/${a.article}` : base;
+};
 const render = (it: any) => {
   const a = S[it.src];
   // 한 조문에 표가 여럿이면(양도소득세 제104조) 화면 읽기 영역 이름이 겹치지 않게 표 번호를 붙인다
   let n = 0;
   const lines = pickParagraphs(a.lines, it.marks).map((l: any) => ({ d: l.d, segs: splitLawLine(l.t).map((s: any) => (s.type === "table" ? { ...s, n: ++n } : s)) }));
-  return { a, lines, tables: n };
+  return { a, lines, tables: n, dropped: droppedParagraphs(a.lines, it.marks) };
+};
+// 판 무리(version): 이름표는 원문 메타(법률 번호·공포일)로, 같은 세목에서 공포일이 가장 늦은 판에 「지금 판」
+const groupLabel = (s: any, g: any) => {
+  if (!g.version) return g.label;
+  const a = S[g.items[0].src];
+  const latest = s.groups.filter((x: any) => x.version).map((x: any) => S[x.items[0].src].promulgationDate).sort().at(-1);
+  return `법률 제${a.promulgationNo}호(${ymd(a.promulgationDate)} 공포) 판${a.promulgationDate === latest ? " — 지금 판" : ""}`;
 };
 const dataset = { "@context": "https://schema.org", "@type": "Dataset", name: "세율·공제 한눈에", description: "상속세·증여세·양도소득세·취득세·종합부동산세·종합소득세·법인세의 세율과 주요 공제 — 법조문 원문 그대로",
-  isBasedOn: Object.values(S).map((a: any) => ({ "@type": "Legislation", name: `${a.law} ${a.article}` })), creator: { "@type": "Organization", name: "하나 더 세무회계" } };
+  isBasedOn: Object.values(S).map((a: any) => ({ "@type": "Legislation", name: /^부칙/.test(a.article) ? `${a.law} ${a.article}` : `${a.law} ${a.article}(법률 제${a.promulgationNo}호)` })), creator: { "@type": "Organization", name: "하나 더 세무회계" } };
 ---
 <Base title="세율·공제 한눈에" description="상속세·증여세·양도소득세·취득세·종합부동산세·종합소득세·법인세의 세율과 주요 공제를 법조문 원문 그대로 모았습니다." jsonLd={[dataset]}>
   <PageHead tag="세율·공제 한눈에" title="세율과 공제, 원문 그대로" crumbs={[{ name: "세율·공제 한눈에" }]}
@@ -36,14 +47,14 @@ const dataset = { "@context": "https://schema.org", "@type": "Dataset", name: "�
 
   <section class="gut rt-sec">
     <div class="wrap rt-in">
-      <p class="rt-warn">이 쪽은 법제처 원문을 받은 날의 판입니다(<a href="/sources">원문 기준일</a>). 지난 거래·과세기간에는 그때 판이 적용될 수 있고, 세율을 더하거나 빼는 다른 조문도 있습니다. 실제 세액은 사실관계에 따라 달라지니 상담 때 함께 확인합니다.</p>
+      <p class="rt-warn">조문마다 적힌 판(법률 번호·공포일)의 원문입니다(<a href="/sources">원문 기준일</a>). 그 뒤에 법이 바뀌었을 수 있고, 지난 거래·과세기간에는 그때 판이 적용될 수 있으며, 세율을 더하거나 빼는 다른 조문도 있습니다. 실제 세액은 사실관계에 따라 달라지니 상담 때 함께 확인합니다.</p>
       {rates.sections.map((s: any) => (
         <section class="rt-tax" id={`r-${s.id}`} aria-labelledby={`rh-${s.id}`}>
           <h2 class="sec-h" id={`rh-${s.id}`}>{s.name}</h2>
           {s.groups.map((g: any) => (
             <div class="rt-group">
-              <p class="rt-gl">{g.label}</p>
-              {g.items.map((it: any) => { const { a, lines, tables } = render(it); return (
+              <p class="rt-gl">{groupLabel(s, g)}</p>
+              {g.items.map((it: any) => { const { a, lines, tables, dropped } = render(it); return (
                 <article class="rt-art">
                   <h3 class="rt-ah">{a.law} {a.article}<span>({a.title})</span></h3>
                   <p class="rt-meta">법률 제{a.promulgationNo}호({ymd(a.promulgationDate)} 공포) · 법제처 원문 {dot(a.fetchedAt)} 받음 · <a href={lawUrl(a)} target="_blank" rel="noopener">법제처에서 보기 ↗<span class="sr-only">(새 창)</span></a></p>
@@ -59,6 +70,7 @@ const dataset = { "@context": "https://schema.org", "@type": "Dataset", name: "�
                           : <p class="rt-formula">[계산식 — 그림으로 된 식이라 옮기지 않았습니다. <a href={lawUrl(a)} target="_blank" rel="noopener">법제처 원문에서 확인 ↗</a>]</p>)}
                       </div>
                     ))}
+                    {dropped.length > 0 && <p class="rt-drop">같은 조 {dropped.join("·")}은(는) 이 쪽에 옮기지 않았습니다 — <a href={lawUrl(a)} target="_blank" rel="noopener">법제처 원문에서 확인 ↗</a></p>}
                   </div>
                 </article>
               ); })}
@@ -104,6 +116,9 @@ const dataset = { "@context": "https://schema.org", "@type": "Dataset", name: "�
   @media (min-width: 700px) { .rt-tw tbody th { white-space: nowrap; } }
   .rt-tw tbody tr:last-child > * { border-bottom: 0; }
   .rt-formula { font-size: 15px; color: var(--ink2); }
-  .rt-omit { font-size: 15px; color: var(--ink2); }
+  .rt-omit, .rt-drop { font-size: 15px; color: var(--ink2); }
+  .rt-drop a { color: var(--ink); }
+  /* 글자 크게(zoom 1.15) 안의 붙박이 칸은 top도 1.15배가 되어 머리글 밑에 틈이 생김 — 되돌림 */
+  html[data-fs="lg"] .rt-nav { top: calc(env(safe-area-inset-top, 0px) + var(--header-h) / 1.15); }
   .rt-rel { display: flex; flex-wrap: wrap; gap: 10px; }
 </style>

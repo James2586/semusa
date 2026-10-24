@@ -1,4 +1,4 @@
-// 새 글 알림(RSS, 2026-10-24 5차 B1): 지면 칼럼(press.json — 제목·날짜·주소 그대로). 네이버 서치어드바이저에 제출하면 새 글 수집이 빨라진다.
+// 새 글 알림(RSS, 2026-10-24 5차 B1): 지면 칼럼(press.json — 제목·날짜·주소 그대로). 글은 이코노미조선 쪽으로 이어진다(구독자용 알림).
 import press from "../data/press.json";
 import site from "../data/site.json";
 

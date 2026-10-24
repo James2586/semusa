@@ -1,5 +1,6 @@
 // 빌드 전에 운영자가 고치는 파일(src/data/*.json, src/content/faq/*.md)을 검사한다.
 // 틀린 곳이 있으면 파일 이름과 줄 번호를 한국어로 알려 주고 빌드를 멈춘다.
+import { splitLawLine, pickParagraphs } from "../src/lib/lawTable.js";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -227,10 +228,18 @@ export function checkRates(text, srcText, { calcSlugs, topicSlugs }) {
     seen.add(s.id);
     if (s.topic && !topicSlugs.has(s.topic)) errors.push(`${at}: topic "${s.topic}"는 topics.json에 없습니다.`);
     for (const c of s.calculators || []) if (!calcSlugs.has(c)) errors.push(`${at}: calculators "${c}"는 calculators.json에 없습니다.`);
-    for (const g of s.groups || []) for (const it of g.items || []) {
-      const a = src[it.src];
-      if (!a) { errors.push(`${at}: src "${it.src}"는 docs/rates-sources.json에 없습니다 — scripts/make-rates-sources.mjs`); continue; }
-      for (const m of it.marks || []) if (!a.lines.some((l) => l.d === 1 && l.t.trim().startsWith(m))) errors.push(`${at}: ${it.src}에 "${m}"항이 없습니다.`);
+    for (const g of s.groups || []) {
+      if (!g.label && !g.version) errors.push(`${at}: 무리마다 label 또는 version이 있어야 합니다.`);
+      const first = src[g.items?.[0]?.src];
+      for (const it of g.items || []) {
+        const a = src[it.src];
+        if (!a) { errors.push(`${at}: src "${it.src}"는 docs/rates-sources.json에 없습니다 — scripts/make-rates-sources.mjs`); continue; }
+        for (const m of it.marks || []) if (!a.lines.some((l) => l.d === 1 && l.t.trim().startsWith(m))) errors.push(`${at}: ${it.src}에 "${m}"항이 없습니다.`);
+        // 부칙은 같은 무리 조문의 판(법률 번호)과 같아야 한다 — 법이 바뀌어 조문만 새 판이 되면 옛 부칙이 붙어 남는 것을 막음
+        if (/^부칙/.test(a.article) && first && a.promulgationNo !== first.promulgationNo) errors.push(`${at}: ${it.src}(법률 제${a.promulgationNo}호)가 조문 판(법률 제${first.promulgationNo}호)과 다릅니다.`);
+        // 보일 줄에 풀지 못한 선 문자 표가 있으면 멈춤(계산식 그림으로 잘못 보이지 않게)
+        for (const l of pickParagraphs(a.lines, it.marks)) if (splitLawLine(l.t).some((x) => x.type === "raw")) errors.push(`${at}: ${it.src}에 풀지 못한 표가 있습니다 — src/lib/lawTable.js`);
+      }
     }
     if (/\d/.test(s.omitted || "") && /[0-9]+(%|퍼센트|분의|원)/.test(s.omitted)) errors.push(`${at}: omitted에 세율·금액을 적지 말 것(원문 링크로만).`);
   }
