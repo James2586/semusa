@@ -104,7 +104,7 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
       <Pager target="home-bks" label="책 목록" />
       <div class="two books-2">
         <ul class="chan">
-          {channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
+          {channels.map((c) => <li><a href={(c as any).link || c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
           <li><a href="/columns"><span>칼럼·책 모두 보기</span><span aria-hidden="true">›</span></a></li>
         </ul>
         <div class="vid"><VideoCard id="portfolio" /></div>
