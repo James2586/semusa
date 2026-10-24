@@ -1,0 +1,21 @@
+{
+  "_note": "상황 길잡이(2026-10-24 3차 A1): 고른 상황 → 기한(deadlines.json event·yearly) · 서비스 · 계산기 · 칼럼(press.json 주제 칸) 잇기. 세법 내용은 여기 적지 않는다 — 기한·근거는 deadlines.json, 준비할 것은 services.json prepare.",
+  "situations": [
+    { "id": "inherit", "label": "가족이 돌아가셨어요", "event": "inherit", "services": ["inheritance-gift"], "calculators": ["inheritance", "inheritance-pro"] },
+    { "id": "gift", "label": "재산을 받았어요(증여)", "event": "gift", "services": ["inheritance-gift"], "calculators": ["gift", "burden-gift"] },
+    { "id": "give", "label": "자녀 등에게 재산을 주려고 해요", "event": "gift", "planned": true, "services": ["inheritance-gift"], "calculators": ["gift", "burden-gift"], "dateLabel": "주려는 날(예정)" },
+    { "id": "sell", "label": "집·땅을 팔았어요(팔 예정이에요)", "event": "sell", "services": ["real-estate"], "calculators": ["transfer"] },
+    { "id": "buy", "label": "집·땅을 샀어요(살 예정이에요)", "event": "buy", "services": ["real-estate"], "calculators": ["acquisition"] },
+    { "id": "own", "label": "집을 여러 채 가지고 있어요", "services": ["real-estate"], "calculators": ["jongbu", "transfer"], "yearly": ["jongbu"] },
+    { "id": "audit", "label": "세무조사 결과 통지를 받았어요", "event": "audit", "services": ["appeal"], "calculators": [] },
+    { "id": "notice", "label": "세금 고지서를 받았어요", "event": "notice", "services": ["appeal"], "calculators": [] },
+    { "id": "biz", "label": "사업을 시작했거나 운영해요", "services": ["bookkeeping"], "calculators": [], "yearly": ["vat2", "income", "vat1", "withholding"] },
+    { "id": "corp", "label": "법인을 운영하거나 법인 전환을 고민해요", "services": ["corporate"], "calculators": ["ceo-pay", "corp-gift", "corp-loan", "corp-dividend"], "yearly": ["corp", "withholding", "vat1", "vat2"] },
+    { "id": "retire", "label": "퇴직금을 받았어요(받을 예정이에요)", "services": [], "calculators": ["retirement", "exec-retirement"] }
+  ],
+  "who": [
+    { "id": "me", "label": "제 일이에요" },
+    { "id": "family", "label": "가족 일을 대신 알아봐요", "note": "가족 대신 알아보신다면, 아래 「이 화면 보내기」로 가족에게 이 결과를 보내 주세요." },
+    { "id": "corp", "label": "법인 일이에요", "services": ["corporate"], "calculators": ["corp-gift", "ceo-pay"] }
+  ]
+}

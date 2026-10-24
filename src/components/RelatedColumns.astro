@@ -1,0 +1,23 @@
+---
+// 관련 칼럼(2026-10-24 3차 C1): press.json articles의 주제 칸(services·calculators)으로 서비스·계산기 쪽에 칼럼을 잇는다. 제목·날짜는 지면 그대로.
+import press from "../data/press.json";
+import PlusList from "./PlusList.astro";
+interface Props { service?: string; calculator?: string; heading?: string; limit?: number }
+const { service, calculator, heading = "이 일에 대한 칼럼", limit = 4 } = Astro.props;
+const list = (press.articles || []).filter((a: any) => (service && a.services?.includes(service)) || (calculator && a.calculators?.includes(calculator))).slice(0, limit);
+const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
+const id = `h-col-${service || calculator}`;
+---
+{list.length > 0 && (
+  <section class="sec gut ruled" aria-labelledby={id}>
+    <div class="wrap">
+      <span class="tag">이코노미조선 「성광호의 세무 ABC」</span>
+      <h2 class="sec-h" id={id}>{heading}</h2>
+      <PlusList label={heading} items={list.map((a: any) => ({ href: a.url, ext: true, kicker: `${dot(a.date)} · ${a.topic}`, title: a.title }))} />
+      <p class="rc-more"><a class="more-link" href="/columns#h-press">칼럼 모두 보기 ›</a></p>
+    </div>
+  </section>
+)}
+<style>
+  .rc-more { margin-top: 20px; }
+</style>

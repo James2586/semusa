@@ -79,7 +79,11 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
         {press.articles?.length > 0 && (
           <>
             <h3 class="press-h">연재한 칼럼 {press.articles.length}편</h3>
-            <PlusList label="이코노미조선 칼럼" items={press.articles.map((a) => ({ href: a.url, ext: true, kicker: pressDate(a.date), title: a.title }))} />
+            <div class="press-chips" role="group" aria-label="칼럼 주제로 거르기">
+              {["전체", ...new Set(press.articles.map((a: any) => a.topic))].map((t, i) => <button type="button" class="fchip" aria-pressed={i === 0 ? "true" : "false"} data-topic={t}>{t}</button>)}
+            </div>
+            <p class="sr-only" role="status" id="press-status"></p>
+            <div id="press-list"><PlusList label="이코노미조선 칼럼" items={press.articles.map((a: any) => ({ href: a.url, ext: true, kicker: `${pressDate(a.date)} · ${a.topic}`, title: a.title, attrs: { "data-topic": a.topic } }))} /></div>
             <p class="more"><a class="more-link" href={ch["이코노미조선 칼럼"]} target="_blank" rel="noopener">이코노미조선에서 전체 보기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a></p>
           </>
         )}
@@ -141,6 +145,7 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
   .press-t:hover { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
   .press .go { justify-self: start; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
   .press-h { margin-top: 36px; font-size: 18px; }
+  .press-chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
   .press-sec .more { margin-top: 20px; }
   .press img { width: 100%; height: auto; display: block; border-radius: 4px; box-shadow: 0 10px 24px -18px rgba(21, 25, 21, .5); }
   .press-meta { display: grid; gap: 6px; align-content: center; padding: 0 4px 4px; }
@@ -240,4 +245,14 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
     document.querySelector(".cards")!.classList.toggle("wall", k === "책");
     status.textContent = `${k} ${n}개`;
   }));
+  // 칼럼 주제 칩(2026-10-24 3차 C1)
+  const pchips = [...document.querySelectorAll<HTMLButtonElement>(".press-chips .fchip")];
+  const prows = [...document.querySelectorAll<HTMLLIElement>("#press-list li[data-topic]")];
+  for (const c of pchips) c.addEventListener("click", () => {
+    const t = c.dataset.topic!;
+    for (const o of pchips) o.setAttribute("aria-pressed", String(o === c));
+    let n = 0;
+    for (const li of prows) { const show = t === "전체" || li.dataset.topic === t; li.hidden = !show; if (show) n++; }
+    document.getElementById("press-status")!.textContent = `${t} 칼럼 ${n}편`;
+  });
 </script>

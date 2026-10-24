@@ -6,6 +6,8 @@ import PageHead from "../../components/PageHead.astro";
 import PlusList from "../../components/PlusList.astro";
 import BookCover from "../../components/BookCover.astro";
 import FaqList from "../../components/FaqList.astro";
+import PrepareKit from "../../components/PrepareKit.astro";
+import RelatedColumns from "../../components/RelatedColumns.astro";
 import UpcomingDeadlines from "../../components/UpcomingDeadlines.astro";
 import svcData from "../../data/services.json";
 import calcData from "../../data/calculators.json";
@@ -102,12 +104,14 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
     </section>
   )}
 
+  <RelatedColumns service={svc.slug} />
+
   <section class="sec gut ruled" aria-labelledby="h-prep">
     <div class="wrap two">
       <div>
         <span class="tag">상담 전에</span>
         <h2 class="sec-h" id="h-prep">가져오시면 좋은 것</h2>
-        <ul class="checks checks-sm reveal">{svc.prepare.map((t: string) => <li>{t}</li>)}</ul>
+        <div class="prep-kit"><PrepareKit items={svc.prepare} id={svc.slug} title={svc.name} /></div>
         <p class="note">상담을 빠르게 하려는 목록이며, 법에서 정한 신고 첨부서류 목록은 아닙니다. 없는 것이 있어도 괜찮습니다.</p>
       </div>
       {book && (
@@ -154,8 +158,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
   .checks li { position: relative; padding: 14px 0 14px 34px; border-bottom: 1px solid var(--line); font-size: 17px; }
   .checks li::before { content: ""; position: absolute; left: 2px; top: 17px; width: 20px; height: 20px; border-radius: 50%; background: var(--moss)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 10.4l2.6 2.6L14 7.6' fill='none' stroke='%23E8C46A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px no-repeat; }
-  .checks-sm li { font-size: 16px; padding-block: 11px; }
-  .checks-sm li::before { top: 13px; }
+  .prep-kit { margin-top: 18px; }
   .two { display: grid; gap: 44px; }
   .two > * { min-width: 0; }
   .does { margin: 14px 0 0; padding-left: 1.1em; display: grid; gap: 8px; color: var(--ink2); }

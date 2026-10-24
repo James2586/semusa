@@ -81,3 +81,17 @@ test("일정 파일: 이미 지난 알림은 넣지 않는다(마감 10일 전�
 test("연도를 치는 중인 값(0202-03-15)은 계산하지 않는다", () => {
   for (const e of data.events) assert.equal(computeDeadline(e, "0202-03-15", { today }), null, e.id);
 });
+
+test("올해 세금 달력: 원천세 12번 + 매년 기한 5가지, 쉬는 날이면 다음 날(2026년 10.10 토 → 10.12 월)", async () => {
+  const { yearOccurrences, yearIcs } = await import("../src/lib/deadlineCalendar.js");
+  const occ = yearOccurrences(data.yearly, 2026, hol);
+  assert.equal(occ.filter((o) => o.id === "withholding").length, 12);
+  assert.equal(occ.length, 12 + data.yearly.filter((y) => y.rule.md).length);
+  const oct = occ.find((o) => o.id === "withholding" && o.rawIso === "2026-10-10");
+  assert.equal(oct.deadlineIso, "2026-10-12");
+  assert.deepEqual(oct.shifted.map((s) => s.reason), ["토요일", "일요일"]);
+  assert.ok(occ.every((o, i) => i === 0 || occ[i - 1].deadlineIso <= o.deadlineIso));
+  const ics = yearIcs(occ, { now: new Date(2026, 9, 24) });
+  assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, occ.length);
+  assert.ok((ics.match(/BEGIN:VALARM/g) || []).length < occ.length); // 지난 알림은 빠짐
+});

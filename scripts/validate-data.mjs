@@ -121,6 +121,59 @@ export function checkHome(text, svcSlugs, root = ROOT) {
   return errors;
 }
 
+// 지면 칼럼(2026-10-24): 기사 주소·날짜 모양, 주제 칸이 가리키는 서비스·계산기가 실제로 있는지
+export function checkPress(text, svcSlugs, calcSlugs) {
+  const errors = [];
+  const { data, error } = parseJsonFile("press.json", text);
+  if (error) return [error];
+  (data.articles || []).forEach((a, i) => {
+    const at = `press.json articles ${i + 1}번째`;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(a.date || "")) errors.push(`${at}: date는 "YYYY-MM-DD"이어야 합니다.`);
+    if (!a.title || !/^https:\/\//.test(a.url || "")) errors.push(`${at}: title과 https 주소가 있어야 합니다.`);
+    for (const s of a.services || []) if (!svcSlugs.has(s)) errors.push(`${at}: services "${s}"는 services.json에 없습니다.`);
+    for (const c of a.calculators || []) if (!calcSlugs.has(c)) errors.push(`${at}: calculators "${c}"는 calculators.json에 없습니다.`);
+  });
+  return errors;
+}
+
+// 상황 길잡이(2026-10-24 3차): 상황마다 가리키는 기한·서비스·계산기가 실제로 있는지
+export function checkGuide(text, svcSlugs, calcSlugs, eventIds, yearlyIds) {
+  const errors = [];
+  const { data, error } = parseJsonFile("guide.json", text);
+  if (error) return [error];
+  const all = [...(data.situations || []), ...(data.who || [])];
+  all.forEach((g) => {
+    const at = `guide.json "${g.id}"`;
+    if (!g.id || !g.label) errors.push(`${at}: id와 label이 있어야 합니다.`);
+    if (g.event && !eventIds.has(g.event)) errors.push(`${at}: event "${g.event}"는 deadlines.json events에 없습니다.`);
+    for (const y of g.yearly || []) if (!yearlyIds.has(y)) errors.push(`${at}: yearly "${y}"는 deadlines.json yearly에 없습니다.`);
+    for (const x of g.services || []) if (!svcSlugs.has(x)) errors.push(`${at}: services "${x}"는 services.json에 없습니다.`);
+    for (const c of g.calculators || []) if (!calcSlugs.has(c)) errors.push(`${at}: calculators "${c}"는 calculators.json에 없습니다.`);
+  });
+  if (!(data.situations || []).length) errors.push("guide.json: situations가 비었습니다.");
+  return errors;
+}
+
+// 용어 풀이(3차 C3): 인용은 docs/glossary-sources.json 원문을 글자 그대로, 풀이의 숫자는 인용에 있는 것만
+export function checkGlossary(text, srcText) {
+  const errors = [];
+  const { data, error } = parseJsonFile("glossary.json", text);
+  if (error) return [error];
+  const src = JSON.parse(srcText).items || {};
+  const ids = new Set();
+  for (const t of data.terms || []) {
+    const at = `glossary.json "${t.id}"`;
+    if (ids.has(t.id)) errors.push(`${at}: id가 겹칩니다.`);
+    ids.add(t.id);
+    if (!t.term || !t.plain || !t.law || !t.quotes?.length) { errors.push(`${at}: term·plain·law·quotes가 있어야 합니다.`); continue; }
+    for (const q of t.quotes) if (!src[q.src]?.lines?.some((l) => l.includes(q.text))) errors.push(`${at}: 인용이 원문(${q.src})에 글자 그대로 없습니다 — "${String(q.text).slice(0, 30)}…"`);
+    const quoted = t.quotes.map((q) => q.text).join(" ");
+    for (const n of String(t.plain).match(/\d[\d,]*(?:억|천만|만)?/g) || []) if (!quoted.includes(n)) errors.push(`${at}: 풀이의 숫자 "${n}"이(가) 인용 원문에 없습니다.`);
+    if (!src[t.quotes[0].src] || !t.law.startsWith(src[t.quotes[0].src].law)) errors.push(`${at}: law(${t.law})가 원문 법 이름과 다릅니다.`);
+  }
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -177,7 +230,10 @@ export function validateAll(root = ROOT) {
   let svcSlugs = new Set();
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
   errors.push(...checkHome(read("src/data/home.json"), svcSlugs, root));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json"]) {
+  errors.push(...checkPress(read("src/data/press.json"), svcSlugs, calcSlugs));
+  errors.push(...checkGlossary(read("src/data/glossary.json"), read("docs/glossary-sources.json")));
+  errors.push(...checkGuide(read("src/data/guide.json"), svcSlugs, calcSlugs, eventIds, yearlyIds));
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

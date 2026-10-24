@@ -183,3 +183,11 @@ input:not([type="checkbox"]):not([type="radio"]):hover, select:hover, textarea:h
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* 글자 크게(2026-10-24 3차 D2): 글자가 px라 쪽 전체를 1.15배로(zoom) — 머리글 「가가」, 이 기기에만 기억 */
+/* 머리글은 그대로 둔다(휴대폰에서 로고·찾기·메뉴가 한 줄에 들어가게) */
+html[data-fs="lg"] :is(main, .foot) { zoom: 1.15; }
+/* 창(찾기·메뉴)은 넓은 화면에서만 같이 키운다 — 휴대폰에선 100vw 창이 1.15배로 화면 밖에 걸렸다(3차 검토). 휴대폰은 글자만 키움 */
+@media (min-width: 700px) { html[data-fs="lg"] dialog { zoom: 1.15; } }
+/* 계산기 틀은 「화면 한 장 높이」를 지켜야 해서 키우지 않는다(되돌림 zoom) — 계산기 결과·보고서 창이 화면 밖에 뜨지 않게 */
+html[data-fs="lg"] .frame { zoom: calc(1 / 1.15); }

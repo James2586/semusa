@@ -1,13 +1,13 @@
 ---
 // 목록 줄(2026-10-24 2차 개편 공통 부품): 굵은 이름 + 설명 + 오른쪽 작은 +(올리면 90° 회전). 서비스·계산기·관련 글이 같은 모양.
 // meta: 이름 아래 [이름, 값] 짝(서비스 핵심 기한 — 짝 하나는 줄바꿈되지 않음), side: 컴퓨터에서 오른쪽 단 글(이런 분께 등)
-interface Item { href: string; title: string; vt?: string; kicker?: string; desc?: string; meta?: [string, string][]; side?: string; ext?: boolean }
+interface Item { href: string; title: string; vt?: string; attrs?: Record<string, string>; kicker?: string; desc?: string; meta?: [string, string][]; side?: string; ext?: boolean }
 interface Props { items: Item[]; label?: string }
 const { items, label } = Astro.props;
 ---
 <ul class:list={["plist reveal", items.some((i) => i.side) && "plist-2"]} aria-label={label}>
   {items.map((i) => (
-    <li>
+    <li {...(i.attrs || {})}>
       <a href={i.href} target={i.ext ? "_blank" : undefined} rel={i.ext ? "noopener" : undefined}>
         <span class="pl-main">
           {i.kicker && <small>{i.kicker}</small>}
@@ -22,6 +22,7 @@ const { items, label } = Astro.props;
   ))}
 </ul>
 <style>
+  .plist li[hidden] { display: none; }
   .plist { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--ink); }
   .plist a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
   .pl-main { display: grid; gap: 3px; min-width: 0; }

@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 29개(색인 26 + 공지·개인정보 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 29);
+test("페이지 33개(색인 29 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 33);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 26);
+  assert.equal((sm.match(/<loc>/g) || []).length, 29);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -116,7 +116,7 @@ test("마무리 띠: 404 말고 모든 페이지에 하나(홈도 — 2026-10-24
   for (const f of htmlFiles(DIST)) {
     const h = readFileSync(f, "utf8");
     const n = (h.match(/class="closing /g) || []).length;
-    const expect = /\/404\.html$/.test(f) ? 0 : 1;
+    const expect = /\/(404|offline)\.html$/.test(f) ? 0 : 1; // 오프라인 안내: 카카오톡은 인터넷이 있어야 열림
     assert.equal(n, expect, f);
   }
   assert.match(readFileSync(join(DIST, "services", "appeal.html"), "utf8"), /id="h-closing"[^>]*>기한이 있는 일입니다</);
@@ -146,4 +146,68 @@ test("기한 달력(2026-10-24): 홈·서비스 계산 카드에서 이어지고
   for (const f of ["index.html", "services/inheritance-gift.html", "services/real-estate.html", "services/appeal.html"]) {
     assert.match(readFileSync(join(DIST, f), "utf8"), /href="\/deadline" data-cal/, f);
   }
+});
+
+test("올해 세금 달력(2026-10-24 3차): 12달 × 두 해, 근거 조문, 자바스크립트 없이도 달력이 보인다", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "tax-calendar.html"), "utf8");
+  assert.equal((h.match(/class="tc-mon"/g) || []).length, 24);
+  assert.match(h, /국세기본법 제5조 제1항/);
+  assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /href="\/tax-calendar"/);
+});
+
+test("상황 길잡이: 상황마다 결과 묶음 · 법인 묶음 · 근거 조문 · 참고용 문구", { skip: !has }, () => {
+  const html = readFileSync(join(DIST, "guide.html"), "utf8");
+  const guide = JSON.parse(readFileSync("src/data/guide.json", "utf8"));
+  for (const g of guide.situations) {
+    assert.match(html, new RegExp(`data-panel="${g.id}"`), g.id);
+    if (!g.services.includes("corporate")) assert.match(html, new RegExp(`data-panel="${g.id}-corp"`), `${g.id}-corp`);
+  }
+  assert.match(html, /근거 상속세 및 증여세법 제67조/);
+  assert.match(html, /계산 결과는 참고용입니다/);
+  assert.match(html, /보내는 것은 고른 상황과 날짜가 담긴 주소뿐입니다/);
+  assert.match(html, /href="\/deadline\?e=inherit"/);
+});
+
+test("사이트 찾기: search.json · 머리글 찾기·글자 크게 · 질문 자리 id", { skip: !has }, () => {
+  const j = JSON.parse(readFileSync(join(DIST, "search.json"), "utf8"));
+  assert.ok(j.items.length > 40);
+  assert.ok(j.items.some((i) => i.u.startsWith("/faq#q-")));
+  const home = readFileSync(join(DIST, "index.html"), "utf8");
+  assert.match(home, /id="sx"/);
+  assert.match(home, /id="fsBtn"[^>]*aria-pressed="false"/);
+  assert.match(home, /localStorage\.getItem\("fs"\)/);
+  for (const i of j.items.filter((x) => x.u.startsWith("/faq#"))) assert.match(readFileSync(join(DIST, "faq.html"), "utf8"), new RegExp(`id="${i.u.slice(5)}"`));
+});
+
+test("상담 준비 꾸러미: 서비스마다 prepare 목록이 체크 칸으로 · 이 기기에만 안내", { skip: !has }, () => {
+  const svc = JSON.parse(readFileSync("src/data/services.json", "utf8")).services;
+  for (const sv of svc) {
+    const h = readFileSync(join(DIST, `services/${sv.slug}.html`), "utf8");
+    assert.match(h, new RegExp(`data-pk="${sv.slug}"`), sv.slug);
+    for (const t of sv.prepare) assert.ok(h.includes(`value="${t.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}"`), `${sv.slug}: ${t}`);
+    assert.match(h, /챙긴 표시는 이 기기에만 남고/);
+  }
+});
+
+test("용어 풀이: 용어마다 자리·원문·근거 조문 · 찾기 목록에 용어", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "glossary.html"), "utf8");
+  const g = JSON.parse(readFileSync("src/data/glossary.json", "utf8"));
+  for (const t of g.terms) {
+    assert.match(h, new RegExp(`id="g-${t.id}"`), t.id);
+    assert.ok(h.includes(t.law.replace(/&/g, "&amp;")), t.law);
+  }
+  assert.match(h, /출처 법제처 국가법령정보/);
+  const j = JSON.parse(readFileSync(join(DIST, "search.json"), "utf8"));
+  assert.equal(j.items.filter((i) => i.k === "용어").length, g.terms.length);
+});
+
+test("오프라인: sw.js가 미리 저장하는 쪽이 실제로 있고, 모든 쪽이 등록 · 오프라인 안내는 색인 밖", { skip: !has }, () => {
+  const sw = readFileSync(join(DIST, "sw.js"), "utf8");
+  const pre = JSON.parse(sw.match(/const PRECACHE = (\[[^\]]+\])/)[1]);
+  assert.deepEqual(pre, ["/deadline", "/tax-calendar", "/offline"]);
+  for (const u of pre) assert.ok(existsSync(join(DIST, `${u.slice(1)}.html`)), u);
+  assert.match(sw, /url\.origin !== location\.origin\) return/); // 다른 사이트(계산기·카카오)는 건드리지 않음
+  assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /serviceWorker\.register\("\/sw\.js"\)/);
+  assert.doesNotMatch(readFileSync(join(DIST, "sitemap-0.xml"), "utf8"), /offline/);
+  assert.match(readFileSync(join(DIST, "offline.html"), "utf8"), /name="robots" content="noindex"/);
 });

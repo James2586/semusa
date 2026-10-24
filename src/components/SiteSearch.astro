@@ -1,0 +1,127 @@
+---
+// 사이트 찾기 창(2026-10-24 3차 A2): 머리글 🔍 · Ctrl/⌘+K · "/" 로 연다. 목록(/search.json)은 처음 열 때만 받는다 — 첫 화면 용량 그대로.
+// 거르기는 src/lib/searchIndex.js searchItems(글자 일치만 — AI·점수 노출 없음).
+const SUGGEST = ["상속세 기한", "양도세", "종부세", "증여 공제", "법인 전환", "세무조사", "고지서"];
+---
+<dialog class="sx" id="sx" aria-label="사이트에서 찾기">
+  <div class="sx-top" role="search">
+    <svg class="sx-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+    <label for="sx-in" class="sr-only">사이트에서 찾기</label>
+    <input id="sx-in" type="search" placeholder="예: 양도세, 상속 기한, 종부세" autocomplete="off" enterkeyhint="search" spellcheck="false" />
+    <button type="button" class="sx-close" data-sx-close>닫기</button>
+  </div>
+  <p class="sx-st" role="status" aria-live="polite" data-sx-st></p>
+  <div class="sx-sug" data-sx-sug>
+    <p class="sx-sh">이런 걸 찾아보세요</p>
+    <div class="sx-chips">{SUGGEST.map((s) => <button type="button" class="fchip" data-sx-q={s}>{s}</button>)}</div>
+  </div>
+  <ul class="sx-list" data-sx-list></ul>
+  <p class="sx-foot">찾지 못한 것은 <a href="/guide">상황 길잡이</a>에서 고르거나, 카카오톡으로 물어보세요.</p>
+</dialog>
+
+<style is:global>
+  .sx { width: min(680px, calc(100vw - 24px)); max-height: min(78vh, 720px); margin: 8vh auto auto; padding: 0; border: 1px solid var(--line); border-top: 3px solid var(--gold); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: 0 30px 60px -30px rgba(17, 21, 17, .5); }
+  .sx[open] { display: flex; flex-direction: column; }
+  .sx::backdrop { background: rgba(17, 21, 17, .45); }
+  .sx-top { display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 16px; border-bottom: 1px solid var(--line); }
+  .sx-ico { width: 22px; height: 22px; fill: none; stroke: var(--ink2); stroke-width: 2; stroke-linecap: round; flex: none; }
+  .sx-top input { flex: 1; min-width: 0; min-height: 48px; border: 0; background: transparent; font: 500 18px var(--f-body); color: var(--ink); }
+  .sx-top input:focus { outline: none; }
+  .sx-top:focus-within { box-shadow: inset 0 -2px 0 var(--moss); }
+  .sx-close { min-height: 44px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 999px; background: var(--surface); font: 600 15px var(--f-body); color: var(--ink2); cursor: pointer; }
+  .sx-close:focus-visible, .sx-list a:focus-visible, .sx-foot a:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .sx-st { padding: 10px 16px 0; font-size: 14px; color: var(--ink2); min-height: 1px; }
+  .sx-st:empty { padding: 0; }
+  .sx-sug { padding: 12px 16px 4px; }
+  .sx-sug[hidden] { display: none; }
+  .sx-sh { font-size: 14px; color: var(--ink2); margin-bottom: 8px; }
+  .sx-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sx-list { list-style: none; margin: 0; padding: 6px 8px; overflow-y: auto; overscroll-behavior: contain; flex: 1; }
+  .sx-list a { display: grid; gap: 2px; padding: 10px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); }
+  .sx-list a:hover, .sx-list a:focus-visible { background: var(--gold-soft); }
+  .sx-k { font-size: 14px; color: var(--gold-text); font-weight: 700; }
+  .sx-t { font-size: 16.5px; font-weight: 700; line-height: 1.45; }
+  .sx-d { font-size: 14.5px; color: var(--ink2); line-height: 1.5; }
+  .sx-foot { padding: 12px 16px 14px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--ink2); }
+  .sx-foot a { color: var(--ink); font-weight: 600; }
+  @media (max-width: 699px) {
+    html[data-fs="lg"] .sx-top input { font-size: 20px; }
+    html[data-fs="lg"] .sx-t { font-size: 19px; }
+    html[data-fs="lg"] .sx-d, html[data-fs="lg"] .sx-foot { font-size: 16.5px; }
+  }
+  @media (max-width: 599px) { .sx { width: 100vw; max-width: 100vw; height: 100%; max-height: 100%; margin: 0; border-radius: 0; border-top-width: 0; } }
+</style>
+
+<script>
+  import { searchItems } from "../lib/searchIndex.js";
+  const dlg = document.getElementById("sx") as HTMLDialogElement;
+  const input = document.getElementById("sx-in") as HTMLInputElement;
+  const list = dlg.querySelector<HTMLUListElement>("[data-sx-list]")!;
+  const st = dlg.querySelector<HTMLElement>("[data-sx-st]")!;
+  const sug = dlg.querySelector<HTMLElement>("[data-sx-sug]")!;
+  let items: any[] | null = null, loading: Promise<void> | null = null, failed = false, opener: HTMLElement | null = null;
+
+  function load() {
+    if (!loading) {
+      failed = false;
+      loading = fetch("/search.json").then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }).then((j) => { items = j.items || []; })
+        .catch(() => { items = null; loading = null; failed = true; });
+    }
+    return loading;
+  }
+  function render() {
+    const q = input.value.trim();
+    sug.hidden = !!q;
+    list.replaceChildren();
+    if (!q) { st.textContent = ""; return; }
+    // 목록을 못 받았으면 알린다 — 다시 받기는 글자를 칠 때(입력 처리기)만, 여기서 다시 부르면 끊긴 동안 끝없이 돈다
+    if (!items) { st.textContent = failed ? "찾기 목록을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요." : "목록을 불러오는 중…"; return; }
+    const found = searchItems(items, q);
+    st.textContent = found.length ? `${found.length}개 찾음${found.length === 30 ? "(앞 30개)" : ""}` : `「${q}」은(는) 찾지 못했습니다. 낱말을 줄이거나 다르게 적어 보세요.`;
+    for (const it of found) {
+      const li = document.createElement("li"), a = document.createElement("a");
+      a.href = it.u;
+      if (it.ext) { a.target = "_blank"; a.rel = "noopener"; }
+      const k = document.createElement("span"); k.className = "sx-k"; k.textContent = it.k + (it.ext ? " · 새 창" : "");
+      const t = document.createElement("span"); t.className = "sx-t"; t.textContent = it.t;
+      const d = document.createElement("span"); d.className = "sx-d"; d.textContent = it.d || "";
+      a.append(k, t, d); li.append(a); list.append(li);
+    }
+  }
+  function open(from?: HTMLElement | null) {
+    if (dlg.open) return;
+    const act = document.activeElement as HTMLElement | null;
+    opener = from || (act && act !== document.body ? act : document.getElementById("sxBtn"));
+    dlg.showModal(); input.focus(); input.select();
+    load().then(render);
+  }
+  dlg.addEventListener("close", () => opener?.focus?.());
+  dlg.addEventListener("click", (e) => {
+    const t = e.target as HTMLElement;
+    if (t === dlg || t.closest("[data-sx-close]")) dlg.close();
+    const qb = t.closest<HTMLElement>("[data-sx-q]");
+    if (qb) { input.value = qb.dataset.sxQ!; render(); input.focus(); }
+    if (t.closest(".sx-list a, .sx-foot a") && !(t.closest("a") as HTMLAnchorElement).target) dlg.close();
+  });
+  input.addEventListener("input", () => { render(); if (failed && !items) load().then(render); });
+  // 찾기 칸에 글자가 있으면 Chrome은 첫 Esc를 「글자 지우기」로 쓴다 — 창 닫기로 맞춘다
+  input.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); dlg.close(); } });
+  // ↓↑로 결과 사이를 오간다(입력칸 ↔ 첫 결과)
+  dlg.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    const links = [...list.querySelectorAll<HTMLAnchorElement>("a")];
+    if (!links.length) return;
+    const i = links.indexOf(document.activeElement as HTMLAnchorElement);
+    e.preventDefault();
+    if (e.key === "ArrowDown") links[Math.min(i + 1, links.length - 1)].focus();
+    else if (i <= 0) input.focus();
+    else links[i - 1].focus();
+  });
+  document.querySelectorAll<HTMLElement>("[data-sx-open]").forEach((b) => b.addEventListener("click", () => open(b)));
+  addEventListener("keydown", (e) => {
+    const t = e.target as HTMLElement;
+    const typing = t.closest("input, textarea, select, [contenteditable='true']");
+    if ((e.key === "k" || e.key === "K") && (e.ctrlKey || e.metaKey)) { e.preventDefault(); open(); }
+    else if (e.key === "/" && !typing && !e.altKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); open(); }
+  });
+</script>

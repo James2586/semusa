@@ -2,19 +2,20 @@
 // categories: 서비스 쪽에서 그 분야 질문만(services.json faq — faq 파일의 category)
 interface Props { limit?: number; categories?: string[] }
 const { limit, categories } = Astro.props;
-const mods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
-const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).filter((f) => !categories || categories.includes(f.category)).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
+import { faqId } from "../lib/searchIndex.js";
+const mods = Object.entries(import.meta.glob("../content/faq/*.md", { eager: true })) as [string, any][];
+const faqs = mods.map(([path, m]) => ({ ...m.frontmatter, id: faqId(path), Content: m.Content })).filter((f) => !categories || categories.includes(f.category)).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
 ---
 <div class="faq">
   {faqs.map((f) => (
-    <details data-cat={f.category}>
+    <details data-cat={f.category} id={f.id}>
       <summary><span class="q" aria-hidden="true">Q</span><span>{f.q}</span><span class="pm" aria-hidden="true">+</span></summary>
       <div class="a prose"><f.Content />{f.law && <p class="law">{f.law}</p>}</div>
     </details>
   ))}
 </div>
 <style>
-  .faq details { border-bottom: 1px solid var(--line); }
+  .faq details { border-bottom: 1px solid var(--line); scroll-margin-top: calc(var(--header-h) + 16px); }
   .faq { border-top: 1px solid var(--line); }
   .faq details[hidden] { display: none; }
   .faq summary { display: flex; gap: 12px; align-items: flex-start; padding: 18px 0; cursor: pointer; list-style: none; font-size: 17.5px; font-weight: 600; }
@@ -24,3 +25,19 @@ const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).filter(
   .faq details[open] .pm { transform: rotate(45deg); }
   .a { padding: 0 0 20px 26px; font-size: 16.5px; }
 </style>
+<script>
+  // 찾기에서 /faq#q-… 로 오면 그 질문을 펼친다
+  function openHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const d = id && document.getElementById(id);
+    if (!(d instanceof HTMLDetailsElement) || !d.closest(".faq")) return;
+    // 다른 분야 칩으로 거른 채면 「전체」로 돌려 칩과 목록을 맞춘다
+    if (d.hidden) document.querySelector<HTMLButtonElement>('.fchip[data-cat="전체"]')?.click();
+    d.hidden = false; d.open = true;
+    d.scrollIntoView({ block: "start" });
+    d.querySelector("summary")?.focus({ preventScroll: true });
+  }
+  // 첫 열기: 다른 스크립트(칩)가 붙은 뒤에
+  if (document.readyState === "complete") openHash(); else addEventListener("load", openHash, { once: true });
+  addEventListener("hashchange", openHash);
+</script>

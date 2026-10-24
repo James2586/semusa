@@ -20,6 +20,10 @@ import Logo from "./Logo.astro";
     <div class="f-col">
       <p class="f-h">바로가기</p>
       <ul class="foot-links">
+        <li><a href="/deadline">기한 달력</a></li>
+        <li><a href="/tax-calendar">올해 세금 달력</a></li>
+        <li><a href="/guide">상황 길잡이</a></li>
+        <li><a href="/glossary">용어 풀이</a></li>
         <li><a href="/notice">공지사항</a></li>
         <li><a href="/privacy">개인정보처리방침</a></li>
         {site.channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener">{c.name}</a></li>)}
@@ -43,8 +47,10 @@ import Logo from "./Logo.astro";
   .foot-biz { color: #CFCABC; line-height: 1.9; }
   .foot-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 18px; }
   .foot-links a { color: #E9E4D6; display: inline-flex; align-items: center; min-height: 44px; padding: 0; text-underline-offset: 4px; text-decoration-color: rgba(233, 228, 214, .4); }
+  /* 아래 막대는 1023px까지 보이므로 그 높이만큼 비워 둔다 */
+  @media (min-width: 1024px) { .foot { padding-bottom: 56px; } }
   @media (min-width: 900px) {
-    .foot { padding-block: 56px; }
+    .foot { padding-top: 56px; }
     .foot-in { grid-template-columns: 1fr 1.2fr 1.4fr; gap: 0; }
     .foot-in > * { padding-inline: 32px; }
     .foot-in > :first-child { padding-left: 0; }

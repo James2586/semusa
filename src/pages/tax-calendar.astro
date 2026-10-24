@@ -1,0 +1,179 @@
+---
+// 올해 세금 달력(2026-10-24 3차 B1): deadlines.json yearly(법조문 대조분)를 12달 달력으로. 쉬는 날이면 다음 날(국세기본법 §5①) — 새 기한 없음.
+// 빌드한 해와 다음 해를 미리 그려 두고(자바스크립트 없이도 보임), 화면은 지난 날·이번 달 표시와 내 달력에 넣기만 한다.
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import data from "../data/deadlines.json";
+import { fetchHolidayRows } from "../lib/holidays.js";
+import { buildHolidayIndex, toIso } from "../lib/ntsDeadline.js";
+import { yearOccurrences } from "../lib/deadlineCalendar.js";
+const rows = await fetchHolidayRows();
+const hol = buildHolidayIndex(rows);
+const Y = new Date().getFullYear();
+const WD = ["일", "월", "화", "수", "목", "금", "토"];
+const md = (iso: string) => { const [, m, d] = iso.split("-").map(Number); return `${m}. ${d}.`; };
+const years = [Y, Y + 1].map((y) => {
+  const occ = yearOccurrences(data.yearly, y, hol);
+  const months = Array.from({ length: 12 }, (_, m) => {
+    const first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
+    const items = occ.filter((o) => Number(o.deadlineIso.slice(5, 7)) === m + 1 && Number(o.deadlineIso.slice(0, 4)) === y);
+    const due = new Set(items.map((o) => o.deadlineIso));
+    const moved = new Set(items.flatMap((o) => o.shifted.map((s: any) => s.iso)));
+    const cells = Array.from({ length: days }, (_, i) => {
+      const date = new Date(y, m, i + 1), iso = toIso(date);
+      return { d: i + 1, iso, hol: hol.byDate.get(iso), we: date.getDay() === 0 || date.getDay() === 6, due: due.has(iso), moved: moved.has(iso) };
+    });
+    return { m: m + 1, first, cells, items };
+  });
+  return { y, occ, months, known: occ.every((o) => o.knownYear) };
+});
+const kinds = data.yearly;
+---
+<Base title="올해 세금 달력" description="원천세·부가가치세·종합소득세·법인세·종합부동산세 — 매년 돌아오는 신고·납부 기한을 12달 달력으로, 쉬는 날은 미뤄진 날로 보여 드립니다.">
+  <PageHead tag="올해 세금 달력" title="1년 세금 달력" crumbs={[{ name: "올해 세금 달력" }]}
+    lead="매년 돌아오는 신고·납부 기한을 12달로 펼쳤습니다. 기한이 토·일요일·공휴일이면 다음 날로 옮겨 적었습니다." />
+
+  <section class="gut tc-sec" data-tc>
+    <div class="wrap">
+      <div class="tc-bar">
+        <div class="tc-years" role="group" aria-label="해 고르기">
+          {years.map((Y0, i) => <button type="button" class="fchip" aria-pressed={i === 0 ? "true" : "false"} data-year={Y0.y}>{Y0.y}년</button>)}
+        </div>
+        <div class="tc-acts">
+          <a class="tc-now" href="#" data-now hidden>이번 달로 ↓</a>
+          <button type="button" class="btn btn-moss" data-ics hidden>이 해 일정 모두 내 달력에 넣기</button>
+          <button type="button" class="btn btn-line" data-print hidden>인쇄</button>
+        </div>
+      </div>
+      <p class="tc-status" role="status" data-status></p>
+
+      {years.map((Y0, yi) => (
+        <div class="tc-year" data-panel={Y0.y} hidden={yi !== 0}>
+          <h2 class="sr-only">{Y0.y}년</h2>
+          {!Y0.known && <p class="tc-warn">※ {Y0.y}년 공휴일 자료가 아직 없어 토·일요일·노동절만 반영했습니다. 공휴일이 정해지면 다시 확인하세요.</p>}
+          <div class="tc-grid">
+            {Y0.months.map((mo) => (
+              <article class="tc-mon" id={`m-${Y0.y}-${mo.m}`} data-ym={`${Y0.y}-${String(mo.m).padStart(2, "0")}`}>
+                <h3 class="tc-mt">{mo.m}월<small data-badge></small></h3>
+                <div class="tc-g" aria-hidden="true">
+                  {WD.map((w) => <span class="tc-wd">{w}</span>)}
+                  {Array.from({ length: mo.first }, () => <span></span>)}
+                  {mo.cells.map((c) => <span class:list={["tc-d", c.we && "we", c.hol && "hol", c.moved && "moved", c.due && "due"]} data-iso={c.iso} title={c.hol || undefined}>{c.d}</span>)}
+                </div>
+                {mo.items.length > 0 ? (
+                  <ul class="tc-list">
+                    {mo.items.map((o) => (
+                      <li data-iso={o.deadlineIso}>
+                        <b>{Number(o.deadlineIso.slice(8))}일({o.weekday})</b> {o.name}
+                        {o.shifted.length > 0 && <span class="tc-mv">{o.shifted.map((s: any) => `${md(s.iso)}(${s.weekday})${/^[토일]요일$/.test(s.reason) ? "" : ` ${s.reason}`}`).join("·")}이 쉬는 날이라 미뤄짐</span>}
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p class="tc-none">이달은 매년 돌아오는 기한이 없습니다.</p>}
+              </article>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div class="tc-law">
+        <h2 class="sec-h tc-lh">달력에 넣은 기한과 근거</h2>
+        <ul>
+          {kinds.map((k) => <li><b>{k.name}</b><span>{k.when}</span><span class="tc-l">{k.law}</span></li>)}
+          <li><b>쉬는 날 연장</b><span>기한이 토·일요일·공휴일·노동절이면 그다음 날</span><span class="tc-l">국세기본법 제5조 제1항</span></li>
+        </ul>
+        <p class="tc-note">종합부동산세는 고지된 세액을 내는 기한이고, 법인세는 사업연도가 1월~12월인 법인의 기한입니다. 사정마다 다를 수 있어 결과는 참고용입니다. 특정한 일의 기한은 <a href="/deadline">기한 달력</a>에서 날짜를 넣어 보세요.</p>
+      </div>
+    </div>
+    <script type="application/json" data-tc-data set:html={JSON.stringify(years.map((Y0) => ({ y: Y0.y, occ: Y0.occ.map((o) => ({ id: o.id, name: o.name, law: o.law, deadlineIso: o.deadlineIso })) }))).replace(/</g, "\\u003c")} />
+  </section>
+</Base>
+
+<style>
+  .tc-sec { padding-block: 24px 72px; }
+  .tc-bar { display: flex; flex-wrap: wrap; gap: 12px 20px; justify-content: space-between; align-items: center; }
+  .tc-years, .tc-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tc-now { font-weight: 700; color: var(--gold-text); min-height: 44px; display: inline-flex; align-items: center; padding: 0 6px; text-underline-offset: 4px; }
+  .tc-status { margin-top: 8px; font-size: 14.5px; color: var(--muted); min-height: 1.4em; }
+  .tc-warn { margin: 10px 0 0; font-size: 15px; color: var(--ink2); padding: 10px 14px; background: var(--surface); border-left: 3px solid var(--moss); border-radius: 0 8px 8px 0; }
+  .tc-grid { margin-top: 16px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); }
+  .tc-mon { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 14px 12px; display: grid; gap: 10px; align-content: start; scroll-margin-top: calc(var(--header-h) + 16px); }
+  .tc-mon.now { border-color: var(--moss); box-shadow: 0 0 0 1px var(--moss); }
+  .tc-mt { font-family: var(--f-display); font-size: 20px; display: flex; justify-content: space-between; align-items: baseline; }
+  .tc-mt small { font-family: var(--f-body); font-size: 14px; font-weight: 700; color: var(--moss); }
+  .tc-g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+  .tc-wd { font-size: 14px; color: var(--muted); text-align: center; }
+  .tc-d { position: relative; height: 28px; border-radius: 5px; display: grid; place-items: center; font-size: 14px; color: var(--ink2); font-variant-numeric: tabular-nums; }
+  .tc-d.we { color: var(--muted); }
+  .tc-d.hol { background: #E8E2D6; }
+  .tc-d.moved::after { content: ""; position: absolute; left: 22%; right: 22%; top: 50%; border-top: 1.5px solid #B8553A; transform: rotate(-35deg); }
+  .tc-d.due { background: var(--moss); color: var(--on-moss); font-weight: 700; }
+  /* 지난 날: 흐린 색(투명도로 흐리면 글자 대비가 모자람) */
+  .tc-d.past { color: var(--muted); background: transparent; }
+  .tc-d.past.hol { background: #F0ECE4; }
+  .tc-d.past.due { background: #5F6E63; color: #FFFFFF; }
+  .tc-d.today { outline: 2px dashed var(--gold-text); outline-offset: -2px; }
+  .tc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 10px; font-size: 15.5px; }
+  .tc-list li.done { color: var(--muted); }
+  .tc-list b { font-variant-numeric: tabular-nums; }
+  .tc-mv { display: block; font-size: 14px; color: var(--muted); }
+  .tc-none { border-top: 1px solid var(--line); padding-top: 10px; font-size: 14.5px; color: var(--muted); }
+  .tc-law { margin-top: 40px; display: grid; gap: 12px; }
+  .tc-law ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  .tc-law li { display: grid; gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .tc-law li span { font-size: 15.5px; color: var(--ink2); }
+  .tc-law .tc-l { font-size: 14px; color: var(--muted); }
+  .tc-note { font-size: 15px; color: var(--muted); }
+  .tc-note a { color: var(--gold-text); }
+  @media (min-width: 900px) { .tc-law li { grid-template-columns: 240px minmax(0, 1fr) 260px; gap: 16px; align-items: baseline; } }
+  @media print {
+    :global(.hdr), :global(.bbar), :global(.foot), :global(.closing), :global(.totop), :global(.page-head), .tc-bar { display: none !important; }
+    .tc-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .tc-mon { break-inside: avoid; padding: 8px; }
+    .tc-d { height: 18px; font-size: 9pt; }
+    .tc-d.due { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+
+<script>
+  import { toIso } from "../lib/ntsDeadline.js";
+  import { yearIcs } from "../lib/deadlineCalendar.js";
+  const root = document.querySelector<HTMLElement>("[data-tc]")!;
+  const data = JSON.parse(root.querySelector("[data-tc-data]")!.textContent || "[]");
+  const todayIso = toIso(new Date()), ym = todayIso.slice(0, 7);
+  const chips = [...root.querySelectorAll<HTMLButtonElement>("[data-year]")];
+  const panels = [...root.querySelectorAll<HTMLElement>("[data-panel]")];
+  const status = root.querySelector<HTMLElement>("[data-status]")!;
+  // 빌드한 해가 아니라 오늘이 속한 해로 연다(1월 1일 뒤 다시 배포하기 전·오프라인 저장본에서도 맞게)
+  const nowY = new Date().getFullYear();
+  let year = Number((chips.find((c) => Number(c.dataset.year) === nowY) || chips[0]).dataset.year);
+  // 지난 날·오늘·이번 달
+  root.querySelectorAll<HTMLElement>(".tc-d[data-iso]").forEach((c) => { if (c.dataset.iso! < todayIso) c.classList.add("past"); if (c.dataset.iso === todayIso) c.classList.add("today"); });
+  root.querySelectorAll<HTMLElement>(".tc-list li[data-iso]").forEach((li) => { if (li.dataset.iso! < todayIso) li.classList.add("done"); });
+  const cur = root.querySelector<HTMLElement>(`.tc-mon[data-ym="${ym}"]`);
+  const now = root.querySelector<HTMLAnchorElement>("[data-now]")!;
+  if (cur) { cur.classList.add("now"); cur.querySelector("[data-badge]")!.textContent = "이번 달"; now.href = `#${cur.id}`; }
+  function show(y: number) {
+    year = y;
+    for (const c of chips) c.setAttribute("aria-pressed", String(Number(c.dataset.year) === y));
+    for (const p of panels) p.hidden = Number(p.dataset.panel) !== y;
+    now.hidden = !(cur && cur.closest<HTMLElement>("[data-panel]")!.dataset.panel === String(y));
+    status.textContent = "";
+  }
+  for (const c of chips) c.addEventListener("click", () => show(Number(c.dataset.year)));
+  show(year);
+  const ics = root.querySelector<HTMLButtonElement>("[data-ics]")!, pr = root.querySelector<HTMLButtonElement>("[data-print]")!;
+  ics.hidden = false; pr.hidden = false;
+  ics.addEventListener("click", () => {
+    const y = data.find((x: any) => x.y === year);
+    const items = y.occ.filter((o: any) => o.deadlineIso >= todayIso);
+    if (!items.length) { status.textContent = `${year}년에는 남은 기한이 없습니다.`; return; }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([yearIcs(items, { url: location.href })], { type: "text/calendar;charset=utf-8" }));
+    a.download = `tax-calendar-${year}.ics`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    status.textContent = `${year}년 남은 기한 ${items.length}건을 일정 파일로 받았어요. 열면 휴대폰 달력에 들어갑니다(7일 전 알림 — 구글 달력은 알림을 따로 설정).`;
+  });
+  pr.addEventListener("click", () => window.print());
+</script>

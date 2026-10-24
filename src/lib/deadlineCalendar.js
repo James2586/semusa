@@ -1,7 +1,7 @@
 // 기한 달력(2026-10-24 "결정적 한 장면"): computeDeadline 결과를 달·칸·상태로 옮긴다. 기한을 새로 계산하지 않는다 —
 // 시작일·말일·원래 마감일·건너뛴 날·진짜 마감일은 결과 값 그대로, 쉬는 날 이름은 ntsDeadline.js(nonBusinessReason) 그대로.
 // 펼치는 달: 시작 달·원래 마감 달·진짜 마감 달. 그 사이 달은 접힌 띠(fold) 하나로 묶고, 펼치면 볼 달 목록을 함께 준다.
-import { parseIso, toIso, weekdayKo, nonBusinessReason } from "./ntsDeadline.js";
+import { parseIso, toIso, weekdayKo, nonBusinessReason, applyDeadlineExtension } from "./ntsDeadline.js";
 
 const addDays = (iso, n) => { const d = parseIso(iso); return toIso(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)); };
 const monthKey = (iso) => iso.slice(0, 7);
@@ -90,5 +90,36 @@ export function deadlineIcs({ name, deadlineIso, startIso, url = "", law = "", n
     ...(alarmAt(30) > now ? alarm("-P29DT15H", "30일 전") : []), ...(alarmAt(7) > now ? alarm("-P6DT15H", "7일 전") : []),
     "END:VEVENT", "END:VCALENDAR",
   ];
+  return lines.map(fold).join("\r\n") + "\r\n";
+}
+
+// 올해 세금 달력(2026-10-24 3차 B1): deadlines.json yearly를 그해의 회차로 펼친다 — 매달(monthDay)은 12번, 매년(md)은 한 번.
+// 쉬는 날 연장은 applyDeadlineExtension(국세기본법 §5①) 그대로. 새 기한을 만들지 않는다.
+export function yearOccurrences(yearly, year, holidays = null) {
+  const out = [];
+  for (const it of yearly || []) {
+    const raws = it.rule?.monthDay ? Array.from({ length: 12 }, (_, m) => new Date(year, m, it.rule.monthDay))
+      : it.rule?.md ? [new Date(year, Number(it.rule.md.slice(0, 2)) - 1, Number(it.rule.md.slice(3)))] : [];
+    for (const raw of raws) {
+      const ext = applyDeadlineExtension(raw, holidays);
+      out.push({ id: it.id, name: it.name, law: it.law, monthly: !!it.rule.monthDay, rawIso: toIso(raw), rawWeekday: weekdayKo(raw), deadlineIso: ext.deadlineIso, weekday: weekdayKo(ext.deadline), shifted: ext.shifted, knownYear: ext.knownYear });
+    }
+  }
+  return out.sort((a, b) => a.deadlineIso.localeCompare(b.deadlineIso) || a.name.localeCompare(b.name));
+}
+
+// 여러 기한을 한 파일에(1년치) — 기한마다 하루 일정 + 7일 전 오전 9시 알림(지난 알림은 뺌)
+export function yearIcs(items, { now = new Date(), url = "" } = {}) {
+  const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//hanadeo//tax-calendar//KO", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+  for (const it of items) {
+    const d = it.deadlineIso.replace(/-/g, ""), next = addDays(it.deadlineIso, 1).replace(/-/g, "");
+    const [yy, mm, dd] = it.deadlineIso.split("-").map(Number);
+    lines.push("BEGIN:VEVENT", `UID:${d}-${it.id}@semusatax.vercel.app`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${next}`, "TRANSP:TRANSPARENT",
+      `SUMMARY:${icsEsc(it.name)}`, `DESCRIPTION:${icsEsc([`근거: ${it.law}`, "결과는 참고용입니다.", url].filter(Boolean).join("\n"))}`);
+    if (new Date(yy, mm - 1, dd - 7, 9) > now) lines.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc(`${it.name} 7일 전`)}`, "TRIGGER:-P6DT15H", "END:VALARM");
+    lines.push("END:VEVENT");
+  }
+  lines.push("END:VCALENDAR");
   return lines.map(fold).join("\r\n") + "\r\n";
 }
