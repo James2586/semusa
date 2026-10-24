@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 31개(색인 28 + 공지·개인정보 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 31);
+test("페이지 33개(색인 29 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 33);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 28);
+  assert.equal((sm.match(/<loc>/g) || []).length, 29);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -116,7 +116,7 @@ test("마무리 띠: 404 말고 모든 페이지에 하나(홈도 — 2026-10-24
   for (const f of htmlFiles(DIST)) {
     const h = readFileSync(f, "utf8");
     const n = (h.match(/class="closing /g) || []).length;
-    const expect = /\/404\.html$/.test(f) ? 0 : 1;
+    const expect = /\/(404|offline)\.html$/.test(f) ? 0 : 1; // 오프라인 안내: 카카오톡은 인터넷이 있어야 열림
     assert.equal(n, expect, f);
   }
   assert.match(readFileSync(join(DIST, "services", "appeal.html"), "utf8"), /id="h-closing"[^>]*>기한이 있는 일입니다</);
@@ -187,4 +187,27 @@ test("상담 준비 꾸러미: 서비스마다 prepare 목록이 체크 칸으�
     for (const t of sv.prepare) assert.ok(h.includes(`value="${t.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}"`), `${sv.slug}: ${t}`);
     assert.match(h, /챙긴 표시는 이 기기에만 남고/);
   }
+});
+
+test("용어 풀이: 용어마다 자리·원문·근거 조문 · 찾기 목록에 용어", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "glossary.html"), "utf8");
+  const g = JSON.parse(readFileSync("src/data/glossary.json", "utf8"));
+  for (const t of g.terms) {
+    assert.match(h, new RegExp(`id="g-${t.id}"`), t.id);
+    assert.ok(h.includes(t.law.replace(/&/g, "&amp;")), t.law);
+  }
+  assert.match(h, /출처 법제처 국가법령정보/);
+  const j = JSON.parse(readFileSync(join(DIST, "search.json"), "utf8"));
+  assert.equal(j.items.filter((i) => i.k === "용어").length, g.terms.length);
+});
+
+test("오프라인: sw.js가 미리 저장하는 쪽이 실제로 있고, 모든 쪽이 등록 · 오프라인 안내는 색인 밖", { skip: !has }, () => {
+  const sw = readFileSync(join(DIST, "sw.js"), "utf8");
+  const pre = JSON.parse(sw.match(/const PRECACHE = (\[[^\]]+\])/)[1]);
+  assert.deepEqual(pre, ["/deadline", "/tax-calendar", "/offline"]);
+  for (const u of pre) assert.ok(existsSync(join(DIST, `${u.slice(1)}.html`)), u);
+  assert.match(sw, /url\.origin !== location\.origin\) return/); // 다른 사이트(계산기·카카오)는 건드리지 않음
+  assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /serviceWorker\.register\("\/sw\.js"\)/);
+  assert.doesNotMatch(readFileSync(join(DIST, "sitemap-0.xml"), "utf8"), /offline/);
+  assert.match(readFileSync(join(DIST, "offline.html"), "utf8"), /name="robots" content="noindex"/);
 });

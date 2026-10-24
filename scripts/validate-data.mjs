@@ -154,6 +154,26 @@ export function checkGuide(text, svcSlugs, calcSlugs, eventIds, yearlyIds) {
   return errors;
 }
 
+// 용어 풀이(3차 C3): 인용은 docs/glossary-sources.json 원문을 글자 그대로, 풀이의 숫자는 인용에 있는 것만
+export function checkGlossary(text, srcText) {
+  const errors = [];
+  const { data, error } = parseJsonFile("glossary.json", text);
+  if (error) return [error];
+  const src = JSON.parse(srcText).items || {};
+  const ids = new Set();
+  for (const t of data.terms || []) {
+    const at = `glossary.json "${t.id}"`;
+    if (ids.has(t.id)) errors.push(`${at}: id가 겹칩니다.`);
+    ids.add(t.id);
+    if (!t.term || !t.plain || !t.law || !t.quotes?.length) { errors.push(`${at}: term·plain·law·quotes가 있어야 합니다.`); continue; }
+    for (const q of t.quotes) if (!src[q.src]?.lines?.some((l) => l.includes(q.text))) errors.push(`${at}: 인용이 원문(${q.src})에 글자 그대로 없습니다 — "${String(q.text).slice(0, 30)}…"`);
+    const quoted = t.quotes.map((q) => q.text).join(" ");
+    for (const n of String(t.plain).match(/\d[\d,]*(?:억|천만|만)?/g) || []) if (!quoted.includes(n)) errors.push(`${at}: 풀이의 숫자 "${n}"이(가) 인용 원문에 없습니다.`);
+    if (!src[t.quotes[0].src] || !t.law.startsWith(src[t.quotes[0].src].law)) errors.push(`${at}: law(${t.law})가 원문 법 이름과 다릅니다.`);
+  }
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -211,8 +231,9 @@ export function validateAll(root = ROOT) {
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
   errors.push(...checkHome(read("src/data/home.json"), svcSlugs, root));
   errors.push(...checkPress(read("src/data/press.json"), svcSlugs, calcSlugs));
+  errors.push(...checkGlossary(read("src/data/glossary.json"), read("docs/glossary-sources.json")));
   errors.push(...checkGuide(read("src/data/guide.json"), svcSlugs, calcSlugs, eventIds, yearlyIds));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json"]) {
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

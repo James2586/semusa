@@ -11,6 +11,7 @@ export function ogPagesFrom({ services = [], calculators = [], groups = [], book
     { path: "/calculators", file: "calculators", kicker: `세금 계산기 ${calculators.length}종`, title: "직접 만든 계산기로 먼저", sub: "결과는 참고용입니다" },
     { path: "/columns", file: "columns", kicker: "칼럼·책", title: `저서 ${booksTotal}권과 칼럼`, sub: "이코노미조선 「성광호의 세무 ABC」" },
     { path: "/about", file: "about", kicker: "전문가 소개", title: "세무전문가 성광호", sub: `저서 ${booksTotal}권 · 이코노미조선 칼럼리스트` },
+    { path: "/glossary", file: "glossary", kicker: "용어 풀이", title: "세금 말, 쉬운 말로", sub: "쉬운 말 풀이와 법조문 원문을 함께" },
     { path: "/faq", file: "faq", kicker: "자주 묻는 질문", title: "자주 묻는 질문", sub: "근거 조문과 함께 답합니다" },
     ...services.map((s) => ({ path: `/services/${s.slug}`, file: `services-${s.slug}`, kicker: "서비스", title: s.name, sub: (s.keyDeadlines || []).map(([l, v]) => `${l} ${v}`).join(" · ") })),
     ...calculators.map((c) => ({ path: `/calculators/${c.slug}`, file: `calc-${c.slug}`, kicker: `세금 계산기 · ${gname[c.group] || ""}`, title: c.name, sub: `${c.short} · 결과는 참고용` })),

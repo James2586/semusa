@@ -5,6 +5,7 @@ import calcData from "../data/calculators.json";
 import press from "../data/press.json";
 import dl from "../data/deadlines.json";
 import guide from "../data/guide.json";
+import glossary from "../data/glossary.json";
 import { SITE_PAGES } from "../lib/sitePages.js";
 
 export async function GET() {
@@ -13,7 +14,7 @@ export async function GET() {
     .sort((a, b) => Number(a.order) - Number(b.order));
   const items = buildSearchIndex({
     pages: SITE_PAGES, services: svcData.services, calculators: calcData.calculators, faqs,
-    articles: press.articles || [], events: dl.events, yearly: dl.yearly, situations: guide.situations,
+    articles: press.articles || [], events: dl.events, yearly: dl.yearly, situations: guide.situations, terms: glossary.terms,
   });
   return new Response(JSON.stringify({ items }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
 }

@@ -14,7 +14,7 @@ export const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, "");
 const strip = (md) => String(md || "").replace(/\*\*|__|`|#+\s?/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/\s+/g, " ").trim();
 const clip = (s, n = 90) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
-export function buildSearchIndex({ services = [], calculators = [], faqs = [], articles = [], events = [], yearly = [], situations = [], pages = [] }) {
+export function buildSearchIndex({ services = [], calculators = [], faqs = [], articles = [], events = [], yearly = [], situations = [], pages = [], terms = [] }) {
   const items = [];
   const add = (it) => {
     const hay = [it.t, it.d, it.x].join(" ");
@@ -29,6 +29,7 @@ export function buildSearchIndex({ services = [], calculators = [], faqs = [], a
   for (const f of faqs) add({ k: "자주 묻는 질문", t: f.q, d: clip(strip(f.body)), u: `/faq#${f.id}`, x: [f.category, strip(f.body), f.law].join(" ") });
   for (const e of events) add({ k: "기한", t: `${e.name} 기한`, d: String(e.why || "").replace("{n}", e.rule?.monthEnd ?? ""), u: `/deadline?e=${e.id}`, x: [e.chip, e.dateLabel, e.law].join(" ") });
   for (const y of yearly) add({ k: "기한", t: `${y.name} 기한`, d: "매년 돌아오는 기한 — 올해 세금 달력", u: "/tax-calendar", x: y.law || "" });
+  for (const t of terms) add({ k: "용어", t: t.term, d: clip(t.plain), u: `/glossary#g-${t.id}`, x: [t.plain, t.law, t.group].join(" ") });
   for (const g of situations) add({ k: "상황", t: g.label, d: "상황 길잡이에서 기한·서비스·계산기를 한 번에", u: `/guide?s=${g.id}`, x: "" });
   for (const a of articles) add({ k: "칼럼", t: a.title, d: `이코노미조선 · ${a.date.split("-").map(Number).join(". ")}.`, u: a.url, x: a.topic || "", ext: true });
   return items;
