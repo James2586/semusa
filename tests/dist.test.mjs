@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 33개(색인 29 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 33);
+test("페이지 41개(색인 37 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 41);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 29);
+  assert.equal((sm.match(/<loc>/g) || []).length, 37);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -210,4 +210,48 @@ test("오프라인: sw.js가 미리 저장하는 쪽이 실제로 있고, 모든
   assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /serviceWorker\.register\("\/sw\.js"\)/);
   assert.doesNotMatch(readFileSync(join(DIST, "sitemap-0.xml"), "utf8"), /offline/);
   assert.match(readFileSync(join(DIST, "offline.html"), "utf8"), /name="robots" content="noindex"/);
+});
+
+test("주제 모아 보기: 주제마다 기한·용어·계산기·서비스 · 근거 조문 · 찾기 목록", { skip: !has }, () => {
+  const T = JSON.parse(readFileSync("src/data/topics.json", "utf8")).topics;
+  const dl = JSON.parse(readFileSync("src/data/deadlines.json", "utf8"));
+  const g = JSON.parse(readFileSync("src/data/glossary.json", "utf8")).terms;
+  for (const t of T) {
+    const h = readFileSync(join(DIST, `topics/${t.slug}.html`), "utf8");
+    for (const id of [...t.events, ...t.yearly]) { const e = [...dl.events, ...dl.yearly].find((x) => x.id === id); assert.ok(h.includes(e.law), `${t.slug}: ${e.law}`); }
+    for (const id of t.glossary) assert.match(h, new RegExp(`href="/glossary#g-${id}"`), `${t.slug}: ${id}`);
+    for (const c of t.calculators) assert.match(h, new RegExp(`href="/calculators/${c}"`), `${t.slug}: ${c}`);
+    for (const s of t.services) assert.match(h, new RegExp(`href="/services/${s}"`), `${t.slug}: ${s}`);
+    if (t.calculators.length) assert.match(h, /결과는 참고용입니다/);
+  }
+  const j = JSON.parse(readFileSync(join(DIST, "search.json"), "utf8"));
+  assert.equal(j.items.filter((i) => i.k === "주제").length, T.length);
+  assert.match(readFileSync(join(DIST, "topics.html"), "utf8"), /href="\/topics\/appeal"/);
+});
+
+test("상담 요청 글: 길잡이·기한 달력에 붙고, 이 기기 안에서만이라는 안내 · 저장소에 쓰지 않음", { skip: !has }, () => {
+  for (const f of ["guide.html", "deadline.html"]) {
+    const h = readFileSync(join(DIST, f), "utf8");
+    assert.match(h, /data-cn-text/, f);
+    assert.match(h, /이 글은 이 기기 안에서만 만들고 어디로도 보내지 않습니다/, f);
+  }
+  assert.doesNotMatch(readFileSync("src/components/ConsultNote.astro", "utf8"), /localStorage|sessionStorage|fetch\(/);
+});
+
+test("세금 생애 지도: 정거장마다 펼침 단추·내용(기한 근거·계산기·용어) · 첫 화면 맛보기 링크", { skip: !has }, () => {
+  const L = JSON.parse(readFileSync("src/data/lifemap.json", "utf8"));
+  const G = Object.fromEntries(JSON.parse(readFileSync("src/data/guide.json", "utf8")).situations.map((s) => [s.id, s]));
+  const dl = JSON.parse(readFileSync("src/data/deadlines.json", "utf8"));
+  const h = readFileSync(join(DIST, "life.html"), "utf8");
+  for (const s of [...L.stops, ...L.anytime]) {
+    assert.match(h, new RegExp(`id="lm-b-${s.id}"[^>]*aria-controls="lm-p-${s.id}"`), s.id);
+    const g = G[s.guide];
+    if (g.event) assert.ok(h.includes(dl.events.find((e) => e.id === g.event).law), `${s.id}: event law`);
+    for (const y of g.yearly || []) assert.ok(h.includes(dl.yearly.find((e) => e.id === y).law), `${s.id}: ${y}`);
+    for (const c of g.calculators) assert.match(h, new RegExp(`href="/calculators/${c}"`), `${s.id}: ${c}`);
+    for (const t of s.glossary) assert.match(h, new RegExp(`href="/glossary#g-${t}"`), `${s.id}: ${t}`);
+  }
+  assert.equal((h.match(/class="lm-panel"[^>]*hidden/g) || []).length, L.stops.length + L.anytime.length - 1); // 처음엔 하나만 펼침
+  const home = readFileSync(join(DIST, "index.html"), "utf8");
+  for (const s of L.stops) assert.match(home, new RegExp(`href="/life#${s.id}"`));
 });

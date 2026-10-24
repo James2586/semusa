@@ -174,6 +174,45 @@ export function checkGlossary(text, srcText) {
   return errors;
 }
 
+// 주제 모아 보기(4차 A1): 주제마다 가리키는 기한·용어·질문 분야·계산기·서비스·칼럼 주제·책이 실제로 있는지
+export function checkTopics(text, ctx) {
+  const errors = [];
+  const { data, error } = parseJsonFile("topics.json", text);
+  if (error) return [error];
+  const KINDS = [["events", "eventIds", "deadlines.json events"], ["yearly", "yearlyIds", "deadlines.json yearly"], ["glossary", "glossaryIds", "glossary.json"],
+    ["faq", "faqCats", "FAQ category"], ["calculators", "calcSlugs", "calculators.json"], ["services", "svcSlugs", "services.json"], ["press", "pressTopics", "press.json topic"], ["books", "bookTitles", "home.json books"]];
+  const seen = new Set();
+  for (const t of data.topics || []) {
+    const at = `topics.json "${t.slug}"`;
+    if (!/^[a-z][a-z-]*$/.test(t.slug || "") || !t.name || !t.lead) errors.push(`${at}: slug(영문 소문자)·name·lead가 있어야 합니다.`);
+    if (seen.has(t.slug)) errors.push(`${at}: slug가 겹칩니다.`);
+    seen.add(t.slug);
+    for (const [k, set, label] of KINDS) for (const v of t[k] || []) if (!ctx[set].has(v)) errors.push(`${at}: ${k} "${v}"는 ${label}에 없습니다.`);
+    if (!(t.events?.length || t.yearly?.length)) errors.push(`${at}: 기한(events 또는 yearly)이 하나는 있어야 합니다.`);
+  }
+  if ((data.topics || []).length < 1) errors.push("topics.json: topics가 비었습니다.");
+  return errors;
+}
+
+// 세금 생애 지도(4차 D1): 정거장마다 상황 길잡이 상황·주제·용어 id가 실제로 있는지, id 겹침 없음
+export function checkLifemap(text, { guideIds, topicSlugs, glossaryIds }) {
+  const errors = [];
+  const { data, error } = parseJsonFile("lifemap.json", text);
+  if (error) return [error];
+  const seen = new Set();
+  for (const s of [...(data.stops || []), ...(data.anytime || [])]) {
+    const at = `lifemap.json "${s.id}"`;
+    if (!/^[a-z][a-z-]*$/.test(s.id || "") || !s.label) errors.push(`${at}: id(영문 소문자)·label이 있어야 합니다.`);
+    if (seen.has(s.id)) errors.push(`${at}: id가 겹칩니다.`);
+    seen.add(s.id);
+    if (!guideIds.has(s.guide)) errors.push(`${at}: guide "${s.guide}"는 guide.json situations에 없습니다.`);
+    if (s.topic && !topicSlugs.has(s.topic)) errors.push(`${at}: topic "${s.topic}"는 topics.json에 없습니다.`);
+    for (const g of s.glossary || []) if (!glossaryIds.has(g)) errors.push(`${at}: glossary "${g}"는 glossary.json에 없습니다.`);
+  }
+  if ((data.stops || []).length < 3) errors.push("lifemap.json: stops가 셋 이상이어야 합니다.");
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -233,7 +272,23 @@ export function validateAll(root = ROOT) {
   errors.push(...checkPress(read("src/data/press.json"), svcSlugs, calcSlugs));
   errors.push(...checkGlossary(read("src/data/glossary.json"), read("docs/glossary-sources.json")));
   errors.push(...checkGuide(read("src/data/guide.json"), svcSlugs, calcSlugs, eventIds, yearlyIds));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json"]) {
+  {
+    const ids = (f, pick) => { try { return new Set(pick(JSON.parse(read(f)))); } catch { return new Set(); } };
+    const faqCats = new Set(readdirSync(join(root, "src/content/faq")).filter((f) => f.endsWith(".md"))
+      .map((f) => (readFileSync(join(root, "src/content/faq", f), "utf8").match(/^category:\s*(.+)$/m) || [])[1]?.trim()).filter(Boolean));
+    errors.push(...checkTopics(read("src/data/topics.json"), {
+      svcSlugs, calcSlugs, eventIds, yearlyIds, faqCats,
+      glossaryIds: ids("src/data/glossary.json", (d) => d.terms.map((t) => t.id)),
+      pressTopics: ids("src/data/press.json", (d) => d.articles.map((a) => a.topic)),
+      bookTitles: ids("src/data/home.json", (d) => d.books.map((b) => b.title)),
+    }));
+    errors.push(...checkLifemap(read("src/data/lifemap.json"), {
+      guideIds: ids("src/data/guide.json", (d) => d.situations.map((s) => s.id)),
+      topicSlugs: ids("src/data/topics.json", (d) => d.topics.map((t) => t.slug)),
+      glossaryIds: ids("src/data/glossary.json", (d) => d.terms.map((t) => t.id)),
+    }));
+  }
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json", "src/data/topics.json", "src/data/lifemap.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

@@ -1,0 +1,27 @@
+---
+// 주제 모아 보기 목록(2026-10-24 4차 A1) — 주제마다 기한 이름을 함께(deadlines.json 그대로)
+import Base from "../../layouts/Base.astro";
+import PageHead from "../../components/PageHead.astro";
+import PlusList from "../../components/PlusList.astro";
+import DeadlineBand from "../../components/DeadlineBand.astro";
+import topicData from "../../data/topics.json";
+import dl from "../../data/deadlines.json";
+const nameOf = (id: string) => (dl.events.find((e) => e.id === id) || dl.yearly.find((e) => e.id === id))!.name;
+const items = topicData.topics.map((t) => ({ href: `/topics/${t.slug}`, title: t.name, kicker: [...t.events, ...t.yearly].map(nameOf).slice(0, 2).join(" · "), desc: t.lead }));
+---
+<Base title="주제 모아 보기" description="상속·증여, 양도, 취득, 보유세, 법인, 세무조사·불복 — 주제마다 기한·용어·계산기·칼럼·책을 한 쪽에 모았습니다.">
+  <PageHead tag="주제 모아 보기" title="주제마다 한 쪽에" crumbs={[{ name: "주제 모아 보기" }]}
+    lead="기한·용어·계산기·질문·칼럼·책을 주제별로 모았습니다. 찾는 일이 어디에 속하는지 모르겠다면 상황 길잡이부터 써 보세요." />
+  <section class="sec gut tl-sec" aria-labelledby="h-tl">
+    <div class="wrap">
+      <h2 class="sr-only" id="h-tl">주제 목록</h2>
+      <PlusList items={items} label="주제" />
+      <p class="tl-more"><a class="more-link" href="/guide">상황 길잡이 ›</a></p>
+      <DeadlineBand kicker="신고 기한이 궁금하면" />
+    </div>
+  </section>
+</Base>
+<style>
+  .tl-sec { padding-top: 28px; }
+  .tl-more { margin-top: 22px; }
+</style>

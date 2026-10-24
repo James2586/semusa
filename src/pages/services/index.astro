@@ -15,10 +15,12 @@ const items = svcData.services.map((s: any) => ({ href: `/services/${s.slug}`, v
     <div class="wrap">
       <h2 class="sr-only" id="h-list">서비스 목록</h2>
       <PlusList items={items} label="서비스" />
+      <p class="tmore"><a class="more-link" href="/topics">주제별로 모아 보기 ›</a></p>
       <DeadlineBand kicker="어떤 일인지 모르겠다면" />
     </div>
   </section>
 </Base>
 <style>
   .list-sec { padding-top: 28px; }
+  .tmore { margin-top: 22px; }
 </style>

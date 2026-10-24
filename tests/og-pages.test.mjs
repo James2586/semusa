@@ -7,7 +7,7 @@ import { ogPagesFrom } from "../src/lib/ogPages.js";
 
 const read = (p) => JSON.parse(readFileSync(p, "utf8"));
 const svc = read("src/data/services.json"), calc = read("src/data/calculators.json"), home = read("src/data/home.json");
-const pages = ogPagesFrom({ services: svc.services, calculators: calc.calculators, groups: calc.groups, booksTotal: home.booksTotal });
+const pages = ogPagesFrom({ services: svc.services, calculators: calc.calculators, groups: calc.groups, booksTotal: home.booksTotal, topics: read("src/data/topics.json").topics });
 const pngSize = (b) => [b.readUInt32BE(16), b.readUInt32BE(20)];
 
 test("서비스·계산기마다 공유 그림이 있고 크기는 1200×630 — 자료를 고치면 node scripts/make-og-pages.mjs", () => {
