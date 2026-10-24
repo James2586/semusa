@@ -36,7 +36,8 @@
     { "title": "알아두면 돈이 되는 개인사업자 법인전환과 영업권 평가 실무", "color": "#7030A0", "cover": "/img/books/corp-conversion.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "알아두면 돈이 되는 비상장주식과 영업권 평가 실무", "color": "#15396F", "cover": "/img/books/unlisted-stock.webp", "coauthors": ["한경식", "이영봉"] },
     { "title": "병·의원 세무 관리", "color": "#2D55C8", "date": "2024-10", "cover": "/img/books/clinic-tax.webp", "coauthors": ["조성식"] },
-    { "title": "전문직 사업자 세무 관리", "color": "#77F6FF", "cover": "/img/books/professional.webp", "coauthors": ["조성식"] }
+    { "title": "전문직 사업자 세무 관리", "color": "#77F6FF", "cover": "/img/books/professional.webp", "coauthors": ["조성식"] },
+    { "title": "동물병원 세무 관리", "color": "#77F6FF", "cover": "/img/books/animal-hospital.webp", "coauthors": ["조성식"] }
   ],
   "homeBooks": 4,
   "booksTotal": 33,
