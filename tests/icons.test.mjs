@@ -1,5 +1,5 @@
 // 아이콘이 깨진 그림이 아닌지 본다(2026-10-24 — 예전 PNG에 브라우저의 "깨진 그림" 표시가 찍혀 바로가기 아이콘이 하얗게 나왔다).
-// PNG 머리(크기)와 가운데·가장자리 픽셀 색을 읽는다. 다시 만들 땐 favicon.svg와 같은 숲색 바탕 + 금색 십자.
+// PNG 머리(크기)와 픽셀 색을 읽는다. 그림은 글자 로고 A의 "더+"(숲색 바탕·크림색 "더"·금색 +) — scripts/make-brand-images.mjs로만 다시 만든다.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -28,15 +28,17 @@ function readPng(file) {
       px[y * stride + x] = (line[x] + pred) & 255;
     }
   }
-  return { w, h, at: (x, y) => [...px.subarray(y * stride + x * bpp, y * stride + x * bpp + 3)] };
+  return { w, h, all: (fn) => { let n = 0; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (fn([...px.subarray(y * stride + x * bpp, y * stride + x * bpp + 3)])) n++; return n; }, at: (x, y) => [...px.subarray(y * stride + x * bpp, y * stride + x * bpp + 3)] };
 }
 const near = (c, hex) => c.every((v, i) => Math.abs(v - parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16)) < 24);
 
-test("아이콘 PNG: 크기가 맞고 숲색 바탕에 금색 십자(깨진 그림 아님)", () => {
+test("아이콘 PNG: 크기가 맞고 숲색 바탕에 크림색 \"더\"와 금색 +(깨진 그림 아님)", () => {
   for (const [f, s] of [["favicon-32.png", 32], ["apple-touch-icon.png", 180], ["icon-192.png", 192], ["icon-512.png", 512], ["icon-maskable-512.png", 512]]) {
     const p = readPng(f);
     assert.deepEqual([p.w, p.h], [s, s], f);
-    assert.ok(near(p.at(s >> 1, s >> 1), "#E8C46A"), `${f}: 가운데가 금색이 아님`);
+    // 글자 칸 크기는 아이콘마다 다르므로 넓이 대비 비율로 본다(작은 32px도 몇 픽셀은 남는다)
+    assert.ok(p.all((c) => near(c, "#F3F0E7")) >= s * s * 0.01, `${f}: 크림색 "더"가 없음`);
+    assert.ok(p.all((c) => near(c, "#E8C46A")) >= Math.max(3, s * s * 0.002), `${f}: 금색 +가 없음`);
     assert.ok(near(p.at(Math.round(s * 0.12), s >> 1), "#1E3A2A"), `${f}: 바탕이 숲색이 아님`);
   }
 });

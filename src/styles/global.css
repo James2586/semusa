@@ -32,8 +32,10 @@
 /* 제목 글꼴: 빌드 뒤 scripts/subset-fonts.mjs가 쓰인 글자만 잘라 만든다 */
 @font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-la-700.woff2") format("woff2"); unicode-range: U+0000-024F, U+2000-206F, U+20AC, U+2190-21FF; }
 @font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-ko-700.woff2") format("woff2"); unicode-range: U+1100-11FF, U+3000-303F, U+3130-318F, U+AC00-D7AF, U+FF00-FFEF; }
-/* 남은 날 큰 숫자: 명조 숫자 열 개만(약 3KB) */
-@font-face { font-family: "Hanadeo Num"; font-weight: 400; font-display: swap; src: url("/fonts/serif-num-400.woff2") format("woff2"); unicode-range: U+0030-0039; }
+/* 남은 날 큰 숫자·로고의 가는 +: 명조 400 숫자 열 개와 + (약 3KB) */
+@font-face { font-family: "Hanadeo Num"; font-weight: 400; font-display: swap; src: url("/fonts/serif-num-400.woff2") format("woff2"); unicode-range: U+002B, U+0030-0039; }
+/* 글자 로고 "하나 더": 명조 900에서 로고 글자만 */
+@font-face { font-family: "Hanadeo Logo"; font-weight: 900; font-display: swap; src: url("/fonts/serif-logo-900.woff2") format("woff2"); unicode-range: U+AC00-D7AF; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }

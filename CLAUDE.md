@@ -29,6 +29,8 @@
 - 종이색은 풀빛 도는 회색(#F2F3EE), + 기호는 로고·첫 화면 제목 끝 하나·마감 표시·서비스 목록 표시·옅은 모눈(`.plusgrid`)에만 — 장식으로 늘리지 말 것(2026-10-24 시안 1판에서 십자수처럼 보인다는 지적).
 - 책 목록 `home.json` books는 최신순 — 홈은 앞에서 `homeBooks`(4)권만, 칼럼·책 페이지는 전부. 표지 사진은 `cover`(public/img/books/, PowerPoint에서 PNG로 내보낸 것 → webp 400px), 없으면 표지색(`color`)으로 그린 표지. 표지 PPTX를 이 환경에서 그림으로 바꾸면 글꼴이 없어 깨지니 쓰지 말 것.
 - 칼럼·책 카드 표지는 `src/components/Thumb.astro` — 블로그 글은 제목 낱말로 주제(`src/lib/thumbTopic.js`)를 골라 색·그림을 바꾸고, RSS에 네이버 사진(pstatic.net)이 있으면 사진을 쓴다(못 불러오면 그림).
-- 아이콘 PNG·`manifest.webmanifest`는 favicon.svg와 같은 그림(숲색 바탕 + 금색 십자) — `tests/icons.test.mjs`가 픽셀을 본다(예전 PNG에 깨진 그림 표시가 찍혀 바로가기 아이콘이 하얬다).
+- 로고는 글자 로고 A「하나 더+ │ 세무회계」(2026-10-24 운영자 선택) — `src/components/Logo.astro` 한 곳(머리글·메뉴·바닥글은 `dark`). "하나 더"는 명조 900을 그 세 글자만 잘라(`serif-logo-900`), +는 가는 금색(`Hanadeo Num` 400).
+  아이콘 PNG 5개·`og.png`는 같은 로고의 "더+"(숲색 바탕·크림색 더·금색 +) — `scripts/make-brand-images.mjs`로만 다시 만든다(손으로 고치지 말 것). `tests/icons.test.mjs`가 픽셀을 본다(예전 PNG에 깨진 그림 표시가 찍혀 바로가기 아이콘이 하얬다).
+- 사진은 `public/img/photos/`, 출처는 `docs/photo-sources.md` — 분위기 사진(mood-*)은 사람·장소·다른 저자 책 제목이 없는 것만 장식으로, 운영자 사진(own-*)은 우리 책만 선명하게 두고 다른 책은 흐리게.
 - 칼럼·책의 블로그 최신 글은 빌드 때 RSS를 읽고(`src/lib/blogFeed.js`), 못 읽으면 그 칸만 뺀다 — 빌드를 실패시키지 말 것.
 - 영상(`src/data/videos.json`)은 누를 때만 받는다(preload=none, 자동 재생 금지). 영상 속 "22권"은 통합검색 22가 검색하는 책 — 옆에 "저서 33권 중 22권" 설명을 빼지 말 것.
