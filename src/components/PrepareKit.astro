@@ -1,0 +1,94 @@
+---
+// 상담 준비 꾸러미(2026-10-24 3차 C2): services.json prepare 목록을 체크리스트로 — 챙긴 것 표시는 이 기기 localStorage(`prep:<id>`)에만,
+// 서버로 보내지 않는다. 「목록 보내기」는 글자 목록(챙김 ☑/아직 ☐)만 공유창·복사로, 「인쇄」는 이 목록 한 장만.
+// 글은 자료 파일 그대로(법에서 정한 첨부서류 목록이 아니라는 안내를 같이).
+import site from "../data/site.json";
+interface Props { items: string[]; id: string; title: string; dark?: boolean }
+const { items, id, title } = Astro.props;
+---
+<div class="pk" data-pk={id} data-pk-title={title}>
+  <ul class="pk-list">
+    {items.map((t) => (
+      <li><label><input type="checkbox" value={t} /><span>{t}</span></label></li>
+    ))}
+  </ul>
+  <div class="pk-bar" data-pk-bar hidden>
+    <p class="pk-n" aria-live="polite" data-pk-n></p>
+    <div class="pk-acts">
+      <button type="button" class="btn btn-moss pk-send" data-pk-send>목록 보내기</button>
+      <button type="button" class="pk-tl" data-pk-print>인쇄 한 장</button>
+      <button type="button" class="pk-tl" data-pk-reset>표시 지우기</button>
+    </div>
+    <p class="pk-st" role="status" data-pk-st>챙긴 표시는 이 기기에만 남고, 어디로도 보내지 않습니다.</p>
+  </div>
+  <p class="pk-print-h" aria-hidden="true">{title} — 상담 때 챙길 것 · {site.name}</p>
+</div>
+
+<style is:global>
+  .pk { display: grid; gap: 12px; }
+  .pk-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .pk-list li { border-bottom: 1px solid var(--line); }
+  .pk-list label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; min-height: 44px; cursor: pointer; font-size: 16.5px; line-height: 1.55; }
+  .pk-list input { appearance: none; -webkit-appearance: none; flex: none; width: 22px; height: 22px; margin: 2px 0 0; border: 1.5px solid var(--moss); border-radius: 50%; background: var(--surface); cursor: pointer; display: grid; place-items: center; }
+  .pk-list input::after { content: ""; width: 10px; height: 6px; border-left: 2px solid var(--on-moss); border-bottom: 2px solid var(--on-moss); transform: translateY(-1px) rotate(-45deg); opacity: 0; }
+  .pk-list input:checked { background: var(--moss); }
+  .pk-list input:checked::after { opacity: 1; }
+  .pk-list input:checked + span { color: var(--ink2); text-decoration: line-through; text-decoration-color: rgba(30, 58, 42, .45); }
+  .pk-list input:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .pk-bar { display: grid; gap: 8px; }
+  .pk-bar[hidden] { display: none; }
+  .pk-n { font-size: 15px; font-weight: 700; color: var(--moss); }
+  .pk-acts { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+  .pk-send { min-height: 44px; padding: 0 18px; }
+  .pk-tl { min-height: 44px; padding: 0 2px; border: 0; background: none; font: 500 15.5px var(--f-body); color: var(--ink); text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; cursor: pointer; }
+  .pk-tl:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .pk-st { font-size: 14px; color: var(--ink2); }
+  .pk-print-h { display: none; }
+  /* 「인쇄 한 장」: 누른 목록만 종이에 */
+  @media print {
+    html.pk-printing body * { visibility: hidden !important; }
+    html.pk-printing .pk.pk-on, html.pk-printing .pk.pk-on * { visibility: visible !important; }
+    html.pk-printing .pk.pk-on { position: absolute; inset: 0 auto auto 0; width: 100%; zoom: 1 !important; }
+    html.pk-printing .pk-on .pk-bar { display: none !important; }
+    html.pk-printing .pk-on .pk-print-h { display: block; order: -1; font-size: 14pt; font-weight: 700; margin-bottom: 8px; }
+    html.pk-printing .pk-on .pk-list input { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+
+<script>
+  const KEY = (id: string) => `prep:${id}`;
+  document.querySelectorAll<HTMLElement>("[data-pk]").forEach((kit) => {
+    const id = kit.dataset.pk!, title = kit.dataset.pkTitle || "";
+    const boxes = [...kit.querySelectorAll<HTMLInputElement>("input[type=checkbox]")];
+    const n = kit.querySelector<HTMLElement>("[data-pk-n]")!, st = kit.querySelector<HTMLElement>("[data-pk-st]")!;
+    kit.querySelector<HTMLElement>("[data-pk-bar]")!.hidden = false;
+    // 글로 기억 — 목록 순서가 바뀌어도 맞게. 같은 id 목록이 한 쪽에 여럿이면(상황 길잡이) 서로 맞춘다
+    const load = () => { let saved: string[] = []; try { saved = JSON.parse(localStorage.getItem(KEY(id)) || "[]"); } catch {} for (const b of boxes) b.checked = saved.includes(b.value); };
+    load();
+    document.addEventListener("pk-sync", (e) => { const d = (e as CustomEvent).detail; if (d.id === id && d.kit !== kit) { load(); count(); } });
+    const count = () => { const k = boxes.filter((b) => b.checked).length; n.textContent = `${boxes.length}개 중 ${k}개 챙김`; };
+    const save = () => {
+      try { const v = boxes.filter((b) => b.checked).map((b) => b.value); if (v.length) localStorage.setItem(KEY(id), JSON.stringify(v)); else localStorage.removeItem(KEY(id)); } catch {}
+      document.dispatchEvent(new CustomEvent("pk-sync", { detail: { id, kit } }));
+    };
+    count();
+    kit.addEventListener("change", () => { count(); save(); });
+    kit.querySelector("[data-pk-reset]")!.addEventListener("click", () => { boxes.forEach((b) => (b.checked = false)); count(); save(); st.textContent = "챙긴 표시를 지웠습니다."; });
+    kit.querySelector("[data-pk-send]")!.addEventListener("click", async () => {
+      const url = location.origin + location.pathname;
+      const text = [`${title} — 상담 때 챙길 것`, ...boxes.map((b) => `${b.checked ? "☑" : "☐"} ${b.value}`), url].join("\n");
+      try {
+        if (navigator.share) { await navigator.share({ title: `${title} — 상담 때 챙길 것`, text }); return; }
+        await navigator.clipboard.writeText(text);
+        st.textContent = "목록을 복사했습니다. 카카오톡 대화창에 붙여 넣으세요.";
+      } catch (e: any) { if (e?.name !== "AbortError") st.textContent = "복사하지 못했습니다. 목록을 길게 눌러 복사해 주세요."; }
+    });
+    kit.querySelector("[data-pk-print]")!.addEventListener("click", () => {
+      document.querySelectorAll(".pk-on").forEach((k) => k.classList.remove("pk-on"));
+      kit.classList.add("pk-on");
+      document.documentElement.classList.add("pk-printing");
+      addEventListener("afterprint", () => { document.documentElement.classList.remove("pk-printing"); kit.classList.remove("pk-on"); }, { once: true });
+      print();
+    });
+  });
+</script>

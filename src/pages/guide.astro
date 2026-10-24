@@ -5,6 +5,7 @@
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
 import KakaoIcon from "../components/KakaoIcon.astro";
+import PrepareKit from "../components/PrepareKit.astro";
 import guide from "../data/guide.json";
 import dl from "../data/deadlines.json";
 import svcData from "../data/services.json";
@@ -107,7 +108,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
             {b.prepare.length > 0 && (
               <div class="gd-box">
                 <h3 class="gd-bh">상담 때 있으면 좋은 것</h3>
-                <ul class="gd-prep">{b.prepare.map((p: string) => <li>{p}</li>)}</ul>
+                <PrepareKit items={b.prepare} id={b.services.map((s: any) => s.slug).join("+") || `guide-${key}`} title={g.label} />
               </div>
             )}
             {b.cols.length > 0 && (

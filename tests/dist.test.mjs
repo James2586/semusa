@@ -178,3 +178,13 @@ test("사이트 찾기: search.json · 머리글 찾기·글자 크게 · 질문
   assert.match(home, /localStorage\.getItem\("fs"\)/);
   for (const i of j.items.filter((x) => x.u.startsWith("/faq#"))) assert.match(readFileSync(join(DIST, "faq.html"), "utf8"), new RegExp(`id="${i.u.slice(5)}"`));
 });
+
+test("상담 준비 꾸러미: 서비스마다 prepare 목록이 체크 칸으로 · 이 기기에만 안내", { skip: !has }, () => {
+  const svc = JSON.parse(readFileSync("src/data/services.json", "utf8")).services;
+  for (const sv of svc) {
+    const h = readFileSync(join(DIST, `services/${sv.slug}.html`), "utf8");
+    assert.match(h, new RegExp(`data-pk="${sv.slug}"`), sv.slug);
+    for (const t of sv.prepare) assert.ok(h.includes(`value="${t.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}"`), `${sv.slug}: ${t}`);
+    assert.match(h, /챙긴 표시는 이 기기에만 남고/);
+  }
+});

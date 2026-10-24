@@ -6,6 +6,10 @@ import Footer from "../components/Footer.astro";
 import BottomBar from "../components/BottomBar.astro";
 import ClosingCta from "../components/ClosingCta.astro";
 import BackToTop from "../components/BackToTop.astro";
+import svcData from "../data/services.json";
+import calcData from "../data/calculators.json";
+import home from "../data/home.json";
+import { ogPagesFrom } from "../lib/ogPages.js";
 
 interface Props {
   title?: string;
@@ -25,14 +29,17 @@ const {
 } = Astro.props;
 const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | 상속·증여·부동산 세금 ${site.repTitle} ${site.rep}`;
 const canonical = new URL(Astro.url.pathname, site.siteUrl).href;
-const ogImage = new URL("/og.png", site.siteUrl).href;
+// 쪽마다 공유 그림(3차 B3): 목록에 있는 쪽은 public/og/<file>.png, 없으면 사이트 그림
+const ogPage = ogPagesFrom({ services: svcData.services, calculators: calcData.calculators, groups: calcData.groups, booksTotal: home.booksTotal })
+  .find((p) => p.path === Astro.url.pathname.replace(/\/$/, "").replace(/\.html$/, ""));
+const ogImage = new URL(ogPage ? `/og/${ogPage.file}.png` : "/og.png", site.siteUrl).href;
 const org = {
   "@context": "https://schema.org",
   "@type": "AccountingService",
   name: site.name,
   url: site.siteUrl,
   email: site.email,
-  image: ogImage,
+  image: new URL("/og.png", site.siteUrl).href,
   address: { "@type": "PostalAddress", streetAddress: site.address.street, addressLocality: site.address.locality, addressRegion: site.address.region, addressCountry: "KR" },
   openingHours: site.hoursSchema,
   areaServed: "KR",
