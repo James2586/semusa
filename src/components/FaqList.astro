@@ -1,0 +1,24 @@
+---
+interface Props { limit?: number }
+const { limit } = Astro.props;
+const mods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
+const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
+---
+<div class="faq">
+  {faqs.map((f) => (
+    <details>
+      <summary><span class="q" aria-hidden="true">Q</span><span>{f.q}</span><span class="pm" aria-hidden="true">+</span></summary>
+      <div class="a prose"><f.Content />{f.law && <p class="law">{f.law}</p>}</div>
+    </details>
+  ))}
+</div>
+<style>
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq details:first-child { border-top: 1px solid var(--line); }
+  .faq summary { display: flex; gap: 12px; align-items: flex-start; padding: 18px 0; cursor: pointer; list-style: none; font-size: 17.5px; font-weight: 600; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .q { font-family: var(--f-display); color: var(--gold-text); flex: none; }
+  .pm { margin-left: auto; color: var(--gold-text); font-size: 22px; line-height: 1.2; transition: transform .2s; flex: none; }
+  .faq details[open] .pm { transform: rotate(45deg); }
+  .a { padding: 0 0 20px 26px; font-size: 16.5px; }
+</style>

@@ -1,0 +1,33 @@
+---
+import data from "../data/videos.json";
+interface Props { id: string; dark?: boolean }
+const { id, dark = false } = Astro.props;
+const v = data.videos.find((x) => x.id === id)!;
+---
+<figure class:list={["vcard", dark && "vdark"]} id={`video-${v.id}`}>
+  <video controls preload="none" playsinline poster={v.poster} width="540" height="960" aria-label={v.title}>
+    <source src={v.src} type="video/mp4" />
+  </video>
+  <figcaption>
+    <b>{v.title}</b> <span class="len">{v.seconds}초</span>
+    <p class="vnote">{v.note}</p>
+    <details>
+      <summary>영상 내용 글로 보기</summary>
+      <ul>{v.transcript.map((t) => <li>{t}</li>)}</ul>
+    </details>
+  </figcaption>
+</figure>
+<style>
+  .vcard { margin: 0; display: grid; gap: 12px; max-width: 300px; }
+  video { width: 100%; height: auto; aspect-ratio: 9 / 16; border-radius: 6px; background: #0E1622; box-shadow: 0 16px 30px -18px rgba(0, 0, 0, .6); }
+  figcaption { font-size: 15.5px; color: var(--ink2); }
+  figcaption b { font-size: 16.5px; color: var(--ink); }
+  .len { font-size: 14px; color: var(--muted); }
+  .vnote { margin-top: 6px; font-size: 15px; color: var(--muted); }
+  details { margin-top: 8px; }
+  summary { cursor: pointer; color: var(--gold-text); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+  details ul { margin: 4px 0 0; padding-left: 1.1em; display: grid; gap: 4px; font-size: 15px; }
+  .vdark figcaption, .vdark .vnote, .vdark .len { color: var(--on-moss2); }
+  .vdark figcaption b { color: var(--on-moss); }
+  .vdark summary { color: var(--gold-hi); }
+</style>

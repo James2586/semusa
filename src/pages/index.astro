@@ -1,0 +1,253 @@
+---
+import Base from "../layouts/Base.astro";
+import site from "../data/site.json";
+import home from "../data/home.json";
+import svcData from "../data/services.json";
+import calcData from "../data/calculators.json";
+import KakaoIcon from "../components/KakaoIcon.astro";
+import FaqList from "../components/FaqList.astro";
+import LocationBlock from "../components/LocationBlock.astro";
+import VideoCard from "../components/VideoCard.astro";
+import Pager from "../components/Pager.astro";
+
+const svcName = Object.fromEntries(svcData.services.map((s) => [s.slug, s.name]));
+const calcCount = calcData.calculators.length;
+---
+<Base cta={false}>
+  <!-- 1 첫 화면 -->
+  <section class="sec-dark gut hero" aria-labelledby="h-hero">
+    <div class="wrap hero-in">
+      <div class="hero-text">
+        <div class="who">
+          <img class="ph-sm" src="/img/profile-360.webp" width="92" height="129" alt="" fetchpriority="high" />
+          <p><b>{site.rep}</b>{site.repTitle} · {site.column}</p>
+        </div>
+        <h1 class="hero-h" id="h-hero">
+          상속·증여·부동산 세금,<br />
+          책을 쓴<span class="ipic ipic-books" aria-hidden="true">{home.books.map((b) => <i style={`--c:${b.color}`}></i>)}</span><em>{site.repTitle}<svg class="sig" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C40 2, 90 12, 140 5 S190 6, 198 4" /></svg></em>가<br />
+          직접 봅니다.
+        </h1>
+        <p class="hero-lead">계산기로 먼저 확인하고, 필요할 때 상담하세요.</p>
+        <div class="hero-acts">
+          <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
+          <a class="tlink" href="/calculators">내 세금 먼저 계산해 보기 ›</a>
+        </div>
+        <ul class="facts">{home.facts.map((f) => <li>{f}</li>)}</ul>
+      </div>
+      <img class="ph-lg" src="/img/profile.webp" srcset="/img/profile-360.webp 360w, /img/profile.webp 591w" sizes="300px" width="591" height="827" alt={`${site.repTitle} ${site.rep}`} />
+    </div>
+  </section>
+
+  <!-- 2 상황 고르기 -->
+  <section class="sec gut" aria-labelledby="h-situ">
+    <div class="wrap">
+      <span class="tag">어떤 상황이세요?</span>
+      <h2 class="sec-h" id="h-situ">지금 상황을 고르면<br />맞는 안내로 바로 갑니다</h2>
+      <ul class="situ">
+        {home.situations.map((s: any) => (
+          <li class:list={[s.desktopOnly && "desk-only"]}>
+            <a class:list={["row-link", s.urgent && "urgent"]} href={`/services/${s.service}`}>
+              <span>{s.text}{s.sub && <small>{s.sub}</small>}<span class="sr-only"> — {svcName[s.service]} 안내로 이동</span></span>
+              <span class="arr" aria-hidden="true">›</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="more"><a class="more-link" href="/calculators">세금 계산기 {calcCount}종 전체 보기 ›</a></p>
+    </div>
+  </section>
+
+  <!-- 3 책과 칼럼 -->
+  <section class="sec sec-dark gut" aria-labelledby="h-books">
+    <div class="wrap books">
+      <div>
+        <span class="tag">칼럼·책</span>
+        <h2 class="sec-h" id="h-books">책과 칼럼으로<br />먼저 만나 보세요</h2>
+        <p class="sec-sub">상속·증여, 법인, 부동산 세금을 다룬 책 {home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.</p>
+        <div class="vid"><VideoCard id="portfolio" dark /></div>
+      </div>
+      <div class="books-r">
+        <ul class="covers" id="home-covers" aria-label="책 목록">
+          {home.books.map((b) => (
+            <li><a class="cv" style={`--c:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-t">{b.title}</span><span class="cv-a">{site.rep}</span></a></li>
+          ))}
+          <li><a class="cv cv-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-t">{home.booksTotal}권<br />전체 보기</span><span class="cv-a">교보문고 ↗</span></a></li>
+        </ul>
+        <Pager target="home-covers" label="책 목록" dark />
+        <ul class="chan">
+          {site.channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 상담은 이렇게 -->
+  <section class="sec sec-alt gut" aria-labelledby="h-how">
+    <div class="wrap">
+      <span class="tag">상담은 이렇게</span>
+      <h2 class="sec-h" id="h-how">상담 전에 궁금한 것</h2>
+      <div class="how">
+        {home.consult.map((c) => (
+          <div class="card how-c">
+            <h3>{c.title}</h3>
+            <p>{c.text}</p>
+            {c.more && <button type="button" class="more-btn" data-open="dlg-prep">자세히 보기</button>}
+          </div>
+        ))}
+      </div>
+      <div class="how-2">
+        <div>
+          <h3 class="sub-h">진행 순서</h3>
+          <ol class="steps">
+            {home.steps.map((s) => <li><b>{s.title}</b><span>{s.text}</span></li>)}
+          </ol>
+        </div>
+        <div>
+          <h3 class="sub-h">고객 후기</h3>
+          <ul class="reviews">
+            {home.reviews.map((r) => (
+              <li class="card rv">
+                <p class="rv-top"><span class="stars" aria-label="별 다섯 개">★★★★★</span><span class="ind">{r.industry}</span></p>
+                <p>{r.text}</p>
+                <p class="rv-by">{r.name} · {r.industry}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 자주 묻는 질문 -->
+  <section class="sec gut" aria-labelledby="h-faq">
+    <div class="wrap narrow">
+      <span class="tag">자주 묻는 질문</span>
+      <h2 class="sec-h" id="h-faq">많이 물어보시는 것</h2>
+      <div style="margin-top:18px"><FaqList limit={5} /></div>
+      <p class="more"><a class="more-link" href="/faq">자주 묻는 질문 더 보기 ›</a></p>
+    </div>
+  </section>
+
+  <!-- 6 오시는 길 -->
+  <section class="sec sec-alt gut" aria-labelledby="h-loc">
+    <div class="wrap">
+      <span class="tag">오시는 길</span>
+      <h2 class="sec-h" id="h-loc">찾아오시는 길</h2>
+      <LocationBlock />
+    </div>
+  </section>
+
+  <dialog class="dlg" id="dlg-prep" aria-labelledby="dlg-prep-h">
+    <div class="dlg-h"><h2 id="dlg-prep-h">상담 전에 준비하면 좋은 것</h2><button type="button" aria-label="닫기" data-close>✕</button></div>
+    <div class="dlg-b">
+      <ul>{home.prepare.map((p) => <li>{p}</li>)}</ul>
+      <p class="law">분야별 자세한 서류 목록은 서비스 페이지에서 안내합니다.</p>
+    </div>
+  </dialog>
+</Base>
+
+<style>
+  /* 1 */
+  .hero { padding-block: 32px 40px; }
+  .hero-in { display: grid; gap: 22px; }
+  .hero-text { display: grid; gap: 22px; }
+  .who { display: flex; gap: 16px; align-items: center; }
+  .ph-sm { width: 92px; height: 118px; object-fit: cover; object-position: top; border-radius: 4px; background: var(--moss2); }
+  .who p { color: var(--on-moss2); font-size: 15.5px; line-height: 1.6; }
+  .who b { display: block; color: var(--on-moss); font-size: 20px; }
+  .hero-h { font-family: var(--f-display); font-size: 30px; line-height: 1.4; }
+  .hero-h em { font-style: normal; color: var(--gold-hi); position: relative; white-space: nowrap; }
+  .sig { position: absolute; left: 0; bottom: -8px; width: 100%; height: 12px; overflow: visible; }
+  .sig path { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 300; stroke-dashoffset: 0; animation: sign 1s cubic-bezier(.4, 0, .2, 1) .35s both; }
+  @keyframes sign { from { stroke-dashoffset: 300; } to { stroke-dashoffset: 0; } }
+  .hero-lead { color: var(--on-moss2); }
+  .hero-acts { display: grid; gap: 14px; justify-items: start; }
+  .hero-acts .btn { width: 100%; }
+  .hero-acts .tlink { color: var(--on-moss); }
+  .facts { list-style: none; margin: 0; padding: 16px 0 0; border-top: 1px solid rgba(243, 240, 231, .16); display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 15px; color: var(--on-moss2); }
+  .facts li::before { content: ""; display: inline-block; width: 6px; height: 6px; border: 1.5px solid var(--gold-hi); transform: rotate(45deg); margin-right: 8px; vertical-align: 2px; }
+  .ph-lg { display: none; }
+
+  /* 2 */
+  .situ { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+  .situ .row-link { height: 100%; min-height: 60px; font-size: 17.5px; }
+  .situ .urgent { background: var(--gold-soft); border-color: rgba(160, 120, 40, .35); }
+  .desk-only { display: none; }
+  .more { margin-top: 24px; }
+
+  /* 3 */
+  .books { display: grid; gap: 24px; }
+  .books .sec-sub { margin-top: 4px; }
+  .vid { margin-top: 24px; }
+  .books-r { min-width: 0; }
+  .covers { list-style: none; margin: 0; padding: 6px 2px 14px; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .covers li { flex: none; scroll-snap-align: start; }
+  .cv { width: 132px; aspect-ratio: 3 / 4.3; border-radius: 2px 4px 4px 2px; padding: 14px 12px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; background: var(--c); color: #FFF7E6; box-shadow: 0 10px 18px -12px rgba(0, 0, 0, .7), inset 4px 0 0 rgba(0, 0, 0, .18); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
+  .cv:hover, .cv:focus-visible { transform: translateY(-6px); }
+  .cv-t { font-family: var(--f-body); font-weight: 700; font-size: 15.5px; line-height: 1.4; }
+  .cv-a { font-size: 14px; opacity: .9; }
+  .cv-all { background: transparent; border: 1.5px dashed rgba(232, 196, 106, .6); color: var(--on-moss); box-shadow: none; justify-content: center; gap: 10px; text-align: center; align-items: center; }
+  .cv-all .cv-t { font-size: 17px; }
+  .chan { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid rgba(243, 240, 231, .16); }
+  .chan a { display: flex; justify-content: space-between; align-items: center; min-height: 58px; border-bottom: 1px solid rgba(243, 240, 231, .16); text-decoration: none; font-size: 17px; }
+  .chan a span:last-child { color: var(--gold-hi); }
+
+  /* 4 */
+  .how { display: grid; gap: 12px; margin-top: 22px; }
+  .how-c { display: grid; gap: 4px; }
+  .how-c h3 { font-size: 17px; }
+  .how-c p { font-size: 16px; color: var(--ink2); }
+  .more-btn { justify-self: start; margin-top: 4px; background: none; border: none; padding: 8px 0; font: 600 16px var(--f-body); color: var(--gold-text); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .how-2 { display: grid; gap: 32px; margin-top: 36px; }
+  .sub-h { font-size: 18px; margin-bottom: 10px; }
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: st; }
+  .steps li { display: grid; grid-template-columns: 36px 1fr; column-gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .steps li::before { counter-increment: st; content: counter(st); grid-row: span 2; width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--gold); display: grid; place-items: center; color: var(--gold-text); font-weight: 700; font-size: 15px; }
+  .steps b { font-size: 17px; }
+  .steps span { font-size: 15.5px; color: var(--muted); }
+  .reviews { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .rv { display: grid; gap: 10px; padding: 20px; }
+  .rv-top { display: flex; justify-content: space-between; align-items: center; }
+  .stars { color: var(--gold-text); letter-spacing: 2px; font-size: 15px; }
+  .ind { font-size: 14px; background: var(--gold-soft); color: var(--gold-text); padding: 2px 10px; border-radius: 999px; font-weight: 600; }
+  .rv p { font-size: 16.5px; color: var(--ink2); }
+  .rv .rv-by { font-size: 15px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+
+  /* dialog */
+  .dlg { border: none; border-radius: 8px; padding: 0; width: min(560px, calc(100vw - 32px)); color: var(--ink); background: var(--surface); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .5); }
+  .dlg::backdrop { background: rgba(17, 21, 17, .5); }
+  .dlg[open] { animation: pop .22s cubic-bezier(.2, .7, .2, 1); }
+  @keyframes pop { from { opacity: 0; transform: scale(.97) translateY(6px); } to { opacity: 1; transform: none; } }
+  .dlg-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: var(--moss); color: var(--on-moss); }
+  .dlg-h h2 { font-size: 17px; font-family: var(--f-body); }
+  .dlg-h button { width: 44px; height: 44px; border: none; background: none; color: var(--on-moss); font-size: 22px; cursor: pointer; margin-right: -10px; }
+  .dlg-b { padding: 18px; display: grid; gap: 12px; font-size: 16.5px; color: var(--ink2); }
+  .dlg-b ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+
+  @media (min-width: 900px) {
+    .hero { padding-block: 64px 72px; }
+    .hero-in { grid-template-columns: 1.3fr .7fr; align-items: center; gap: 56px; }
+    .who .ph-sm { display: none; }
+    .ph-lg { display: block; width: 100%; max-width: 300px; justify-self: end; object-fit: cover; object-position: top; border-radius: 4px; box-shadow: 0 24px 40px -24px rgba(0, 0, 0, .6); }
+    .hero-h { font-size: 46px; }
+    .hero-acts { grid-template-columns: auto auto; align-items: center; gap: 24px; }
+    .hero-acts .btn { width: auto; }
+    .situ { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .desk-only { display: block; }
+    .books { grid-template-columns: .9fr 1.1fr; gap: 56px; align-items: start; }
+    .how { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .how-2 { grid-template-columns: 1fr 1fr; gap: 48px; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-open]").forEach((btn) => {
+    const dlg = document.getElementById(btn.dataset.open!) as HTMLDialogElement;
+    btn.addEventListener("click", () => dlg.showModal());
+    dlg.addEventListener("click", (e) => {
+      const t = e.target as Element;
+      if (t === dlg || t.closest("[data-close]")) dlg.close();
+    });
+    dlg.addEventListener("close", () => btn.focus());
+  });
+</script>

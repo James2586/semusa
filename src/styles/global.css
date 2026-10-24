@@ -1,0 +1,138 @@
+/* 하나 더 세무회계 — 디자인 토큰과 공용 모양 (설계서 v2 · 5장)
+   단일 밝은 화면(종이색). 금색은 선·확인 표시에만, 버튼은 카카오 노랑과 숲색 두 가지. */
+:root {
+  --paper: #F9F7F3;
+  --paper2: #F2EFE8;
+  --surface: #FFFFFF;
+  --ink: #1A1710;
+  --ink2: #3C3828;
+  --muted: #5F5A4C;
+  --moss: #1E3A2A;
+  --moss2: #2C5040;
+  --on-moss: #F3F0E7;
+  --on-moss2: #C3CDC6;
+  --gold: #C4993C;
+  --gold-text: #806020;
+  --gold-hi: #E8C46A;
+  --gold-soft: #F5EDD4;
+  --kakao: #FEE500;
+  --kakao-ink: #191600;
+  --line: rgba(60, 56, 40, 0.14);
+  --line2: rgba(60, 56, 40, 0.28);
+  --f-display: "Hanadeo Serif", "Noto Serif KR", "Nanum Myeongjo", serif;
+  /* 본문은 기기 글꼴(내려받기 0) — iOS·Mac Apple SD Gothic Neo, 안드로이드 Noto Sans KR, 윈도 맑은 고딕 */
+  --f-body: Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "맑은 고딕", sans-serif;
+  --gutter: max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(20px, env(safe-area-inset-right, 0px));
+  --header-h: 60px;
+  --bar-h: 60px;
+  color-scheme: light;
+}
+
+/* 제목 글꼴: 빌드 뒤 scripts/subset-fonts.mjs가 쓰인 글자만 잘라 만든다 */
+@font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-la-700.woff2") format("woff2"); unicode-range: U+0000-024F, U+2000-206F, U+20AC, U+2190-21FF; }
+@font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-ko-700.woff2") format("woff2"); unicode-range: U+1100-11FF, U+3000-303F, U+3130-318F, U+AC00-D7AF, U+FF00-FFEF; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 17px;
+  line-height: 1.75;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; display: block; }
+[hidden] { display: none !important; }
+a { color: inherit; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.gut { padding-left: var(--gutter); padding-right: var(--gutter-r); }
+.wrap { max-width: 1080px; margin: 0 auto; }
+.narrow { max-width: 1080px; }
+.narrow > * { max-width: 760px; }
+.skip { position: absolute; left: -9999px; top: 0; background: var(--moss); color: var(--on-moss); padding: 10px 14px; z-index: 100; }
+.skip:focus { left: 12px; top: calc(env(safe-area-inset-top, 0px) + 8px); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 버튼 */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; font: 700 17px var(--f-body); text-decoration: none; border: none; border-radius: 4px; cursor: pointer; }
+.btn svg { width: 20px; height: 20px; flex: none; }
+.btn-kakao { background: var(--kakao); color: var(--kakao-ink); }
+.btn-moss { background: var(--moss); color: var(--on-moss); }
+.btn-line { background: var(--surface); color: var(--ink); border: 1px solid var(--line2); }
+.btn-block { width: 100%; }
+.tlink { font-size: 16.5px; font-weight: 500; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+
+/* 구역 */
+.sec { padding-block: 56px; }
+.sec-alt { background: var(--paper2); }
+.sec-dark { background: var(--moss); color: var(--on-moss); }
+.tag { display: block; font-size: 14px; font-weight: 700; color: var(--gold-text); margin-bottom: 6px; }
+.sec-dark .tag { color: var(--gold-hi); }
+.sec-h { font-family: var(--f-display); font-size: 26px; font-weight: 700; line-height: 1.35; margin-bottom: 8px; }
+.sec-sub { color: var(--muted); font-size: 16px; }
+.sec-dark .sec-sub { color: var(--on-moss2); }
+
+/* 페이지 머리 */
+.page-head { padding-block: 22px 32px; }
+.crumb { font-size: 15px; color: var(--muted); margin: 0 0 6px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.crumb li + li::before { content: "›"; margin-right: 8px; color: var(--line2); }
+.crumb a { color: var(--gold-text); text-decoration: none; }
+.page-h { font-family: var(--f-display); font-size: 30px; line-height: 1.35; font-weight: 700; }
+.page-lead { margin-top: 10px; color: var(--ink2); }
+.sec-dark .crumb, .sec-dark .crumb a { color: var(--on-moss2); }
+.sec-dark .crumb li + li::before { color: var(--on-moss2); }
+.sec-dark .page-lead { color: var(--on-moss2); }
+
+/* 카드 · 목록 */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 18px; }
+.rows { display: grid; gap: 10px; }
+.row-link { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 60px; padding: 12px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; text-decoration: none; color: var(--ink); font-size: 17px; font-weight: 500; }
+.row-link:hover { border-color: var(--gold); }
+.row-link .arr { color: var(--gold-text); font-size: 22px; flex: none; }
+.row-link small { display: block; font-size: 14.5px; color: var(--muted); font-weight: 400; }
+.grid-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.calc-card { display: flex; flex-direction: column; gap: 2px; padding: 14px; min-height: 92px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; text-decoration: none; transition: transform .25s, box-shadow .25s, border-color .25s; }
+.calc-card:hover, .calc-card:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 22px -14px rgba(26, 23, 16, .45); border-color: var(--gold); }
+.calc-card b { font-size: 16.5px; line-height: 1.45; border-left: 3px solid var(--gold); padding-left: 9px; margin-bottom: 2px; }
+.calc-card span { font-size: 14.5px; color: var(--muted); line-height: 1.5; }
+/* 카드 맨 아래 할 일 한 줄(KPMG 참고): 카드 높이가 달라도 같은 높이에 맞춘다 */
+.calc-card .go, .go { margin-top: auto; padding-top: 10px; font-size: 15px; font-weight: 700; color: var(--gold-text); }
+.calc-card[hidden] { display: none; }
+/* 구역 끝 "전체 보기"(KPMG 참고): 숲색 테두리 둥근 링크. 휴대폰에선 가로 가득 */
+.more-link { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; padding: 0 24px; border: 1.5px solid var(--moss); border-radius: 999px; color: var(--moss); font-size: 16.5px; font-weight: 700; text-decoration: none; transition: background .2s, color .2s; }
+.more-link:hover, .more-link:focus-visible { background: var(--moss); color: var(--on-moss); }
+
+/* 제목 속 작은 그림(이노션 참고): 글자 높이에 맞춘 사진·책 표지. 장식이라 화면 읽기에서 숨긴다 */
+.ipic { display: inline-block; height: 0.92em; vertical-align: -0.08em; margin: 0 0.12em; border-radius: 0.14em; overflow: hidden; }
+.ipic-photo { width: 1.55em; object-fit: cover; object-position: center 22%; }
+.ipic-books { width: 1.25em; position: relative; overflow: visible; }
+.ipic-books i { position: absolute; top: 0; width: 0.7em; height: 100%; background: var(--c); border-radius: 0.04em 0.1em 0.1em 0.04em; box-shadow: inset 0.06em 0 0 rgba(0, 0, 0, .2), 0 0.08em 0.16em rgba(0, 0, 0, .3); }
+.ipic-books i:first-child { left: 0; transform: rotate(-6deg); }
+.ipic-books i:last-child { right: 0; transform: rotate(5deg); }
+.ipic-books i::after { content: ""; position: absolute; left: 18%; right: 18%; top: 18%; height: 0.05em; background: rgba(255, 247, 230, .75); }
+
+.pending { border: 1.5px dashed var(--line2); border-radius: 4px; padding: 16px; color: var(--muted); font-size: 15.5px; background: var(--surface); }
+.law { font-size: 14.5px; color: var(--muted); }
+.prose { display: grid; gap: 14px; }
+.prose p, .prose li { color: var(--ink2); }
+.prose strong { color: var(--moss2); }
+
+@media (min-width: 900px) {
+  .sec { padding-block: 80px; }
+  .sec-h { font-size: 34px; }
+  .page-h { font-size: 60px; line-height: 1.2; letter-spacing: -0.01em; }
+  .page-head { padding-block: 40px 48px; }
+  .grid-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .more-link { display: inline-flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

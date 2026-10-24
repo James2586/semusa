@@ -1,0 +1,13 @@
+---
+import Base from "../../layouts/Base.astro";
+import PageHead from "../../components/PageHead.astro";
+import svcData from "../../data/services.json";
+---
+<Base title="서비스" description="상속·증여, 부동산 세금, 법인 컨설팅, 기장·세무신고, 세무조사·불복.">
+  <PageHead title="서비스" crumbs={[{ name: "서비스" }]} lead="지금 상황에 맞는 서비스를 고르세요." />
+  <section class="gut" style="padding-bottom:56px">
+    <div class="wrap rows">
+      {svcData.services.map((s) => <a class="row-link" href={`/services/${s.slug}`}><span>{s.name}<small>{s.short}</small></span><span class="arr">›</span></a>)}
+    </div>
+  </section>
+</Base>

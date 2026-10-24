@@ -1,0 +1,64 @@
+---
+// 옆으로 넘기는 줄(scroll-snap) 아래에 "01 ── 03" 번호·진행선과 이전/다음 버튼을 붙인다.
+// 자동으로 넘기지 않는다. 한 화면에 다 보이면 숨긴다.
+interface Props { target: string; label: string; dark?: boolean }
+const { target, label, dark = false } = Astro.props;
+---
+<div class:list={["pager", dark && "pager-dark"]} data-pager={target} hidden>
+  <button type="button" class="pg-btn" data-dir="-1" aria-label={`${label} 이전`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+  <span class="pg-now" aria-hidden="true">01</span>
+  <span class="pg-bar" aria-hidden="true"><i></i></span>
+  <span class="pg-total" aria-hidden="true">01</span>
+  <button type="button" class="pg-btn" data-dir="1" aria-label={`${label} 다음`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+  <span class="sr-only" role="status" data-pg-status></span>
+</div>
+<style>
+  .pager { display: flex; align-items: center; gap: 12px; margin-top: 8px; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; color: var(--ink2); }
+  .pager[hidden] { display: none; }
+  .pg-btn { width: 44px; height: 44px; display: grid; place-items: center; background: none; border: none; cursor: pointer; color: inherit; border-radius: 50%; }
+  .pg-btn:disabled { opacity: .35; cursor: default; }
+  .pg-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pg-bar { flex: 1; max-width: 200px; height: 2px; background: var(--line2); position: relative; overflow: hidden; }
+  .pg-bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--gold-text); transition: width .25s ease; }
+  .pager-dark { color: var(--on-moss); }
+  .pager-dark .pg-bar { background: rgba(243, 240, 231, .25); }
+  .pager-dark .pg-bar i { background: var(--gold-hi); }
+</style>
+<script>
+  document.querySelectorAll<HTMLElement>("[data-pager]").forEach((pager) => {
+    const strip = document.getElementById(pager.dataset.pager!);
+    if (!strip) return;
+    const items = [...strip.children] as HTMLElement[];
+    const now = pager.querySelector(".pg-now")!, total = pager.querySelector(".pg-total")!;
+    const bar = pager.querySelector<HTMLElement>(".pg-bar i")!, status = pager.querySelector("[data-pg-status]")!;
+    const [prev, next] = pager.querySelectorAll<HTMLButtonElement>(".pg-btn");
+    const pad = (n: number) => String(n).padStart(2, "0");
+    total.textContent = pad(items.length);
+    const current = () => {
+      const left = strip.scrollLeft + 4;
+      let i = items.findIndex((el) => el.offsetLeft - strip.offsetLeft >= left);
+      if (strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4) i = items.length - 1;
+      return Math.max(0, i);
+    };
+    const update = () => {
+      const fits = strip.scrollWidth <= strip.clientWidth + 4;
+      pager.hidden = fits;
+      if (fits) return;
+      const i = current();
+      now.textContent = pad(i + 1);
+      bar.style.width = `${((i + 1) / items.length) * 100}%`;
+      prev.disabled = strip.scrollLeft <= 2;
+      next.disabled = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2;
+    };
+    const go = (dir: number) => {
+      const i = Math.min(items.length - 1, Math.max(0, current() + dir));
+      strip.scrollTo({ left: items[i].offsetLeft - strip.offsetLeft, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      status.textContent = `${items.length}개 중 ${i + 1}번째`;
+    };
+    prev.addEventListener("click", () => go(-1));
+    next.addEventListener("click", () => go(1));
+    strip.addEventListener("scroll", () => requestAnimationFrame(update), { passive: true });
+    addEventListener("resize", update);
+    update();
+  });
+</script>

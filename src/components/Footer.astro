@@ -1,0 +1,54 @@
+---
+import site from "../data/site.json";
+---
+<footer class="foot gut">
+  <div class="wrap foot-in">
+    <div class="f-brand">
+      <p class="foot-lg">{site.name}</p>
+      <p class="foot-c">© {site.copyrightYear} {site.name}.<br />All rights reserved.</p>
+    </div>
+    <div class="f-col">
+      <p class="f-h">사무소</p>
+      <p class="foot-biz">
+        대표 {site.rep}{site.bizNo && <><br />사업자등록번호 {site.bizNo}</>}<br />
+        {site.address.full}<br />
+        {site.email}<br />
+        {site.hours}
+      </p>
+    </div>
+    <div class="f-col">
+      <p class="f-h">바로가기</p>
+      <ul class="foot-links">
+        <li><a href="/notice">공지사항</a></li>
+        <li><a href="/privacy">개인정보처리방침</a></li>
+        {site.channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener">{c.name}</a></li>)}
+      </ul>
+      <p class="f-h f-h2">자주 가는 사이트</p>
+      <ul class="foot-links">
+        {site.usefulSites.map((s) => <li><a href={s.url} target="_blank" rel="noopener">{s.name}</a></li>)}
+      </ul>
+    </div>
+  </div>
+</footer>
+<style>
+  .foot { background: var(--ink); color: #CFCABC; font-size: 15px; padding-block: 40px calc(40px + var(--bar-h) + env(safe-area-inset-bottom, 0px)); }
+  .foot-in { display: grid; gap: 28px; }
+  .foot-lg { font-family: var(--f-display); font-size: 20px; color: #F3F0E7; }
+  .foot-c { margin-top: 8px; font-size: 14px; color: #A8A396; }
+  .f-h { font-size: 14px; font-weight: 700; color: #E8C46A; margin-bottom: 8px; }
+  .f-h2 { margin-top: 18px; }
+  .foot-biz { color: #CFCABC; line-height: 1.9; }
+  .foot-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 18px; }
+  .foot-links a { color: #E9E4D6; display: inline-block; padding: 6px 0; text-underline-offset: 4px; text-decoration-color: rgba(233, 228, 214, .4); }
+  @media (min-width: 900px) {
+    .foot { padding-block: 56px; }
+    .foot-in { grid-template-columns: 1fr 1.2fr 1.4fr; gap: 0; }
+    .foot-in > * { padding-inline: 32px; }
+    .foot-in > :first-child { padding-left: 0; }
+    .foot-in > * + * { border-left: 1px solid rgba(233, 228, 214, .16); }
+    .foot-links { flex-direction: column; flex-wrap: nowrap; }
+    .f-col:last-child { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; align-content: start; }
+    .f-col:last-child .f-h2 { margin-top: 0; grid-column: 2; grid-row: 1; }
+    .f-col:last-child .foot-links:last-child { grid-column: 2; grid-row: 2; }
+  }
+</style>

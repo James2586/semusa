@@ -1,0 +1,25 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import site from "../data/site.json";
+import FaqList from "../components/FaqList.astro";
+
+const mods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
+const faqs = (await Promise.all(mods.map(async (m) => ({ ...m.frontmatter, Content: m.Content, text: String(await m.compiledContent()) }))))
+  .sort((a, b) => Number(a.order) - Number(b.order));
+const strip = (h: string) => h.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: strip(f.text) } })),
+};
+---
+<Base title="자주 묻는 질문" description="상속세 신고 기한, 증여재산공제, 법인 기장 등 자주 묻는 질문." jsonLd={[faqLd]}>
+  <PageHead title="자주 묻는 질문" crumbs={[{ name: "자주 묻는 질문" }]} />
+  <section class="gut" style="padding-bottom:64px">
+    <div class="wrap narrow">
+      <FaqList />
+      <p style="margin-top:24px"><a class="more-link" href={site.faqSiteUrl} target="_blank" rel="noopener">자주 묻는 질문 전체 보기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a></p>
+    </div>
+  </section>
+</Base>

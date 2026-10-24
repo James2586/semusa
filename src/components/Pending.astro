@@ -1,0 +1,5 @@
+---
+interface Props { label?: string }
+const { label = "이 부분은 다음 단계에서 채웁니다." } = Astro.props;
+---
+<p class="pending">{label}</p>

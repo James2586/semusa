@@ -1,0 +1,22 @@
+<!-- 넓은 화면에서 긴 페이지를 내려가면 오른쪽 아래에 작은 "맨 위로" 단추. 휴대폰은 아래 막대가 있어 쓰지 않는다. -->
+<button type="button" class="totop" aria-label="맨 위로" hidden>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+</button>
+<style>
+  .totop { position: fixed; right: max(24px, env(safe-area-inset-right, 0px)); bottom: max(24px, env(safe-area-inset-bottom, 0px)); z-index: 45; width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line2); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; box-shadow: 0 10px 24px -14px rgba(26, 23, 16, .5); }
+  .totop:hover { border-color: var(--gold); color: var(--gold-text); }
+  .totop svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .totop[hidden] { display: none; }
+  @media (max-width: 899px) { .totop { display: none !important; } }
+</style>
+<script>
+  const btn = document.querySelector<HTMLButtonElement>(".totop")!;
+  const onScroll = () => { btn.hidden = scrollY < innerHeight * 1.5; };
+  addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
+  onScroll();
+  btn.addEventListener("click", () => {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    document.getElementById("main")?.focus({ preventScroll: true });
+  });
+</script>

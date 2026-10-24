@@ -1,0 +1,12 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import LocationBlock from "../components/LocationBlock.astro";
+import site from "../data/site.json";
+---
+<Base title="오시는 길" description={`${site.address.full} · ${site.hours}`}>
+  <PageHead title="오시는 길" crumbs={[{ name: "오시는 길" }]} />
+  <section class="gut" style="padding-bottom:64px">
+    <div class="wrap"><LocationBlock /></div>
+  </section>
+</Base>
