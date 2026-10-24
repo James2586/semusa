@@ -1,8 +1,9 @@
 ---
-interface Props { limit?: number }
-const { limit } = Astro.props;
+// categories: 서비스 쪽에서 그 분야 질문만(services.json faq — faq 파일의 category)
+interface Props { limit?: number; categories?: string[] }
+const { limit, categories } = Astro.props;
 const mods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
-const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
+const faqs = mods.map((m) => ({ ...m.frontmatter, Content: m.Content })).filter((f) => !categories || categories.includes(f.category)).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
 ---
 <div class="faq">
   {faqs.map((f) => (

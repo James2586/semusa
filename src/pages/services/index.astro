@@ -1,13 +1,32 @@
 ---
 import Base from "../../layouts/Base.astro";
 import PageHead from "../../components/PageHead.astro";
+import PlusList from "../../components/PlusList.astro";
 import svcData from "../../data/services.json";
+// 줄마다 서비스 이름 + 핵심 기한(첫 화면과 같은 services.json keyDeadlines) + 이런 분께 한 줄
+const items = svcData.services.map((s: any) => ({ href: `/services/${s.slug}`, title: s.name, meta: s.keyDeadlines, side: s.forWho[0] }));
 ---
 <Base title="서비스" description="상속·증여, 부동산 세금, 법인 컨설팅, 기장·세무신고, 세무조사·불복.">
-  <PageHead title="서비스" crumbs={[{ name: "서비스" }]} lead="지금 상황에 맞는 서비스를 고르세요." />
-  <section class="gut" style="padding-bottom:56px">
-    <div class="wrap rows">
-      {svcData.services.map((s) => <a class="row-link" href={`/services/${s.slug}`}><span>{s.name}<small>{s.short}</small></span><span class="arr">›</span></a>)}
+  <PageHead tag="서비스 · 다섯 가지 일" title="일마다 먼저 볼 기한이 다릅니다" crumbs={[{ name: "서비스" }]}
+    lead="지금 상황에 맞는 일을 고르세요. 이름 아래가 그 일의 핵심 기한입니다."
+    photo={{ name: "own-angle", w: [600, 900], ratio: "4 / 5" }} />
+  <section class="sec gut list-sec" aria-labelledby="h-list">
+    <div class="wrap">
+      <h2 class="sr-only" id="h-list">서비스 목록</h2>
+      <PlusList items={items} label="서비스" />
+      <a class="find" href="/#h-hero">
+        <span><small>어떤 일인지 모르겠다면</small><b class="find-t">무슨 일이 있었는지 고르고 날짜만 넣어 보세요</b></span>
+        <span class="find-go">기한 계산 <span aria-hidden="true">›</span></span>
+      </a>
     </div>
   </section>
 </Base>
+<style>
+  .list-sec { padding-top: 28px; }
+  .find { margin-top: 36px; display: grid; gap: 12px; padding: 22px 22px; background: var(--moss); color: var(--on-moss); border-radius: 10px; text-decoration: none; }
+  .find small { display: block; font-size: 14px; color: var(--gold-hi); font-weight: 700; margin-bottom: 4px; }
+  .find-t { font-family: var(--f-display); font-size: 21px; line-height: 1.4; }
+  .find-go { font-weight: 700; color: var(--gold-hi); }
+  .find:hover .find-go { text-decoration: underline; text-underline-offset: 4px; }
+  @media (min-width: 900px) { .find { grid-template-columns: 1fr auto; align-items: center; padding: 28px 32px; } .find-t { font-size: 24px; } }
+</style>

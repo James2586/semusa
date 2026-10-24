@@ -1,15 +1,54 @@
 ---
-interface Props { title: string; lead?: string; crumbs?: { name: string; href?: string }[]; dark?: boolean }
-const { title, lead, crumbs = [], dark = false } = Astro.props;
+// 안쪽 페이지 머리(2026-10-24 2차 개편): 옅은 + 모눈 바탕, 위치 표시, 금색 짧은 선 꼬리표, 명조 제목, 한 줄 설명.
+// chips: 그 일의 핵심 기한(서비스 쪽 — services.json keyDeadlines), photo: 컴퓨터 화면 오른쪽 장식 사진(public/img/photos — 휴대폰에선 숨김).
+interface Photo { name: string; w: number[]; ratio?: string; pos?: string }
+interface Props { title: string; lead?: string; crumbs?: { name: string; href?: string }[]; tag?: string; chips?: [string, string][]; photo?: Photo }
+const { title, lead, crumbs = [], tag, chips, photo } = Astro.props;
+const src = photo ? `/img/photos/${photo.name}-${photo.w[photo.w.length - 1]}.webp` : "";
+const srcset = photo ? photo.w.map((w) => `/img/photos/${photo.name}-${w}.webp ${w}w`).join(", ") : "";
 ---
-<section class:list={["page-head gut", dark && "sec-dark"]}>
-  <div class="wrap">
-    <nav aria-label="현재 위치"><ol class="crumb">
-      <li><a href="/">홈</a></li>
-      {crumbs.map((c) => <li>{c.href ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>)}
-    </ol></nav>
-    <h1 class="page-h">{title}</h1>
-    {lead && <p class="page-lead">{lead}</p>}
-    <slot />
+<section class:list={["page-head gut plusgrid", photo && "ph-has-photo"]}>
+  <div class="wrap ph-in">
+    <div class="ph-text">
+      <nav aria-label="현재 위치"><ol class="crumb">
+        <li><a href="/">홈</a></li>
+        {crumbs.map((c) => <li>{c.href ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>)}
+      </ol></nav>
+      {tag && <p class="ph-tag">{tag}</p>}
+      <h1 class="page-h">{title}</h1>
+      {lead && <p class="page-lead">{lead}</p>}
+      {chips && chips.length > 0 && (
+        <ul class="ph-chips" aria-label="핵심 기한">
+          {chips.map(([l, v]) => <li><span>{l}</span><b>{v}</b></li>)}
+        </ul>
+      )}
+      <slot />
+    </div>
+    {photo && (
+      <div class="ph-photo" style={`aspect-ratio:${photo.ratio || "4 / 5"}`} aria-hidden="true">
+        <picture>
+          <source media="(max-width: 899px)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACw=" />{/* 휴대폰에선 숨기므로 받지 않게 */}
+          <img src={src} srcset={srcset} sizes="360px" alt="" loading="lazy" decoding="async" style={photo.pos ? `object-position:${photo.pos}` : undefined} />
+        </picture>
+      </div>
+    )}
   </div>
 </section>
+<style>
+  .page-head { padding-block: 22px 34px; border-bottom: 1px solid var(--line); }
+  .ph-in { display: grid; gap: 28px; align-items: center; }
+  .ph-text { min-width: 0; }
+  .ph-tag { margin-top: 14px; font-size: 15px; font-weight: 600; color: var(--ink2); display: flex; gap: 10px; align-items: center; }
+  .ph-tag::before { content: ""; width: 20px; height: 1px; background: var(--gold); }
+  .ph-tag + .page-h { margin-top: 8px; }
+  .ph-chips { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .ph-chips li { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--line2); border-radius: 999px; font-size: 15px; color: var(--ink2); }
+  .ph-chips b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ph-photo { display: none; }
+  @media (min-width: 900px) {
+    .page-head { padding-block: 40px 56px; }
+    .ph-has-photo .ph-in { grid-template-columns: minmax(0, 1fr) 340px; column-gap: 64px; }
+    .ph-photo { display: block; overflow: hidden; border-radius: 10px; box-shadow: 0 30px 50px -36px rgba(21, 25, 21, .55); }
+    .ph-photo picture, .ph-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  }
+</style>

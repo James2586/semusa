@@ -1,0 +1,45 @@
+---
+// 목록 줄(2026-10-24 2차 개편 공통 부품): 굵은 이름 + 설명 + 오른쪽 작은 +(올리면 90° 회전). 서비스·계산기·관련 글이 같은 모양.
+// meta: 이름 아래 [이름, 값] 짝(서비스 핵심 기한 — 짝 하나는 줄바꿈되지 않음), side: 컴퓨터에서 오른쪽 단 글(이런 분께 등)
+interface Item { href: string; title: string; kicker?: string; desc?: string; meta?: [string, string][]; side?: string; ext?: boolean }
+interface Props { items: Item[]; label?: string }
+const { items, label } = Astro.props;
+---
+<ul class:list={["plist", items.some((i) => i.side) && "plist-2"]} aria-label={label}>
+  {items.map((i) => (
+    <li>
+      <a href={i.href} target={i.ext ? "_blank" : undefined} rel={i.ext ? "noopener" : undefined}>
+        <span class="pl-main">
+          {i.kicker && <small>{i.kicker}</small>}
+          <b>{i.title}{i.ext && <span class="sr-only">(새 창)</span>}</b>
+          {i.meta && <span class="pl-meta">{i.meta.map(([l, v], n) => <>{n > 0 && " · "}<span class="kp">{l} <em>{v}</em></span></>)}</span>}
+          {i.desc && <span class="pl-desc">{i.desc}</span>}
+        </span>
+        {i.side && <span class="pl-side">{i.side}</span>}
+        <svg class="pl-plus" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+      </a>
+    </li>
+  ))}
+</ul>
+<style>
+  .plist { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--ink); }
+  .plist a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+  .pl-main { display: grid; gap: 3px; min-width: 0; }
+  .plist small { font-size: 14px; color: var(--muted); }
+  .plist b { font-size: 18px; }
+  .pl-meta { font-size: 15.5px; color: var(--ink2); }
+  .pl-meta em { font-style: normal; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kp { white-space: nowrap; }
+  .pl-desc, .pl-side { font-size: 15.5px; color: var(--muted); }
+  .pl-side { grid-column: 1; }
+  .pl-plus { grid-row: 1 / span 2; grid-column: 2; width: 16px; height: 16px; color: var(--gold-text); transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .plist a:hover .pl-plus, .plist a:focus-visible .pl-plus { transform: rotate(90deg); }
+  .plist a:hover b { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
+  @media (min-width: 900px) {
+    .plist a { padding: 20px 0; }
+    .plist-2 a { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; column-gap: 40px; }
+    .plist-2 .pl-side { grid-column: 2; grid-row: 1; }
+    .plist-2 .pl-plus { grid-column: 3; grid-row: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .pl-plus { transition: none; } }
+</style>

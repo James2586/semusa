@@ -1,6 +1,12 @@
 ---
+// 서비스 상세(2026-10-24 2차 개편): 머리에 핵심 기한 칩 → 기한(계산 카드 또는 매년 돌아오는 기한 + 근거 조문 목록) → 이런 상황이라면(체크) →
+// 맡겨 주시면 | 진행 순서(세로 연표) → 관련 계산기 → 준비할 것 + 관련 책 → 그 분야 질문 → 마무리 띠(Base)
 import Base from "../../layouts/Base.astro";
 import PageHead from "../../components/PageHead.astro";
+import PlusList from "../../components/PlusList.astro";
+import BookCover from "../../components/BookCover.astro";
+import FaqList from "../../components/FaqList.astro";
+import UpcomingDeadlines from "../../components/UpcomingDeadlines.astro";
 import svcData from "../../data/services.json";
 import calcData from "../../data/calculators.json";
 import home from "../../data/home.json";
@@ -11,55 +17,61 @@ export function getStaticPaths() {
   return svcData.services.map((s) => ({ params: { slug: s.slug }, props: { svc: s } }));
 }
 const { svc } = Astro.props as { svc: any };
+const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]));
 const calcs = svc.calculators.map((slug: string) => calcData.calculators.find((c) => c.slug === slug)!);
 const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
+const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : undefined;
 ---
 <Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"}>
-  <PageHead dark title={svc.name} lead={svc.short} crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
+  <PageHead tag="서비스" title={svc.name} lead={svc.short} chips={svc.keyDeadlines} photo={photo}
+    crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
 
   {svc.urgent && (
-    <div class="gut urgent-band"><p class="wrap">{svc.urgent}</p></div>
+    <div class="gut urgent"><p class="wrap"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>{svc.urgent}</p></div>
   )}
 
   <section class="sec gut" aria-labelledby="h-dl">
-    <div class="wrap narrow">
+    <div class="wrap">
       <span class="tag">기한부터 확인하세요</span>
       <h2 class="sec-h" id="h-dl">신고·청구 기한</h2>
-      {svc.calcEvents && <div class="svc-calc"><DeadlineCalc events={svc.calcEvents} uid={`s-${svc.slug}`} heading={`${svc.name} 기한 계산`} /></div>}
-      <div class="dls">
-        {svc.deadlines.map((d: any) => (
-          <div class="card dl">
-            <h3>{d.title}</h3>
-            {d.track && !svc.calcEvents && (
-              <div class="track" aria-hidden="true">
-                <span class="ln"></span><span class="fl"></span>
-                <span class="dot" style="left:0"></span>
-                {d.track[1] && <span class="dot" style="left:22%"></span>}
-                <span class="dot end" style="left:100%"></span>
-                <span class="lb s">{d.track[0]}</span>
-                {d.track[1] && <span class="lb m">{d.track[1]}</span>}
-                <span class="lb e">{d.track[2]}</span>
-              </div>
-            )}
-            <p>{d.text}</p>
-            <p class="law">{d.law}</p>
-          </div>
-        ))}
+      <div class="dl-two">
+        <div class="dl-main">
+          {svc.calcEvents && <DeadlineCalc events={svc.calcEvents} uid={`s-${svc.slug}`} heading={`${svc.name} 기한 계산`} />}
+          {svc.yearly && !svc.calcEvents && (
+            <div class="yr">
+              <h3 class="sub-h">매년 돌아오는 날</h3>
+              <p class="sec-sub">오늘부터 남은 날 순서입니다.</p>
+              <UpcomingDeadlines only={svc.yearly} />
+            </div>
+          )}
+        </div>
+        <div class="dl-rules">
+          <h3 class="sub-h">기한 규칙과 근거</h3>
+          <ol class="dls">
+            {svc.deadlines.map((d: any) => (
+              <li>
+                <b>{d.title}</b>
+                <p>{d.text}</p>
+                <p class="law">{d.law}</p>
+              </li>
+            ))}
+          </ol>
+          <p class="note">기한이 토·일요일이나 공휴일이면 그다음 날까지입니다. 사정마다 다를 수 있으니 상담 때 함께 확인해 드립니다.</p>
+        </div>
       </div>
-      <p class="note">기한이 토·일요일이나 공휴일이면 그다음 날까지입니다. 사정마다 다를 수 있으니 상담 때 함께 확인해 드립니다.</p>
     </div>
   </section>
 
-  <section class="sec sec-alt gut" aria-labelledby="h-who">
+  <section class="sec gut ruled" aria-labelledby="h-who">
     <div class="wrap narrow">
       <span class="tag">이런 분께</span>
       <h2 class="sec-h" id="h-who">이런 상황이라면</h2>
-      <ul class="who">{svc.forWho.map((t: string) => <li>{t}</li>)}</ul>
+      <ul class="checks">{svc.forWho.map((t: string) => <li>{t}</li>)}</ul>
     </div>
   </section>
 
-  <section class="sec gut" aria-labelledby="h-do">
-    <div class="wrap narrow two">
+  <section class="sec gut ruled" aria-labelledby="h-do">
+    <div class="wrap two">
       <div>
         <span class="tag">함께 하는 일</span>
         <h2 class="sec-h" id="h-do">맡겨 주시면</h2>
@@ -68,78 +80,97 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
       </div>
       <div>
         <span class="tag">진행 순서</span>
-        <h2 class="sec-h">이렇게 진행합니다</h2>
-        <ol class="steps">{svc.steps.map((s: any) => <li><b>{s.title}</b><span>{s.text}</span></li>)}</ol>
+        <h2 class="sec-h" id="h-steps">이렇게 진행합니다</h2>
+        <ol class="vsteps" aria-labelledby="h-steps">{svc.steps.map((s: any) => <li><b>{s.title}</b><span>{s.text}</span></li>)}</ol>
       </div>
     </div>
   </section>
 
   {calcs.length > 0 && (
-    <section class="sec sec-alt gut" aria-labelledby="h-cal">
+    <section class="sec gut ruled" aria-labelledby="h-cal">
       <div class="wrap">
         <span class="tag">먼저 계산해 보기</span>
         <h2 class="sec-h" id="h-cal">관련 계산기</h2>
-        <div class="grid-cards" style="margin-top:16px">
-          {calcs.map((c: any) => <a class="calc-card" href={`/calculators/${c.slug}`}><b>{c.name}</b><span>{c.short}</span><span class="go">계산하기 ›</span></a>)}
-        </div>
+        <p class="sec-sub">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.</p>
+        <PlusList label="관련 계산기" items={calcs.map((c: any) => ({ href: `/calculators/${c.slug}`, kicker: groupName[c.group], title: c.name, desc: c.short }))} />
       </div>
     </section>
   )}
 
-  <section class="sec gut" aria-labelledby="h-prep">
-    <div class="wrap narrow">
-      <span class="tag">상담 전에</span>
-      <h2 class="sec-h" id="h-prep">가져오시면 좋은 것</h2>
-      <ul class="does">{svc.prepare.map((t: string) => <li>{t}</li>)}</ul>
-      <p class="note">상담을 빠르게 하려는 목록이며, 법에서 정한 신고 첨부서류 목록은 아닙니다. 없는 것이 있어도 괜찮습니다.</p>
+  <section class="sec gut ruled" aria-labelledby="h-prep">
+    <div class="wrap two">
+      <div>
+        <span class="tag">상담 전에</span>
+        <h2 class="sec-h" id="h-prep">가져오시면 좋은 것</h2>
+        <ul class="checks checks-sm">{svc.prepare.map((t: string) => <li>{t}</li>)}</ul>
+        <p class="note">상담을 빠르게 하려는 목록이며, 법에서 정한 신고 첨부서류 목록은 아닙니다. 없는 것이 있어도 괜찮습니다.</p>
+      </div>
       {book && (
-        <a class="book" href={site.booksUrl} target="_blank" rel="noopener">
-          {book.cover ? <img class="bk bk-img" src={book.cover} width="400" height="571" alt="" loading="lazy" /> : <span class="bk" style={`--c:${book.color}`} aria-hidden="true"></span>}
-          <span><small>관련 책</small><b>『{book.title}』</b><span>{site.rep} 지음 · 교보문고 ↗</span></span>
-        </a>
+        <div class="book">
+          <BookCover book={book} width={132} link />
+          <div>
+            <span class="tag">관련 책</span>
+            <p class="book-t">『{book.title}』</p>
+            <p class="book-by">{site.rep} 지음</p>
+            <a class="more-link" href={site.booksUrl} target="_blank" rel="noopener">교보문고에서 보기 ↗<span class="sr-only">(새 창)</span></a>
+          </div>
+        </div>
       )}
     </div>
   </section>
 
+  {svc.faq && (
+    <section class="sec gut ruled" aria-labelledby="h-faq">
+      <div class="wrap narrow">
+        <span class="tag">이 일에 대한 질문</span>
+        <h2 class="sec-h" id="h-faq">많이 물어보시는 것</h2>
+        <div style="margin-top:18px"><FaqList categories={svc.faq} /></div>
+        <p class="more"><a class="more-link" href="/faq">자주 묻는 질문 더 보기 ›</a></p>
+      </div>
+    </section>
+  )}
 </Base>
 
 <style>
-  .urgent-band { background: var(--gold-soft); border-bottom: 1px solid rgba(160, 120, 40, .3); }
-  .urgent-band p { padding-block: 14px; font-weight: 600; color: var(--ink); }
-  .svc-calc { margin-top: 18px; }
-  .dls { display: grid; gap: 14px; margin-top: 18px; }
-  .dl { display: grid; gap: 8px; }
-  .dl h3 { font-size: 18px; }
-  .dl p { color: var(--ink2); }
-  .track { position: relative; height: 58px; margin: 4px 8px 4px; }
-  .ln, .fl { position: absolute; left: 0; right: 0; top: 10px; height: 3px; border-radius: 2px; }
-  .ln { background: var(--paper2); }
-  .fl { background: var(--gold); transform-origin: left; animation: fill .9s cubic-bezier(.4, 0, .2, 1) .2s both; }
-  @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-  .dot { position: absolute; top: 3px; width: 17px; height: 17px; border-radius: 50%; background: var(--surface); border: 3px solid var(--gold); transform: translateX(-50%); }
-  .dot.end { background: var(--gold); }
-  .lb { position: absolute; top: 28px; font-size: 14px; color: var(--ink2); white-space: nowrap; }
-  .lb.s { left: -8px; }
-  .lb.m { left: 22%; transform: translateX(-50%); }
-  .lb.e { right: -8px; font-weight: 700; color: var(--gold-text); }
+  /* 불복 쪽 띠: 금색 면 대신 숲색 선 */
+  .urgent { border-bottom: 1px solid var(--line); background: var(--surface); }
+  .urgent p { display: flex; gap: 12px; align-items: flex-start; padding-block: 16px; padding-left: 14px; border-left: 3px solid var(--moss); font-weight: 600; color: var(--ink); }
+  .urgent svg { flex: none; width: 16px; height: 16px; margin-top: 5px; color: var(--moss); }
+  .dl-two { display: grid; gap: 36px; margin-top: 20px; }
+  .dl-two > * { min-width: 0; }
+  .yr .up-list { margin-top: 14px; }
+  .sub-h { font-size: 18px; margin-bottom: 4px; }
+  .dls { list-style: none; margin: 14px 0 0; padding: 0; border-top: 1px solid var(--ink); }
+  .dls li { display: grid; gap: 4px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .dls b { font-size: 17.5px; }
+  .dls p { color: var(--ink2); font-size: 16px; }
+  .dls .law { color: var(--muted); }
   .note { margin-top: 12px; font-size: 15px; color: var(--muted); }
-  .who { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
-  .who li { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: 4px; padding: 14px 16px; font-size: 17px; }
-  .two { display: grid; gap: 40px; }
+  .checks { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .checks li { position: relative; padding: 14px 0 14px 34px; border-bottom: 1px solid var(--line); font-size: 17px; }
+  .checks li::before { content: ""; position: absolute; left: 2px; top: 17px; width: 20px; height: 20px; border-radius: 50%; background: var(--moss)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 10.4l2.6 2.6L14 7.6' fill='none' stroke='%23E8C46A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px no-repeat; }
+  .checks-sm li { font-size: 16px; padding-block: 11px; }
+  .checks-sm li::before { top: 13px; }
+  .two { display: grid; gap: 44px; }
+  .two > * { min-width: 0; }
   .does { margin: 14px 0 0; padding-left: 1.1em; display: grid; gap: 8px; color: var(--ink2); }
   .does li::marker { color: var(--gold); }
-  .steps { list-style: none; margin: 14px 0 0; padding: 0; counter-reset: st; }
-  .steps li { display: grid; grid-template-columns: 36px 1fr; column-gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .steps li::before { counter-increment: st; content: counter(st); grid-row: span 2; width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--gold); display: grid; place-items: center; color: var(--gold-text); font-weight: 700; font-size: 15px; }
-  .steps b { font-size: 17px; }
-  .steps span { font-size: 15.5px; color: var(--muted); }
-  .book { margin-top: 24px; display: flex; gap: 16px; align-items: center; text-decoration: none; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
-  .book:hover { border-color: var(--gold); }
-  .bk { flex: none; width: 56px; height: 80px; background: var(--c); border-radius: 1px 3px 3px 1px; box-shadow: inset 3px 0 0 rgba(0, 0, 0, .18); position: relative; }
-  .bk-img { width: 56px; height: 80px; object-fit: cover; }
-  .bk::after { content: ""; position: absolute; left: 8px; right: 8px; top: 14px; height: 2px; background: rgba(255, 247, 230, .7); }
-  .book small { display: block; font-size: 14px; color: var(--gold-text); font-weight: 600; }
-  .book b { display: block; font-size: 17px; }
-  .book > span:last-child > span { font-size: 15px; color: var(--muted); }
-  @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; gap: 48px; } .narrow.two > * { max-width: none; } }
+  /* 진행 순서: 숲색 점으로 이은 세로 연표 */
+  .vsteps { list-style: none; margin: 18px 0 0; padding: 0; counter-reset: st; }
+  .vsteps li { position: relative; display: grid; gap: 2px; padding: 0 0 22px 44px; }
+  .vsteps li::before { counter-increment: st; content: counter(st); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--moss); color: var(--on-moss); display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+  .vsteps li::after { content: ""; position: absolute; left: 13.5px; top: 32px; bottom: 4px; width: 1px; background: var(--line2); }
+  .vsteps li:last-child { padding-bottom: 0; }
+  .vsteps li:last-child::after { display: none; }
+  .vsteps b { font-size: 17px; line-height: 28px; }
+  .vsteps span { font-size: 15.5px; color: var(--muted); }
+  .book { display: flex; gap: 20px; align-items: center; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; align-self: start; }
+  .book-t { font-family: var(--f-display); font-size: 19px; line-height: 1.45; }
+  .book-by { font-size: 15px; color: var(--muted); margin: 2px 0 12px; }
+  .more { margin-top: 24px; }
+  @media (min-width: 900px) {
+    .dl-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+    .two { grid-template-columns: 1fr 1fr; gap: 72px; }
+  }
 </style>

@@ -81,6 +81,7 @@ p { margin: 0; }
 /* 구역 */
 .sec { padding-block: 56px; }
 .sec-alt { background: var(--paper2); }
+.ruled { border-top: 1px solid var(--line); }
 .sec-dark { background: var(--moss); color: var(--on-moss); }
 .tag { display: block; font-size: 14px; font-weight: 700; color: var(--gold-text); margin-bottom: 6px; }
 .sec-dark .tag { color: var(--gold-hi); }
@@ -89,7 +90,6 @@ p { margin: 0; }
 .sec-dark .sec-sub { color: var(--on-moss2); }
 
 /* 페이지 머리 */
-.page-head { padding-block: 22px 32px; }
 .crumb { font-size: 15px; color: var(--muted); margin: 0 0 6px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 8px; }
 .crumb li + li::before { content: "›"; margin-right: 8px; color: var(--line2); }
 .crumb a { color: var(--gold-text); text-decoration: none; }
@@ -137,7 +137,6 @@ p { margin: 0; }
   .sec { padding-block: 80px; }
   .sec-h { font-size: 34px; }
   .page-h { font-size: 60px; line-height: 1.2; letter-spacing: -0.01em; }
-  .page-head { padding-block: 40px 48px; }
   .grid-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .more-link { display: inline-flex; }
 }

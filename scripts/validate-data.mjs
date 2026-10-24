@@ -52,7 +52,7 @@ export function checkCalculators(text) {
   return errors;
 }
 
-export function checkServices(text, calcSlugs, eventIds = null) {
+export function checkServices(text, calcSlugs, eventIds = null, yearlyIds = null, root = ROOT) {
   const errors = [];
   const { data, error } = parseJsonFile("services.json", text);
   if (error) return [error];
@@ -72,6 +72,9 @@ export function checkServices(text, calcSlugs, eventIds = null) {
     }
     if (s.keyDeadlines !== undefined && !(Array.isArray(s.keyDeadlines) && s.keyDeadlines.every((k) => Array.isArray(k) && k.length === 2 && k.every((t) => typeof t === "string" && t.trim())))) errors.push(`${at}: keyDeadlines는 [["상속세", "말일부터 6개월"], …] 모양이어야 합니다.`);
     for (const e of s.calcEvents || []) if (eventIds && !eventIds.has(e)) errors.push(`${at}: calcEvents "${e}"는 deadlines.json events에 없습니다.`);
+    // 2026-10-24 2차 개편: 매년 돌아오는 기한(법인·기장)·머리 장식 사진·그 분야 질문
+    for (const y of s.yearly || []) if (yearlyIds && !yearlyIds.has(y)) errors.push(`${at}: yearly "${y}"는 deadlines.json yearly에 없습니다.`);
+    if (s.photo !== undefined && !existsSync(join(root, "public/img/photos", `${s.photo}-1200.webp`)) && !existsSync(join(root, "public/img/photos", `${s.photo}-900.webp`))) errors.push(`${at}: photo "${s.photo}" 파일이 public/img/photos/에 없습니다.`);
   });
   return errors;
 }
@@ -167,8 +170,9 @@ export function validateAll(root = ROOT) {
   const dlText = read("src/data/deadlines.json");
   errors.push(...checkDeadlines(dlText));
   let eventIds = new Set();
-  try { eventIds = new Set(JSON.parse(dlText).events.map((e) => e.id)); } catch {}
-  errors.push(...checkServices(read("src/data/services.json"), calcSlugs, eventIds));
+  let yearlyIds = new Set();
+  try { eventIds = new Set(JSON.parse(dlText).events.map((e) => e.id)); yearlyIds = new Set(JSON.parse(dlText).yearly.map((e) => e.id)); } catch {}
+  errors.push(...checkServices(read("src/data/services.json"), calcSlugs, eventIds, yearlyIds));
   errors.push(...checkSite(read("src/data/site.json")));
   let svcSlugs = new Set();
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
