@@ -29,26 +29,27 @@ const first = evs[0];
       ) : <input type="hidden" name={`${uid}-ev`} value={first.id} data-single />}
       <div class="dl-step">
         <span class="dl-sl">{evs.length > 1 && <i aria-hidden="true">2</i>}<label for={`${uid}-date`} data-date-label>{first.dateLabel}</label></span>
-        <input type="date" id={`${uid}-date`} data-date />
+        <input type="date" id={`${uid}-date`} data-date min="1950-01-01" max="2100-12-31" />
         {hasAbroad && <label class="dl-chk" data-abroad-w><input type="checkbox" id={`${uid}-abroad`} data-abroad />{evs.find((e) => e.abroadLabel)?.abroadLabel}</label>}
       </div>
     </div>
-    <div class="dl-out" data-out aria-live="polite">
-      <span class="dl-lab" data-lab>{first.name} 기한</span>
+    <div class="dl-out" data-out>
+      <span class="dl-lab"><span data-lab>{first.name} 기한</span><span class="dl-ex" data-ex>예시 날짜</span></span>
       <div class="dl-row">
-        <span class="dl-dd"><b class="dl-num" data-num aria-hidden="true"></b><span class="sr-only" data-num-sr></span><small data-num-l>날짜를 넣으면 계산합니다</small></span>
+        <span class="dl-dd" aria-hidden="true"><b class="dl-num" data-num></b><small data-num-l>날짜를 넣으면 계산합니다</small></span>
         <span class="dl-date" data-dt></span>
       </div>
       <span class="dl-why" data-why></span>
       <svg class="dl-tl" data-tl aria-hidden="true"></svg>
       <span class="dl-law" data-law>{first.law}</span>
+      <p class="sr-only" aria-live="polite" data-live></p>
     </div>
     <div class="dl-act">
       <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 기한으로 상담하기</a>
       <p data-note>기한이 토·일요일·공휴일이면 다음 날로 옮겼습니다. 결과는 참고용입니다.</p>
     </div>
   </form>
-  <div class="dl-one" aria-live="polite">
+  <div class="dl-one">
     <svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="#C4993C" stroke-width="1.2" /><path d="M11 6.5v9M6.5 11h9" stroke="#806020" stroke-width="1.6" stroke-linecap="round" /></svg>
     <span class="dl-one-t">하나 더 확인할 것</span>
     <span class="dl-one-f" data-fact>{first.fact.text}</span>
@@ -64,26 +65,28 @@ const first = evs[0];
   .dl-step { display: grid; gap: 10px; border: 0; margin: 0; padding: 0; min-width: 0; }
   .dl-step legend, .dl-sl { padding: 0; font-size: 15px; font-weight: 700; color: var(--ink2); display: flex; gap: 8px; align-items: center; }
   .dl-step legend i, .dl-sl i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line2); display: grid; place-items: center; font-size: 14px; color: var(--muted); font-weight: 500; flex: none; }
-  /* 상황 고르기: 휴대폰에선 한 줄 가로 넘김 */
-  .dl-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px; scroll-snap-type: x proximity; scroll-padding-inline: 16px; }
-  .dl-chips::-webkit-scrollbar { display: none; }
-  .dl-chips label { position: relative; flex: none; scroll-snap-align: start; }
+  /* 상황 고르기: 모두 보이게 줄바꿈(가로로 넘기면 불복 쪽 칩이 가려졌다 — 2026-10-24 검토) */
+  .dl-chips { display: flex; flex-wrap: wrap; gap: 8px 6px; }
+  .dl-chips label { position: relative; flex: none; }
   .dl-chips input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
   .dl-chips span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--line2); border-radius: 999px; font-size: 15.5px; background: var(--surface); white-space: nowrap; transition: background .15s, color .15s, border-color .15s; }
   .dl-chips input:checked + span { background: var(--moss); border-color: var(--moss); color: var(--on-moss); font-weight: 700; }
-  .dl-chips input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .dl-chips input:focus-visible + span { outline: 3px solid var(--moss); outline-offset: 2px; }
   .dl-step input[type="date"] { width: 100%; min-height: 52px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 8px; background: var(--paper); font: 500 17px var(--f-body); color: var(--ink); font-variant-numeric: tabular-nums; }
-  .dl-step input[type="date"]:focus { outline: 3px solid var(--gold); outline-offset: 1px; border-color: var(--moss); }
+  .dl-step input[type="date"]:focus { outline: 3px solid var(--moss); outline-offset: 1px; border-color: var(--moss); }
   .dl-chk { display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15.5px; color: var(--ink2); }
   .dl-chk input { width: 20px; height: 20px; accent-color: var(--moss); flex: none; }
 
   .dl-out { background: var(--moss); color: var(--on-moss); padding: 20px 16px 18px; display: grid; gap: 4px; }
-  .dl-lab { font-size: 15px; color: var(--on-moss2); }
+  .dl-lab { font-size: 15px; color: var(--on-moss2); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+  .dl-ex { font-size: 14px; color: var(--gold-hi); border: 1px solid rgba(232, 196, 106, .5); border-radius: 999px; padding: 0 9px; line-height: 1.6; }
+  .dl-out.stale .dl-row, .dl-out.stale .dl-tl, .dl-out.stale .dl-why { opacity: .35; }
+  .dl-out :focus-visible { outline-color: var(--gold-hi); }
   .dl-row { display: grid; gap: 2px; margin-top: 4px; }
   .dl-dd { display: flex; align-items: baseline; gap: 10px; line-height: 1; min-height: 1.2em; }
   .dl-dd small { font-size: 15.5px; color: var(--gold-hi); }
   /* 자릿수 바퀴: 자리마다 0~9가 네 바퀴 쌓여 있고 왼쪽 자리부터 차례로 멈춘다. 숫자 글꼴마다 높이가 달라 칸을 넉넉하게 */
-  .dl-num { --h: 1.6em; display: inline-flex; height: var(--h); margin-block: -.2em -.24em; overflow: hidden; font-family: "Hanadeo Num", "Noto Serif KR", "Nanum Myeongjo", serif; font-weight: 400; font-size: clamp(56px, 17vw, 84px); letter-spacing: -.04em; color: #fff; font-variant-numeric: tabular-nums; -webkit-mask-image: linear-gradient(transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(transparent, #000 9%, #000 91%, transparent); }
+  .dl-num { --h: 1.3em; display: inline-flex; height: var(--h); overflow: hidden; font-family: "Hanadeo Num", "Noto Serif KR", "Nanum Myeongjo", serif; font-weight: 400; font-size: clamp(56px, 17vw, 84px); letter-spacing: -.04em; color: #fff; font-variant-numeric: tabular-nums; -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent); }
   .dl-num:empty { display: none; }
   .dl-reel { display: block; height: var(--h); overflow: hidden; }
   .dl-reel > span { display: flex; flex-direction: column; transition: transform var(--dur, .9s) cubic-bezier(.16, .84, .3, 1); will-change: transform; }
@@ -92,7 +95,7 @@ const first = evs[0];
   .dl-date { font-family: var(--f-display); font-weight: 700; font-size: clamp(21px, 5.8vw, 27px); line-height: 1.35; white-space: nowrap; }
   .dl-date:not(:empty)::after { content: "까지"; font-family: var(--f-body); font-weight: 400; font-size: .62em; color: var(--on-moss2); margin-left: 6px; }
   .dl-why { margin-top: 6px; font-size: 15px; color: var(--on-moss2); }
-  .dl-tl { display: block; width: 100%; height: 64px; margin-top: 10px; }
+  .dl-tl { display: block; width: 100%; height: 76px; margin-top: 6px; }
   .dl-tl text { font: 500 14px var(--f-body); fill: var(--on-moss2); font-variant-numeric: tabular-nums; }
   .dl-tl .dr { stroke-dasharray: 1; stroke-dashoffset: 1; animation: dl-draw var(--t, .5s) cubic-bezier(.4, 0, .2, 1) var(--d, 0s) forwards; }
   .dl-tl .fd { opacity: 0; animation: dl-fade .3s ease-out var(--d, 0s) forwards; }
@@ -102,14 +105,13 @@ const first = evs[0];
   .dl-act { padding: 14px 16px 16px; display: grid; gap: 8px; }
   .dl-act p { font-size: 14px; color: var(--muted); }
 
-  .dl-one { display: grid; grid-template-columns: 28px 1fr; gap: 2px 12px; padding: 16px 18px; border-left: 2px solid var(--gold); background: rgba(255, 255, 255, .7); border-radius: 0 8px 8px 0; }
+  .dl-one { display: grid; grid-template-columns: 28px 1fr; gap: 2px 12px; padding: 16px 18px; border-left: 2px solid var(--gold); background: var(--surface); border-radius: 0 10px 10px 0; }
   .dl-one svg { grid-row: span 3; width: 22px; height: 22px; margin-top: 3px; }
   .dl-one-t { font-size: 14px; font-weight: 700; color: var(--gold-text); }
   .dl-one-f { font-size: 16px; line-height: 1.7; }
   .dl-one-l { font-size: 14px; color: var(--muted); }
 
   @media (min-width: 900px) {
-    .dl-chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
     .dl-ask { padding: 22px 22px 18px; } .dl-out { padding: 22px 22px 20px; } .dl-act { padding: 16px 22px 20px; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -132,6 +134,7 @@ const first = evs[0];
     return n;
   };
   const dotDate = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return `${y}. ${m}. ${d}.`; };
+  const md = (iso: string) => { const [, m, d] = iso.split("-").map(Number); return `${m}. ${d}.`; };
 
   document.querySelectorAll<HTMLElement>("[data-dl-wrap]").forEach((wrap) => {
     const form = wrap.querySelector<HTMLFormElement>("[data-dlcalc]")!;
@@ -139,16 +142,18 @@ const first = evs[0];
     const events: any[] = json.events || [];
     const holidays = buildHolidayIndex(json.holidays || []);
     const q = <T extends Element>(s: string) => wrap.querySelector<T>(s)!;
+    const out = q<HTMLElement>("[data-out]");
     const dateIn = q<HTMLInputElement>("[data-date]");
     const abroad = wrap.querySelector<HTMLInputElement>("[data-abroad]");
     const today = new Date();
     dateIn.value = toIso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 20));
     let reels: { col: HTMLElement; at: number }[] = [];
-    let lead = 0.4; // 처음 한 번은 화면이 뜬 뒤에 움직이게 조금 늦춘다
+    let last: any = null;     // 마지막으로 맞게 계산한 결과(시간 줄 다시 그리기·흐리게 남기기용)
+    let seen = reduce;        // 결과 판이 화면에 들어온 적이 있는지 — 그 전엔 움직이지 않고 완성된 모습만
+    let liveT = 0;
 
-    function roll(n: number) {
+    function roll(n: number, animate: boolean, fromZero = false) {
       const box = q<HTMLElement>("[data-num]"), str = String(n);
-      q("[data-num-sr]").textContent = str;
       if (reels.length !== str.length) {
         box.textContent = ""; reels = [];
         for (let i = 0; i < str.length; i++) {
@@ -160,39 +165,63 @@ const first = evs[0];
       }
       str.split("").forEach((ch, i) => {
         const r = reels[i], to = Number(ch);
-        if (reduce) { r.col.style.transition = "none"; r.col.style.transform = `translateY(calc(var(--h) * ${-to}))`; r.at = to; return; }
-        // 지난 숫자(첫 바퀴)로 순간 이동한 뒤 몇 바퀴 더 돌아 새 숫자에 멈춘다
-        r.col.style.transition = "none"; r.col.style.transform = `translateY(calc(var(--h) * ${-r.at}))`; void r.col.offsetHeight;
-        r.col.style.transition = ""; r.col.style.transitionDelay = lead + "s"; r.col.style.setProperty("--dur", (0.75 + i * 0.14) + "s");
-        r.col.style.transform = `translateY(calc(var(--h) * ${-(to + 10 * (1 + Math.min(i, 2)))}))`;
+        if (fromZero) r.at = 0;
+        r.col.style.transition = "none"; r.col.style.transform = `translateY(calc(var(--h) * ${-(animate ? r.at : to)}))`;
+        if (animate) {
+          // 지난 숫자(첫 바퀴)에서 몇 바퀴 더 돌아 새 숫자에 멈춘다. 왼쪽 자리부터 차례로.
+          void r.col.offsetHeight;
+          r.col.style.transition = ""; r.col.style.transitionDelay = (fromZero ? 0.15 : 0) + "s"; r.col.style.setProperty("--dur", (0.75 + i * 0.14) + "s");
+          r.col.style.transform = `translateY(calc(var(--h) * ${-(to + 10 * (1 + Math.min(i, 2)))}))`;
+        }
         r.at = to;
       });
     }
 
-    function drawTl(startIso: string, midIso: string | null, endIso: string) {
+    function drawTl(r: any, animate: boolean) {
       const svg = q<SVGSVGElement>("[data-tl]"); svg.textContent = "";
-      const SW = Math.max(260, Math.round(svg.getBoundingClientRect().width || 400)); svg.setAttribute("viewBox", `0 0 ${SW} 64`);
+      if (!r) return;
+      const SW = Math.max(260, Math.round(svg.getBoundingClientRect().width || 400)); svg.setAttribute("viewBox", `0 0 ${SW} 76`);
       const P = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).getTime(); };
-      const s = P(startIso), e = P(endIso), t = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+      const s = P(r.startIso), e = P(r.deadlineIso), t = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
       const lo = Math.min(s, t, e), hi = Math.max(s, t, e);
-      const x = (v: number) => 8 + ((v - lo) / Math.max(1, hi - lo)) * (SW - 16);
-      const y = 22, T0 = 0.55 + lead;
-      const at = (node: Element, cls: string, d: number, dur?: number) => { node.setAttribute("class", cls); (node as SVGElement).style.setProperty("--d", d + "s"); if (dur) (node as SVGElement).style.setProperty("--t", dur + "s"); svg.appendChild(node); };
-      at(svgEl("line", { x1: x(s), y1: y, x2: x(e), y2: y, stroke: "rgba(243,240,231,.3)", "stroke-width": 1.5, pathLength: 1 }), "dr", T0, .45);
+      const x = (v: number) => 10 + ((v - lo) / Math.max(1, hi - lo)) * (SW - 20);
+      const y = 34, T0 = animate ? 0.55 : 0;
+      const at = (node: Element, cls: string, d: number, dur?: number) => {
+        if (animate) { node.setAttribute("class", cls); (node as SVGElement).style.setProperty("--d", d + "s"); if (dur) (node as SVGElement).style.setProperty("--t", dur + "s"); }
+        svg.appendChild(node); return node as SVGGraphicsElement;
+      };
+      // 글자가 판 밖으로 나가지 않게 가둔다
+      const label = (px: number, ty: number, txt: string, d: number) => {
+        const n = at(svgEl("text", { x: px, y: ty, "text-anchor": "middle" }, txt), "fd", d) as SVGTextElement;
+        const w = n.getComputedTextLength ? n.getComputedTextLength() : txt.length * 8;
+        const cx = Math.min(Math.max(px, 2 + w / 2), SW - 2 - w / 2);
+        n.setAttribute("x", String(cx));
+        return { n, l: cx - w / 2, r: cx + w / 2 };
+      };
+      at(svgEl("line", { x1: x(lo), y1: y, x2: x(hi), y2: y, stroke: "rgba(243,240,231,.3)", "stroke-width": 1.5, pathLength: 1 }), "dr", T0, .45);
       at(svgEl("circle", { cx: x(s), cy: y, r: 3.5, fill: "#F3F0E7" }), "fd", T0);
       const tEnd = Math.min(Math.max(t, s), e);
       if (tEnd > s) at(svgEl("line", { x1: x(s), y1: y, x2: x(tEnd), y2: y, stroke: "#E8C46A", "stroke-width": 2, "stroke-linecap": "round", pathLength: 1 }), "dr", T0 + .15, .5);
-      if (midIso) at(svgEl("line", { x1: x(P(midIso)), y1: y - 5, x2: x(P(midIso)), y2: y + 5, stroke: "rgba(243,240,231,.5)", "stroke-width": 1.2 }), "fd", T0 + .35);
-      at(svgEl("path", { d: `M${x(t)} ${y - 9}l-4 -6h8z`, fill: "#FFFFFF" }), "fd", T0 + .6);
-      const ex = x(e); // 마감 = 브랜드 +, 세로획 → 가로획
+      if (r.monthEndIso) { const mx = x(P(r.monthEndIso)); at(svgEl("line", { x1: mx, y1: y - 5, x2: mx, y2: y + 5, stroke: "rgba(243,240,231,.5)", "stroke-width": 1.2 }), "fd", T0 + .35); }
+      // 오늘: ▼ + "오늘" 글자
+      const tx = x(t);
+      at(svgEl("path", { d: `M${tx} ${y - 8}l-4.5 -7h9z`, fill: "#FFFFFF" }), "fd", T0 + .6);
+      label(tx, 14, "오늘", T0 + .6);
+      // 마감 = 브랜드 +, 세로획 → 가로획
+      const ex = x(e);
       at(svgEl("path", { d: `M${ex} ${y - 7}v14`, stroke: "#E8C46A", "stroke-width": 2.2, "stroke-linecap": "round", fill: "none", pathLength: 1 }), "dr", T0 + .7, .22);
       at(svgEl("path", { d: `M${ex - 7} ${y}h14`, stroke: "#E8C46A", "stroke-width": 2.2, "stroke-linecap": "round", fill: "none", pathLength: 1 }), "dr", T0 + .88, .22);
-      const md = (iso: string) => { const [, m, d] = iso.split("-").map(Number); return `${m}.${d}`; };
-      at(svgEl("text", { x: x(s), y: 54, "text-anchor": "start" }, `${md(startIso)} 시작`), "fd", T0);
-      at(svgEl("text", { x: SW - 2, y: 54, "text-anchor": "end" }, `${md(endIso)} 마감`), "fd", T0 + .9);
+      const endL = label(ex, 66, `${md(r.deadlineIso)} 마감`, T0 + .9);
+      const startL = label(x(s), 66, `${md(r.startIso)} 시작`, T0);
+      if (startL.r + 10 > endL.l && startL.l < endL.r + 10) startL.n.remove(); // 두 글자가 겹치면 마감만
     }
 
-    function run() {
+    function speak(text: string) {
+      clearTimeout(liveT);
+      liveT = window.setTimeout(() => { q("[data-live]").textContent = text; }, 400);
+    }
+
+    function run(animate: boolean) {
       const pick = form.querySelector<HTMLInputElement>('input[type="radio"]:checked') || form.querySelector<HTMLInputElement>("[data-single]")!;
       const ev = events.find((e) => e.id === pick.value);
       if (!ev) return;
@@ -201,25 +230,45 @@ const first = evs[0];
       if (aw) aw.hidden = !ev.rule.abroadMonths;
       q("[data-fact]").textContent = ev.fact.text; q("[data-fact-law]").textContent = ev.fact.law;
       q("[data-lab]").textContent = ev.name + " 기한";
-      const r = computeDeadline(ev, dateIn.value, { abroad: !!abroad?.checked, holidays, today });
-      if (!r) { q("[data-num]").textContent = ""; reels = []; q("[data-num-l]").textContent = "날짜를 넣으면 계산합니다"; q("[data-dt]").textContent = ""; q("[data-why]").textContent = ""; q("[data-tl]").textContent = ""; return; }
-      q("[data-dt]").textContent = `${dotDate(r.deadlineIso)} (${r.weekday})`;
-      q("[data-num-l]").textContent = r.dday > 0 ? "일 남음" : r.dday === 0 ? "오늘 마감" : "일 지남";
-      q("[data-out]").classList.toggle("late", r.dday < 0);
-      roll(Math.abs(r.dday));
-      const moved = r.shifted.length ? ` · ${r.shifted.map((s: any) => `${dotDate(s.iso)}(${s.weekday}) ${s.reason}`).join(", ")}이라 다음 날(${r.extLaw})` : "";
-      q("[data-why]").textContent = r.why + moved + (r.dday < 0 ? " · 기한이 지났습니다. 지금 할 수 있는 일을 상담하세요." : "");
       q("[data-law]").textContent = ev.law;
+      const r = computeDeadline(ev, dateIn.value, { abroad: !!abroad?.checked, holidays, today });
+      if (!r) { // 날짜를 치는 중이면 지난 결과를 흐리게 남긴다(카드가 출렁이지 않게)
+        out.classList.add("stale");
+        if (!last) q("[data-num-l]").textContent = "날짜를 넣으면 계산합니다";
+        speak("");
+        return;
+      }
+      out.classList.remove("stale");
+      last = r;
+      q("[data-dt]").textContent = `${dotDate(r.deadlineIso)} (${r.weekday})`;
+      const unit = r.dday > 0 ? "일 남음" : r.dday === 0 ? "오늘 마감" : "일 지남";
+      q("[data-num-l]").textContent = unit;
+      out.classList.toggle("late", r.dday < 0);
+      roll(Math.abs(r.dday), animate && seen);
+      // 미뤄진 이유: "10. 31.(토)·11. 1.(일)이 쉬는 날이라 11. 2.(월)로 미뤄집니다(지방세기본법 §24)"
+      const moved = r.shifted.length ? ` · ${r.shifted.map((x: any) => `${md(x.iso)}(${x.weekday})`).join("·")}이 쉬는 날이라 ${md(r.deadlineIso)}(${r.weekday})로 미뤄집니다(${r.extLaw})` : "";
+      q("[data-why]").textContent = r.why + moved + (r.dday < 0 ? " · 기한이 지났습니다. 지금 할 수 있는 일을 상담하세요." : "");
       const unk = unknownYearNote(r);
       q("[data-note]").textContent = (unk ? unk + " " : "기한이 토·일요일·공휴일이면 다음 날로 옮겼습니다. ") + "결과는 참고용입니다.";
-      drawTl(r.startIso, r.monthEndIso, r.deadlineIso);
-      lead = 0;
+      drawTl(r, animate && seen);
+      const [y, m, d] = r.deadlineIso.split("-").map(Number);
+      speak(`${ev.name} 기한 ${y}년 ${m}월 ${d}일 ${r.weekday}요일, ${r.dday > 0 ? `${r.dday}일 남음` : r.dday === 0 ? "오늘 마감" : `${-r.dday}일 지남`}`);
     }
-    form.addEventListener("input", run);
+
+    form.addEventListener("input", () => { q("[data-ex]").hidden = true; run(true); });
     form.addEventListener("submit", (e) => e.preventDefault());
-    // 휴대폰은 스크롤할 때 주소창이 접히며 높이만 바뀐다 — 폭이 바뀔 때만 다시 그린다
+    // 휴대폰은 스크롤할 때 주소창이 접히며 높이만 바뀐다. 폭이 바뀌어도 숫자는 그대로 두고 시간 줄만 다시 그린다.
     let rt = 0, lw = innerWidth;
-    addEventListener("resize", () => { if (innerWidth === lw) return; lw = innerWidth; clearTimeout(rt); rt = window.setTimeout(run, 150); });
-    run();
+    addEventListener("resize", () => { if (innerWidth === lw) return; lw = innerWidth; clearTimeout(rt); rt = window.setTimeout(() => drawTl(last, false), 150); });
+    run(false);
+    // 결과 판이 화면에 반쯤 들어왔을 때 처음 한 번 굴린다(휴대폰에선 첫 화면 아래에 있어 미리 끝나 버렸다 — 2026-10-24 검토)
+    if (!reduce && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver((ents) => {
+        if (!ents.some((x) => x.isIntersecting)) return;
+        io.disconnect(); seen = true;
+        if (last) { roll(Math.abs(last.dday), true, true); drawTl(last, true); }
+      }, { threshold: 0.5 });
+      io.observe(out);
+    } else seen = true;
   });
 </script>

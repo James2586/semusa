@@ -30,7 +30,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
         {svc.deadlines.map((d: any) => (
           <div class="card dl">
             <h3>{d.title}</h3>
-            {d.track && (
+            {d.track && !svc.calcEvents && (
               <div class="track" aria-hidden="true">
                 <span class="ln"></span><span class="fl"></span>
                 <span class="dot" style="left:0"></span>

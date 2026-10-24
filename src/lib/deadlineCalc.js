@@ -28,18 +28,18 @@ export function computeDeadline(ev, startIso, { abroad = false, holidays = null,
   };
 }
 
-// 매년(매달) 돌아오는 기한의 다음 날짜 — 오늘이 그날이면 오늘.
+// 매년(매달) 돌아오는 기한의 다음 날짜 — 이번 회차를 연장(주말·공휴일)까지 적용한 뒤 그날이 오늘보다 앞일 때만 다음 회차로.
+// (원래 날짜로 비교하면 주말이라 미뤄진 실제 마감 당일에 벌써 다음 회차를 보여 준다 — 2026-10-24 검토)
 export function nextYearly(item, { holidays = null, today = new Date() } = {}) {
   const t = dayStart(today);
-  let raw;
-  if (item.rule.monthDay) {
-    raw = new Date(t.getFullYear(), t.getMonth(), item.rule.monthDay);
-    if (raw < t) raw = new Date(t.getFullYear(), t.getMonth() + 1, item.rule.monthDay);
-  } else {
+  const nth = (k) => {
+    if (item.rule.monthDay) return new Date(t.getFullYear(), t.getMonth() - 1 + k, item.rule.monthDay);
     const [m, d] = item.rule.md.split("-").map(Number);
-    raw = new Date(t.getFullYear(), m - 1, d);
-    if (raw < t) raw = new Date(t.getFullYear() + 1, m - 1, d);
+    return new Date(t.getFullYear() - 1 + k, m - 1, d);
+  };
+  for (let k = 0; k < 4; k++) {
+    const raw = nth(k), ext = applyDeadlineExtension(raw, holidays);
+    if (ext.deadline >= t) return { rawIso: toIso(raw), rawWeekday: weekdayKo(raw), deadlineIso: ext.deadlineIso, deadline: ext.deadline, weekday: weekdayKo(ext.deadline), shifted: ext.shifted, knownYear: ext.knownYear, dday: ddayOf(ext.deadline, t) };
   }
-  const ext = applyDeadlineExtension(raw, holidays);
-  return { rawIso: toIso(raw), deadlineIso: ext.deadlineIso, deadline: ext.deadline, weekday: weekdayKo(ext.deadline), shifted: ext.shifted, knownYear: ext.knownYear, dday: ddayOf(ext.deadline, t) };
+  return null;
 }

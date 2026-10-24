@@ -19,7 +19,7 @@ const holidays = await fetchHolidayRows();
   .up-list { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--ink); }
   .up-list li { display: grid; grid-template-columns: 80px minmax(0, 1fr); column-gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
   .up-list li > :not(.up-dd) { grid-column: 2; }
-  .up-dd { grid-row: 1 / span 3; font-family: "Hanadeo Num", "Noto Serif KR", serif; font-size: 22px; line-height: 1.35; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .up-dd { grid-row: 1 / span 3; font-size: 20px; font-weight: 600; line-height: 1.4; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
   .up-dd.soon { color: var(--gold-text); }
   .up-list b { font-size: 17px; }
   .up-when { font-size: 15.5px; font-variant-numeric: tabular-nums; }
@@ -35,7 +35,7 @@ const holidays = await fetchHolidayRows();
     const json = JSON.parse(wrap.querySelector("[data-up-data]")!.textContent || "{}");
     const holidays = buildHolidayIndex(json.holidays || []);
     const list = wrap.querySelector<HTMLElement>("[data-up]")!;
-    const rows = (json.yearly as any[]).map((it) => ({ it, r: nextYearly(it, { holidays }), li: list.querySelector<HTMLElement>(`[data-id="${it.id}"]`)! }));
+    const rows = (json.yearly as any[]).map((it) => ({ it, r: nextYearly(it, { holidays })!, li: list.querySelector<HTMLElement>(`[data-id="${it.id}"]`)! })).filter((x) => x.r);
     rows.sort((a, b) => a.r.dday - b.r.dday);
     let unknown = "";
     for (const { r, li } of rows) {
@@ -43,7 +43,9 @@ const holidays = await fetchHolidayRows();
       dd.textContent = r.dday === 0 ? "D-DAY" : `D-${r.dday}`;
       dd.classList.toggle("soon", r.dday <= 30);
       const [y, m, d] = r.deadlineIso.split("-").map(Number);
-      li.querySelector("[data-date]")!.textContent = `${y}. ${m}. ${d}. (${r.weekday})${r.shifted.length ? " · 쉬는 날이라 다음 날" : ""}`;
+      const [, rm, rd] = r.rawIso.split("-").map(Number);
+      // "7월 25일(일)이 쉬는 날이라 2027. 7. 26. (월)"
+      li.querySelector("[data-date]")!.textContent = (r.shifted.length ? `${rm}월 ${rd}일(${r.rawWeekday})이 쉬는 날이라 ` : "") + `${y}. ${m}. ${d}. (${r.weekday})`;
       list.appendChild(li);
       unknown ||= unknownYearNote(r);
     }

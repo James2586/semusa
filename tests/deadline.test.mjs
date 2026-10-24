@@ -55,6 +55,11 @@ test("매년 돌아오는 기한: 다음 날짜와 주말 연장", () => {
   assert.equal(nextYearly(y.vat1, { today }).deadlineIso, "2027-07-26"); // 7/25 일요일
   assert.equal(nextYearly(y.withholding, { today: new Date(2026, 10, 10) }).dday, 0); // 그날(화)이면 D-0
   assert.equal(nextYearly(y.withholding, { today: new Date(2026, 9, 10) }).deadlineIso, "2026-10-12"); // 10일 토 → 월
+  // 주말이라 미뤄진 실제 마감 당일에는 그날을 보여 준다(다음 회차로 넘어가지 않음)
+  assert.deepEqual([nextYearly(y.income, { today: new Date(2026, 5, 1) }).deadlineIso, nextYearly(y.income, { today: new Date(2026, 5, 1) }).dday], ["2026-06-01", 0]); // 5/31 일
+  assert.equal(nextYearly(y.vat2, { today: new Date(2026, 0, 26) }).deadlineIso, "2026-01-26"); // 1/25 일
+  assert.equal(nextYearly(y.withholding, { today: new Date(2027, 0, 11) }).deadlineIso, "2027-01-11"); // 1/10 일
+  assert.equal(nextYearly(y.withholding, { today: new Date(2027, 0, 12) }).deadlineIso, "2027-02-10");
 });
 
 test("기한 자료: 모든 일·하나 더 확인할 것에 근거 조문", () => {
