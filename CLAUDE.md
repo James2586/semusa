@@ -1,7 +1,7 @@
 # semusa — 하나 더 세무회계 홈페이지
 
 - 배포: https://semusatax.vercel.app (main 병합 → Vercel). 작업 가지에서 만든 것은 단계가 끝나 운영자가 확인하기 전에는 main에 병합하지 않는다.
-- Astro 7 정적 사이트. `npm run build && npm test`(자료 검사·빌드·제목 글꼴 자르기·검사 21개).
+- Astro 7 정적 사이트. `npm run build && npm test`(자료 검사·빌드·제목 글꼴 자르기·검사 26개).
 
 ## 운영자 결정 (바꾸려면 운영자에게 먼저 묻는다)
 
@@ -22,5 +22,7 @@
 - 하위 컴포넌트(`KakaoIcon` 등)에 스타일을 줄 땐 `:global()` — Astro 범위 스타일은 자식 컴포넌트에 닿지 않는다.
 - 서비스 페이지의 기한(`services.json` deadlines)·계산기 안내 글(`calculators.json`)은 법조문 원문과 대조한 것만, `law`(근거 조문) 필수 — 근거 인용은 `docs/calculator-content-sources.json`. 글을 고치면 근거도 같이 고친다.
 - 계산기 iframe은 화면 한 장 높이로 둔다(높이 자동 맞춤 금지) — 계산기 13개의 결과·보고서 창이 화면에 고정되어 떠서, iframe을 내용 길이로 늘리면 그 창이 화면 밖에 뜬다.
+- 칼럼·책 카드 표지는 `src/components/Thumb.astro` — 블로그 글은 제목 낱말로 주제(`src/lib/thumbTopic.js`)를 골라 색·그림을 바꾸고, RSS에 네이버 사진(pstatic.net)이 있으면 사진을 쓴다(못 불러오면 그림).
+- 아이콘 PNG·`manifest.webmanifest`는 favicon.svg와 같은 그림(숲색 바탕 + 금색 십자) — `tests/icons.test.mjs`가 픽셀을 본다(예전 PNG에 깨진 그림 표시가 찍혀 바로가기 아이콘이 하얬다).
 - 칼럼·책의 블로그 최신 글은 빌드 때 RSS를 읽고(`src/lib/blogFeed.js`), 못 읽으면 그 칸만 뺀다 — 빌드를 실패시키지 말 것.
 - 영상(`src/data/videos.json`)은 누를 때만 받는다(preload=none, 자동 재생 금지). 영상 속 "22권"은 통합검색 22가 검색하는 책 — 옆에 "저서 33권 중 22권" 설명을 빼지 말 것.
