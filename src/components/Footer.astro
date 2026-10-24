@@ -30,7 +30,7 @@ import Logo from "./Logo.astro";
         <li><a href="/sources">원문 기준일</a></li>
         <li><a href="/notice">공지사항</a></li>
         <li><a href="/privacy">개인정보처리방침</a></li>
-        {site.channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener">{c.name}</a></li>)}
+        {site.channels.map((c) => <li><a href={(c as any).link || c.url} target="_blank" rel="noopener">{c.name}</a></li>)}
         <li><a href={site.taxSearch.url} target="_blank" rel="noopener">{site.taxSearch.name}<span class="f-note"> · {site.taxSearch.note}</span></a></li>
       </ul>
       <p class="f-h f-h2">자주 가는 사이트</p>

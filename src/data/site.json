@@ -26,7 +26,7 @@
     { "name": "네이버 블로그", "url": "https://blog.naver.com/semusatax" },
     { "name": "네이버 세금 인플루언서", "url": "https://in.naver.com/sungtax" },
     { "name": "인스타그램", "url": "https://www.instagram.com/semusatax" },
-    { "name": "유튜브 @성셈", "url": "https://www.youtube.com/@%EC%84%B1%EC%85%88" }
+    { "name": "유튜브 @성셈", "url": "https://www.youtube.com/@%EC%84%B1%EC%85%88", "link": "https://www.youtube.com/@%EC%84%B1%EC%85%88/shorts" }
   ],
   "booksUrl": "https://search.kyobobook.co.kr/search?keyword=%EC%84%B1%EA%B4%91%ED%98%B8",
   "taxSearch": { "name": "세무 지식 통합검색 22", "url": "https://tax-search-rho.vercel.app/", "note": "세무 실무자용" },

@@ -132,7 +132,7 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
           <p>네이버 블로그·세금 인플루언서·인스타그램·유튜브에 새 세금 글과 영상을 올립니다. 이웃 추가나 팔로우, 구독을 해 두시면 새 글이 올라올 때 바로 보실 수 있습니다.</p>
         </div>
         <ul>
-          {channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener">{c.name} <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a></li>)}
+          {channels.map((c) => <li><a href={(c as any).link || c.url} target="_blank" rel="noopener">{c.name} <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a></li>)}
         </ul>
       </section>
     </div>
