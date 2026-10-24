@@ -1,27 +1,133 @@
 ---
 import Base from "../../layouts/Base.astro";
 import PageHead from "../../components/PageHead.astro";
-import Pending from "../../components/Pending.astro";
 import calcData from "../../data/calculators.json";
+import svcData from "../../data/services.json";
 import site from "../../data/site.json";
 import KakaoIcon from "../../components/KakaoIcon.astro";
 
 export function getStaticPaths() {
   return calcData.calculators.map((c) => ({ params: { slug: c.slug }, props: { calc: c } }));
 }
-const { calc } = Astro.props;
+const { calc } = Astro.props as { calc: any };
 const group = calcData.groups.find((g) => g.id === calc.group)!;
+const services = svcData.services.filter((s) => s.calculators.includes(calc.slug));
+const siblings = calcData.calculators.filter((c) => c.group === calc.group && c.slug !== calc.slug);
+const origin = new URL(calc.url).origin;
+const hasGuide = calc.covers?.length || calc.notCovered?.length || calc.prepare?.length;
+const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc.short}. ${site.repTitle} ${site.rep}이 만든 모의 계산기.`;
 ---
-<Base title={calc.name} description={`${calc.short}. ${site.repTitle} ${site.rep}이 만든 모의 계산기.`} hideBar>
+<Base title={calc.name} description={desc} hideBar>
   <PageHead title={calc.name} lead={calc.short} crumbs={[{ name: "세금 계산기", href: "/calculators" }, { name: calc.name }]}>
-    <p class="meta">검토 {site.repTitle} {site.rep} · {group.name}</p>
+    <p class="meta">{group.name} · 검토 {site.repTitle} {site.rep}</p>
   </PageHead>
-  <section class="gut" style="padding-bottom:64px">
-    <div class="wrap narrow" style="display:grid;gap:18px">
-      <a class="btn btn-moss btn-block" href={calc.url} target="_blank" rel="noopener">계산기 열기 ↗</a>
-      <Pending label="계산기를 이 페이지 안에 넣기(높이 자동)와 설명 글은 4단계에서 채웁니다." />
-      <a class="btn btn-kakao btn-block" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 결과로 상담하기</a>
+
+  <section class="gut">
+    <div class="wrap narrow">
+      {calc.intro && <p class="intro">{calc.intro}</p>}
+      {hasGuide && (
+        <div class="acc">
+          {calc.covers?.length > 0 && <details><summary>이 계산기가 다루는 것<span aria-hidden="true">+</span></summary><ul>{calc.covers.map((t: string) => <li>{t}</li>)}</ul></details>}
+          {calc.notCovered?.length > 0 && <details><summary>계산하지 않는 것<span aria-hidden="true">+</span></summary><ul>{calc.notCovered.map((t: string) => <li>{t}</li>)}</ul></details>}
+          {calc.prepare?.length > 0 && <details><summary>미리 준비할 숫자<span aria-hidden="true">+</span></summary><ul>{calc.prepare.map((t: string) => <li>{t}</li>)}</ul></details>}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="gut calc-sec">
+    <div class="wrap">
+      <div class="frame-hd">
+        <span>{calc.name}</span>
+        <a href={calc.url} target="_blank" rel="noopener">새 창에서 열기 ↗</a>
+      </div>
+      <iframe
+        class="calc-frame"
+        src={calc.url}
+        title={`${calc.name} — 계산 화면`}
+        data-origin={origin}
+        allow="clipboard-write"
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+      <p class="note">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다. 계산 화면이 잘 안 보이면 "새 창에서 열기"를 눌러 주세요.</p>
+    </div>
+  </section>
+
+  <section class="gut after">
+    <div class="wrap narrow">
+      <div class="acts">
+        <a class="btn btn-kakao btn-block" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 결과로 상담하기</a>
+        <button class="btn btn-line btn-block" type="button" data-share={calc.name}>가족에게 이 계산기 보내기</button>
+        <p class="note" role="status" data-share-ok>보내는 것은 이 페이지 주소뿐입니다. 입력한 금액은 보내지 않습니다.</p>
+      </div>
+
+      {calc.deadline && (
+        <div class="prose dl">
+          <h2 class="sec-h">신고·납부 기한</h2>
+          <p>{calc.deadline.text}</p>
+          <p class="law">{calc.deadline.law}</p>
+        </div>
+      )}
+
+      <h2 class="sec-h more-h">이어서 보기</h2>
+      <div class="rows">
+        {services.map((s) => <a class="row-link" href={`/services/${s.slug}`}><span>{s.name} 상담 안내<small>{s.short}</small></span><span class="arr" aria-hidden="true">›</span></a>)}
+        {siblings.map((c) => <a class="row-link" href={`/calculators/${c.slug}`}><span>{c.name}<small>{c.short}</small></span><span class="arr" aria-hidden="true">›</span></a>)}
+        <a class="row-link" href="/calculators"><span>세금 계산기 전체</span><span class="arr" aria-hidden="true">›</span></a>
+      </div>
     </div>
   </section>
 </Base>
-<style>.meta { margin-top: 10px; font-size: 14.5px; color: var(--muted); }</style>
+
+<style>
+  .meta { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
+  .intro { color: var(--ink2); margin-bottom: 18px; }
+  .acc { border-top: 1px solid var(--line); }
+  .acc details { border-bottom: 1px solid var(--line); }
+  .acc summary { display: flex; justify-content: space-between; align-items: center; min-height: 56px; cursor: pointer; list-style: none; font-size: 17px; font-weight: 600; }
+  .acc summary::-webkit-details-marker { display: none; }
+  .acc summary span { color: var(--gold-text); font-size: 22px; transition: transform .2s; }
+  .acc details[open] summary span { transform: rotate(45deg); }
+  .acc ul { margin: 0 0 16px; padding-left: 1.1em; display: grid; gap: 6px; color: var(--ink2); font-size: 16.5px; }
+  .acc li::marker { color: var(--gold); }
+  .calc-sec { padding-block: 28px 8px; }
+  .frame-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; background: var(--moss); color: var(--on-moss); font-size: 15.5px; font-weight: 600; border-radius: 6px 6px 0 0; }
+  .frame-hd a { color: var(--gold-hi); font-weight: 500; white-space: nowrap; }
+  .calc-frame { display: block; width: 100%; height: max(560px, 85vh); border: 1px solid var(--line2); border-top: none; background: var(--surface); }
+  .note { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
+  .after { padding-block: 24px 64px; }
+  .acts { display: grid; gap: 10px; }
+  .dl { margin-top: 40px; }
+  .more-h { margin-top: 40px; font-size: 23px; }
+  .after .rows { margin-top: 12px; }
+</style>
+
+<script>
+  // 계산기가 높이를 알려 오면 그 높이로 맞춘다(계산기 쪽 ?embed=1 작업 뒤). 알려 오지 않으면 화면 높이의 85%.
+  const frame = document.querySelector<HTMLIFrameElement>(".calc-frame");
+  if (frame) {
+    const origin = frame.dataset.origin;
+    addEventListener("message", (e) => {
+      if (e.origin !== origin || e.source !== frame.contentWindow) return;
+      const h = (e.data as { type?: string; h?: number })?.h;
+      if ((e.data as { type?: string })?.type === "semusa:height" && typeof h === "number" && h > 0) {
+        frame.style.height = Math.max(480, Math.round(h)) + "px";
+      }
+    });
+  }
+
+  // 가족에게 보내기: 휴대폰 공유 창(카카오톡 등)으로 페이지 주소만 보낸다. 공유 창이 없으면 주소 복사.
+  document.querySelectorAll<HTMLButtonElement>("[data-share]").forEach((btn) => {
+    const ok = document.querySelector("[data-share-ok]")!;
+    btn.addEventListener("click", async () => {
+      const data = { title: btn.dataset.share, text: `${btn.dataset.share} — 하나 더 세무회계`, url: location.href };
+      try {
+        if (navigator.share) { await navigator.share(data); return; }
+        await navigator.clipboard.writeText(location.href);
+        ok.textContent = "주소를 복사했어요. 카카오톡 대화창에 붙여 넣어 보내세요.";
+      } catch (err) {
+        if ((err as Error)?.name !== "AbortError") ok.textContent = `주소: ${location.href}`;
+      }
+    });
+  });
+</script>

@@ -43,6 +43,10 @@ export function checkCalculators(text) {
     seen.add(c.slug);
     if (c.group && !groups.has(c.group)) errors.push(`${at}: group "${c.group}"는 groups에 없습니다.`);
     if (c.url && !/^https:\/\//.test(c.url)) errors.push(`${at}: url은 https://로 시작해야 합니다.`);
+    for (const k of ["covers", "notCovered", "prepare"]) {
+      if (c[k] !== undefined && !(Array.isArray(c[k]) && c[k].every((t) => typeof t === "string" && t.trim()))) errors.push(`${at}: ${k}는 글 목록(["…", "…"])이어야 합니다.`);
+    }
+    if (c.deadline !== undefined && c.deadline !== null && !(c.deadline.text && c.deadline.law)) errors.push(`${at}: deadline에는 text와 law(근거 조문)가 둘 다 있어야 합니다.`);
   });
   if (!seen.size) errors.push("calculators.json: calculators가 비었습니다.");
   return errors;
@@ -131,7 +135,7 @@ export function validateAll(root = ROOT) {
   let svcSlugs = new Set();
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
   errors.push(...checkHome(read("src/data/home.json"), svcSlugs));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json"]) {
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

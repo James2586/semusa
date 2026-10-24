@@ -65,3 +65,26 @@ test("홈: 6구역, 상황 칸은 있는 서비스 페이지로, 책 33권·후�
   assert.equal((h.match(/class="card rv"/g) || []).length, 2);
   assert.match(h, /class="btn btn-kakao"/);
 });
+
+test("계산기 13페이지: 계산 화면(iframe·제목), 새 창 링크, 참고용 문구, 상담 버튼", { skip: !has }, () => {
+  const calcs = JSON.parse(readFileSync(new URL("../src/data/calculators.json", import.meta.url), "utf8")).calculators;
+  for (const c of calcs) {
+    const h = readFileSync(join(DIST, "calculators", `${c.slug}.html`), "utf8");
+    assert.match(h, new RegExp(`<iframe[^>]*src="${c.url.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}"`), c.slug);
+    assert.match(h, /<iframe[^>]*title="[^"]+"/, c.slug);
+    assert.match(h, /새 창에서 열기/, c.slug);
+    assert.match(h, /결과는 참고용입니다/, c.slug);
+    assert.match(h, /이 결과로 상담하기/, c.slug);
+    if (c.deadline) assert.ok(h.includes(c.deadline.law), `${c.slug}: 근거 조문`);
+  }
+});
+
+test("영상: 누를 때만 받고(preload=none), 33권·22권 설명과 글로 보기가 붙는다", { skip: !has }, () => {
+  for (const p of ["index.html", "about.html"]) {
+    const h = readFileSync(join(DIST, p), "utf8");
+    assert.match(h, /<video[^>]*preload="none"/, p);
+    assert.ok(!/<video[^>]*autoplay/.test(h), p);
+    assert.match(h, /저서 33권 중 22권을 검색합니다/, p);
+    assert.match(h, /영상 내용 글로 보기/, p);
+  }
+});

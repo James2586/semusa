@@ -7,6 +7,7 @@ import calcData from "../data/calculators.json";
 import KakaoIcon from "../components/KakaoIcon.astro";
 import FaqList from "../components/FaqList.astro";
 import LocationBlock from "../components/LocationBlock.astro";
+import VideoCard from "../components/VideoCard.astro";
 
 const svcName = Object.fromEntries(svcData.services.map((s) => [s.slug, s.name]));
 const calcCount = calcData.calculators.length;
@@ -62,6 +63,7 @@ const calcCount = calcData.calculators.length;
         <span class="tag">칼럼·책</span>
         <h2 class="sec-h" id="h-books">책과 칼럼으로<br />먼저 만나 보세요</h2>
         <p class="sec-sub">상속·증여, 법인, 부동산 세금을 다룬 책 {home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.</p>
+        <div class="vid"><VideoCard id="portfolio" dark /></div>
       </div>
       <div class="books-r">
         <ul class="covers" aria-label="책 목록">
@@ -174,6 +176,7 @@ const calcCount = calcData.calculators.length;
   /* 3 */
   .books { display: grid; gap: 24px; }
   .books .sec-sub { margin-top: 4px; }
+  .vid { margin-top: 24px; }
   .books-r { min-width: 0; }
   .covers { list-style: none; margin: 0; padding: 6px 2px 14px; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; }
   .covers li { flex: none; scroll-snap-align: start; }

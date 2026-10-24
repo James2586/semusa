@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
 import site from "../data/site.json";
+import VideoCard from "../components/VideoCard.astro";
 ---
 <Base title="전문가 소개" description={`${site.repTitle} ${site.rep} — ${site.column}. 인사말과 약력.`}>
   <PageHead title="전문가 소개" crumbs={[{ name: "전문가 소개" }]} />
@@ -27,6 +28,11 @@ import site from "../data/site.json";
           <li>방송통신대학교 법학과 석사</li>
           <li>『알면 돈 버는 상속증여 오늘부터 시작』, 『알면 돈 버는 법인컨설팅』 등 저서 <a href={site.booksUrl} target="_blank" rel="noopener">전체 보기 ↗</a></li>
         </ul>
+        <span class="tag" style="margin-top:28px">영상</span>
+        <div class="vids">
+          <VideoCard id="portfolio" />
+          <VideoCard id="tonghap22" />
+        </div>
       </div>
     </div>
   </section>
@@ -42,5 +48,7 @@ import site from "../data/site.json";
   .cv { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
   .cv li::marker { color: var(--gold); }
   .cv a { color: var(--gold-text); }
+  .vids { display: grid; gap: 28px; }
+  @media (min-width: 640px) { .vids { grid-template-columns: repeat(2, minmax(0, 300px)); } }
   @media (min-width: 900px) { .about { grid-template-columns: 300px 1fr; gap: 56px; align-items: start; } .pic { max-width: none; position: sticky; top: 90px; } }
 </style>

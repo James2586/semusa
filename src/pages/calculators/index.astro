@@ -4,18 +4,53 @@ import PageHead from "../../components/PageHead.astro";
 import calcData from "../../data/calculators.json";
 const n = calcData.calculators.length;
 ---
-<Base title="세금 계산기" description={`상속세·증여세·양도소득세·취득세·종부세 등 모의 세금 계산기 ${n}종.`}>
+<Base title="세금 계산기" description={`상속세·증여세·양도소득세·취득세·종합부동산세 등 모의 세금 계산기 ${n}종.`}>
   <PageHead title={`세금 계산기 ${n}종`} crumbs={[{ name: "세금 계산기" }]} lead="결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다." />
   <section class="gut" style="padding-bottom:64px">
-    <div class="wrap" style="display:grid;gap:32px">
-      {calcData.groups.map((g) => (
-        <div>
-          <h2 class="sec-h" style="font-size:22px">{g.name}</h2>
-          <div class="grid-cards" style="margin-top:12px">
-            {calcData.calculators.filter((c) => c.group === g.id).map((c) => <a class="calc-card" href={`/calculators/${c.slug}`}><b>{c.name}</b><span>{c.short}</span></a>)}
+    <div class="wrap">
+      <div class="find">
+        <label for="calc-q">계산기 찾기</label>
+        <input id="calc-q" type="search" placeholder="예: 증여, 퇴직, 법인" autocomplete="off" />
+        <p class="find-msg" role="status" id="calc-msg"></p>
+      </div>
+      <div class="groups">
+        {calcData.groups.map((g) => (
+          <div class="grp" data-grp>
+            <h2 class="sec-h grp-h">{g.name}</h2>
+            <div class="grid-cards">
+              {calcData.calculators.filter((c) => c.group === g.id).map((c) => (
+                <a class="calc-card" href={`/calculators/${c.slug}`} data-q={`${c.name} ${c.short} ${g.name}`}><b>{c.name}</b><span>{c.short}</span></a>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   </section>
 </Base>
+<style>
+  .find { display: grid; gap: 6px; max-width: 420px; margin-bottom: 28px; }
+  .find label { font-weight: 600; font-size: 16px; }
+  .find input { min-height: 52px; border: 1px solid var(--line2); border-radius: 4px; padding: 0 14px; font: 17px var(--f-body); color: var(--ink); background: var(--surface); }
+  .find input:focus { outline: 3px solid var(--gold); outline-offset: 0; border-color: var(--gold); }
+  .find-msg { font-size: 15px; color: var(--muted); min-height: 1.5em; }
+  .groups { display: grid; gap: 32px; }
+  .grp-h { font-size: 22px; margin-bottom: 12px; }
+</style>
+<script>
+  const q = document.getElementById("calc-q") as HTMLInputElement;
+  const msg = document.getElementById("calc-msg")!;
+  const cards = [...document.querySelectorAll<HTMLAnchorElement>("[data-q]")];
+  const groups = [...document.querySelectorAll<HTMLElement>("[data-grp]")];
+  q.addEventListener("input", () => {
+    const words = q.value.trim().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const c of cards) {
+      const hit = words.every((w) => c.dataset.q!.includes(w));
+      c.hidden = !hit;
+      if (hit) shown++;
+    }
+    for (const g of groups) g.hidden = !g.querySelector("[data-q]:not([hidden])");
+    msg.textContent = words.length ? (shown ? `${shown}개를 찾았어요.` : "맞는 계산기가 없어요. 다른 낱말로 찾아 보세요.") : "";
+  });
+</script>
