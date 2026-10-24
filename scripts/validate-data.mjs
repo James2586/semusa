@@ -121,6 +121,21 @@ export function checkHome(text, svcSlugs, root = ROOT) {
   return errors;
 }
 
+// 지면 칼럼(2026-10-24): 기사 주소·날짜 모양, 주제 칸이 가리키는 서비스·계산기가 실제로 있는지
+export function checkPress(text, svcSlugs, calcSlugs) {
+  const errors = [];
+  const { data, error } = parseJsonFile("press.json", text);
+  if (error) return [error];
+  (data.articles || []).forEach((a, i) => {
+    const at = `press.json articles ${i + 1}번째`;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(a.date || "")) errors.push(`${at}: date는 "YYYY-MM-DD"이어야 합니다.`);
+    if (!a.title || !/^https:\/\//.test(a.url || "")) errors.push(`${at}: title과 https 주소가 있어야 합니다.`);
+    for (const s of a.services || []) if (!svcSlugs.has(s)) errors.push(`${at}: services "${s}"는 services.json에 없습니다.`);
+    for (const c of a.calculators || []) if (!calcSlugs.has(c)) errors.push(`${at}: calculators "${c}"는 calculators.json에 없습니다.`);
+  });
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -177,7 +192,8 @@ export function validateAll(root = ROOT) {
   let svcSlugs = new Set();
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
   errors.push(...checkHome(read("src/data/home.json"), svcSlugs, root));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json"]) {
+  errors.push(...checkPress(read("src/data/press.json"), svcSlugs, calcSlugs));
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

@@ -6,6 +6,7 @@ import svcData from "../../data/services.json";
 import site from "../../data/site.json";
 import KakaoIcon from "../../components/KakaoIcon.astro";
 import PlusList from "../../components/PlusList.astro";
+import RelatedColumns from "../../components/RelatedColumns.astro";
 
 export function getStaticPaths() {
   return calcData.calculators.map((c) => ({ params: { slug: c.slug }, props: { calc: c } }));
@@ -83,6 +84,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
       ]} />
     </div>
   </section>
+  <RelatedColumns calculator={calc.slug} heading="이 계산과 관련된 칼럼" limit={3} />
 </Base>
 
 <style>

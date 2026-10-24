@@ -6,6 +6,7 @@ import PageHead from "../../components/PageHead.astro";
 import PlusList from "../../components/PlusList.astro";
 import BookCover from "../../components/BookCover.astro";
 import FaqList from "../../components/FaqList.astro";
+import RelatedColumns from "../../components/RelatedColumns.astro";
 import UpcomingDeadlines from "../../components/UpcomingDeadlines.astro";
 import svcData from "../../data/services.json";
 import calcData from "../../data/calculators.json";
@@ -101,6 +102,8 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
       </div>
     </section>
   )}
+
+  <RelatedColumns service={svc.slug} />
 
   <section class="sec gut ruled" aria-labelledby="h-prep">
     <div class="wrap two">

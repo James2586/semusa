@@ -1,5 +1,5 @@
 {
-  "_note": "지면에 실린 칼럼(최신순). items: 운영자가 보낸 지면 PDF를 그림으로(public/img/press/). articles: 이코노미조선 「성광호의 세무 ABC」 온라인 기사(2026-10-24 이코노미조선 검색 '성광호'에서 읽은 제목·날짜·주소 그대로 — 고쳐 쓰지 말 것).",
+  "_note": "지면에 실린 칼럼(최신순). items: 운영자가 보낸 지면 PDF를 그림으로(public/img/press/). articles: 이코노미조선 「성광호의 세무 ABC」 온라인 기사(2026-10-24 이코노미조선 검색 '성광호'에서 읽은 제목·날짜·주소 그대로 — 고쳐 쓰지 말 것). topic·services·calculators는 제목을 보고 붙인 주제 칸(서비스·계산기 쪽 '관련 칼럼'에 씀) — 세법 내용이 아니라 분류.",
   "items": [
     {
       "outlet": "이코노미조선",
@@ -20,52 +20,117 @@
     {
       "date": "2026-10-19",
       "title": "일시적 2주택, 10월부터 집 팔 시간 줄었다… 양도세 폭탄 주의",
-      "url": "https://economychosun.com/site/data/html_dir/2026/10/17/2026101700003.html"
+      "url": "https://economychosun.com/site/data/html_dir/2026/10/17/2026101700003.html",
+      "topic": "양도",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "transfer"
+      ]
     },
     {
       "date": "2026-09-14",
       "title": "28세 청년의 초밥집 창업, 세금부터 따져봐야 하는 이유",
-      "url": "https://economychosun.com/site/data/html_dir/2026/09/11/2026091100016.html"
+      "url": "https://economychosun.com/site/data/html_dir/2026/09/11/2026091100016.html",
+      "topic": "창업",
+      "services": [
+        "bookkeeping"
+      ],
+      "calculators": []
     },
     {
       "date": "2026-07-27",
       "title": "사업 성공의 분기점… 법인 전환에도 골든타임이 있다",
-      "url": "https://economychosun.com/site/data/html_dir/2026/07/27/2026072700024.html"
+      "url": "https://economychosun.com/site/data/html_dir/2026/07/27/2026072700024.html",
+      "topic": "법인",
+      "services": [
+        "corporate"
+      ],
+      "calculators": [
+        "ceo-pay"
+      ]
     },
     {
       "date": "2026-03-23",
       "title": "ETF 투자로 1억원 벌었는데 세금 폭탄… 놓치기 쉬운 절세 포인트",
-      "url": "https://economychosun.com/site/data/html_dir/2026/03/20/2026032000028.html"
+      "url": "https://economychosun.com/site/data/html_dir/2026/03/20/2026032000028.html",
+      "topic": "금융",
+      "services": [],
+      "calculators": []
     },
     {
       "date": "2026-03-02",
       "title": "상속세 0원 만들었더니, 3년 뒤 양도소득세 폭탄!",
-      "url": "https://economychosun.com/site/data/html_dir/2026/02/27/2026022700021.html"
+      "url": "https://economychosun.com/site/data/html_dir/2026/02/27/2026022700021.html",
+      "topic": "상속·증여",
+      "services": [
+        "inheritance-gift",
+        "real-estate"
+      ],
+      "calculators": [
+        "inheritance",
+        "transfer"
+      ]
     },
     {
       "date": "2026-01-19",
       "title": "서울 20억원 아파트 대물림… 세금 부담 8.5억원이냐 4.7억원이냐",
-      "url": "https://economychosun.com/site/data/html_dir/2026/01/16/2026011600019.html"
+      "url": "https://economychosun.com/site/data/html_dir/2026/01/16/2026011600019.html",
+      "topic": "상속·증여",
+      "services": [
+        "inheritance-gift"
+      ],
+      "calculators": [
+        "gift",
+        "inheritance"
+      ]
     },
     {
       "date": "2025-12-15",
       "title": "중과 유예 종료에 다주택자 비상… 세금 3배 오른다",
-      "url": "https://economychosun.com/site/data/html_dir/2025/12/12/2025121200027.html"
+      "url": "https://economychosun.com/site/data/html_dir/2025/12/12/2025121200027.html",
+      "topic": "양도",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "transfer"
+      ]
     },
     {
       "date": "2025-11-24",
       "title": "공시 가격 급등, 내년 보유세 최대 50% 급증… 강남 집주인 비상",
-      "url": "https://economychosun.com/site/data/html_dir/2025/11/21/2025112100020.html"
+      "url": "https://economychosun.com/site/data/html_dir/2025/11/21/2025112100020.html",
+      "topic": "보유세",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "jongbu"
+      ]
     },
     {
       "date": "2025-11-03",
       "title": "차용증, 이자, 원천징수까지… 가족 간 금전대차의 모든 것",
-      "url": "https://economychosun.com/site/data/html_dir/2025/10/31/2025103100025.html"
+      "url": "https://economychosun.com/site/data/html_dir/2025/10/31/2025103100025.html",
+      "topic": "상속·증여",
+      "services": [
+        "inheritance-gift"
+      ],
+      "calculators": []
     },
     {
       "date": "2025-10-13",
       "title": "1가구 1주택, 장특공에 합산 과세까지… 사례로 보는 쟁점",
-      "url": "https://economychosun.com/site/data/html_dir/2025/10/10/2025101000020.html"
+      "url": "https://economychosun.com/site/data/html_dir/2025/10/10/2025101000020.html",
+      "topic": "양도",
+      "services": [
+        "real-estate"
+      ],
+      "calculators": [
+        "transfer"
+      ]
     }
   ]
 }

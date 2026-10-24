@@ -42,6 +42,7 @@ const first = evs[0];
       <span class="dl-why" data-why></span>
       <svg class="dl-tl" data-tl aria-hidden="true"></svg>
       <span class="dl-law" data-law>{first.law}</span>
+      <div class="dl-strip" data-strip aria-hidden="true"></div>
       <a class="dl-cal" href="/deadline" data-cal>달력으로 크게 보기 <span aria-hidden="true">›</span></a>
       <p class="sr-only" aria-live="polite" data-live></p>
     </div>
@@ -96,6 +97,22 @@ const first = evs[0];
   .dl-date { font-family: var(--f-display); font-weight: 700; font-size: clamp(21px, 5.8vw, 27px); line-height: 1.35; white-space: nowrap; }
   /* 기한 달력(/deadline)으로 넘어갈 때 이 날짜가 큰 날짜로 이어진다(같은 전환 이름 — 한 쪽에 계산 카드는 하나) */
   .dl-date { view-transition-name: dl-date; }
+  /* 기한 달력 맛보기 띠(2026-10-24 3차 B2): 원래 마감일 앞 열흘 → 건너뛴 쉬는 날 → 진짜 마감일 */
+  .dl-strip { display: flex; gap: 3px; margin-top: 10px; overflow: hidden; }
+  .dl-strip:empty { display: none; }
+  .dl-sc { flex: 1 0 0; min-width: 0; max-width: 34px; display: grid; justify-items: center; gap: 2px; }
+  .dl-sc small { font-size: 14px; line-height: 1; height: 14px; color: var(--on-moss2); transform: scale(.78); white-space: nowrap; }
+  .dl-sc b { position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 30px; border-radius: 4px; display: grid; place-items: center; font-size: 14px; font-weight: 500; color: var(--on-moss2); background: rgba(243, 240, 231, .08); font-variant-numeric: tabular-nums; }
+  .dl-sc.c b { background: rgba(243, 240, 231, .22); color: var(--on-moss); }
+  .dl-sc.k b { background: rgba(243, 240, 231, .06); color: var(--on-moss2); box-shadow: inset 0 0 0 1px rgba(232, 196, 106, .45); }
+  .dl-sc.k b::after { content: ""; position: absolute; left: 20%; right: 20%; top: 50%; border-top: 1.5px solid var(--gold-hi); transform: rotate(-35deg); }
+  .dl-sc.f b { background: var(--gold-hi); color: var(--moss); font-weight: 700; }
+  .dl-strip.play .dl-sc.c b { animation: dl-sfill .2s ease-out both; animation-delay: calc(var(--i) * 55ms); }
+  .dl-strip.play .dl-sc.k b { animation: dl-spop .25s ease-out both; animation-delay: calc(var(--i) * 55ms + .2s); }
+  .dl-strip.play .dl-sc.f b { animation: dl-sfin .4s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 55ms + .35s); }
+  @keyframes dl-sfill { from { background: rgba(243, 240, 231, .08); } }
+  @keyframes dl-spop { from { transform: scale(.7); opacity: .3; } }
+  @keyframes dl-sfin { from { transform: scale(.4); } 60% { transform: scale(1.15); } }
   .dl-cal { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; margin-bottom: -6px; color: var(--gold-hi); font-weight: 700; font-size: 15.5px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(232, 196, 106, .45); }
   .dl-cal:hover { text-decoration-color: currentColor; }
   .dl-date:not(:empty)::after { content: "까지"; font-family: var(--f-body); font-weight: 400; font-size: .62em; color: var(--on-moss2); margin-left: 6px; }
@@ -123,6 +140,7 @@ const first = evs[0];
     .dl-reel > span, .dl-chips span { transition: none; }
     .dl-tl .dr { animation: none; stroke-dashoffset: 0; }
     .dl-tl .fd { animation: none; opacity: 1; }
+    .dl-strip.play .dl-sc b { animation: none; }
   }
 </style>
 
@@ -221,6 +239,27 @@ const first = evs[0];
       if (startL.r + 10 > endL.l && startL.l < endL.r + 10) startL.n.remove(); // 두 글자가 겹치면 마감만
     }
 
+    // 맛보기 띠: 원래 마감일 앞 9일(센 날) + 원래 마감일(건너뛰면 빗금) + 건너뛴 날 + 진짜 마감일(+ 다음 날 하나)
+    function drawStrip(r: any, animate: boolean) {
+      const box = q<HTMLElement>("[data-strip]"); box.textContent = ""; box.classList.remove("play");
+      if (!r) return;
+      const P = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d); };
+      const raw = P(r.rawIso), skip = new Set(r.shifted.map((x: any) => x.iso));
+      const days: { d: Date; cls: string }[] = [];
+      for (let k = 9; k >= 0; k--) { const d = new Date(raw.getFullYear(), raw.getMonth(), raw.getDate() - k); days.push({ d, cls: skip.has(toIso(d)) ? "k" : (toIso(d) === r.deadlineIso ? "f" : "c") }); }
+      for (const x of r.shifted.slice(1)) days.push({ d: P(x.iso), cls: "k" });
+      if (r.shifted.length) days.push({ d: P(r.deadlineIso), cls: "f" });
+      const last = days[days.length - 1].d; days.push({ d: new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1), cls: "" });
+      let prevM = -1;
+      days.forEach((x, i) => {
+        const c = document.createElement("span"); c.className = "dl-sc " + x.cls; c.style.setProperty("--i", String(i));
+        const m = x.d.getMonth();
+        c.innerHTML = `<small>${m !== prevM ? `${m + 1}월` : ""}</small><b>${x.d.getDate()}</b>`;
+        prevM = m; box.appendChild(c);
+      });
+      if (animate && !reduce) { void box.offsetWidth; box.classList.add("play"); }
+    }
+
     function speak(text: string) {
       clearTimeout(liveT);
       liveT = window.setTimeout(() => { q("[data-live]").textContent = text; }, 400);
@@ -259,6 +298,7 @@ const first = evs[0];
       const unk = unknownYearNote(r);
       q("[data-note]").textContent = (unk ? unk + " " : "기한이 토·일요일·공휴일이면 다음 날로 옮겼습니다. ") + "결과는 참고용입니다.";
       drawTl(r, animate && seen);
+      drawStrip(r, animate && seen);
       const [y, m, d] = r.deadlineIso.split("-").map(Number);
       speak(`${ev.name} 기한 ${y}년 ${m}월 ${d}일 ${r.weekday}요일, ${r.dday > 0 ? `${r.dday}일 남음` : r.dday === 0 ? "오늘 마감" : `${-r.dday}일 지남`}`);
     }
@@ -274,7 +314,7 @@ const first = evs[0];
       const io = new IntersectionObserver((ents) => {
         if (!ents.some((x) => x.isIntersecting)) return;
         io.disconnect(); seen = true;
-        if (last) { roll(Math.abs(last.dday), true, true); drawTl(last, true); }
+        if (last) { roll(Math.abs(last.dday), true, true); drawTl(last, true); drawStrip(last, true); }
       }, { threshold: 0.5 });
       io.observe(out);
     } else seen = true;
