@@ -18,7 +18,7 @@ const [featured, ...restPosts] = posts;
 const ch = Object.fromEntries(site.channels.map((c) => [c.name, c.url]));
 
 // 그린 표지(사진 없는 책): 제목 앞 머리말("알면 돈 버는" 등)은 작은 글자로 따로
-const KICKER = /^(알면 돈 버는|알면 돈이 되는|알아두면 돈이 되는) /;
+const KICKER = /^(알면 돈 버는|알면 돈이 되는|알아두면 돈이 되는|크리에이터를 위한) /;
 const kickerOf = (t: string) => t.match(KICKER)?.[1] || "";
 type Card = { kind: string; title: string; text?: string; date?: string; href: string; external: boolean; go: string; thumb: "art" | "book" | "video"; topic?: { id: string; label: string }; image?: string; color?: string; poster?: string; cover?: string };
 const cards: Card[] = [
