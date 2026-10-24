@@ -61,11 +61,23 @@ test("건너뛴 날이 없으면 원래 마감 표시 없이 진짜 마감만", 
 });
 
 test("일정 파일(.ics): 마감일 하루·30일 전·7일 전 알림, 줄은 75바이트 이하", () => {
-  const ics = deadlineIcs({ name: "양도소득세 예정신고·납부", deadlineIso: "2026-11-02", startIso: "2026-08-20", url: "https://semusatax.vercel.app/deadline?e=sell&d=2026-08-20", law: "소득세법 제105조 제1항 제1호", now: new Date(Date.UTC(2026, 9, 24)) });
+  const ics = deadlineIcs({ name: "양도소득세 예정신고·납부", deadlineIso: "2026-11-02", startIso: "2026-08-20", url: "https://semusatax.vercel.app/deadline?e=sell&d=2026-08-20", law: "소득세법 제105조 제1항 제1호", now: new Date(2026, 7, 25) });
   assert.match(ics, /DTSTART;VALUE=DATE:20261102\r\n/);
   assert.match(ics, /DTEND;VALUE=DATE:20261103\r\n/);
   assert.equal((ics.match(/BEGIN:VALARM/g) || []).length, 2);
   assert.match(ics, /TRIGGER:-P29DT15H/);
   for (const l of ics.split("\r\n")) assert.ok(new TextEncoder().encode(l).length <= 75, l);
   assert.ok(ics.endsWith("END:VCALENDAR\r\n"));
+});
+
+test("일정 파일: 이미 지난 알림은 넣지 않는다(마감 10일 전이면 7일 전 알림만)", () => {
+  const ics = deadlineIcs({ name: "취득세", deadlineIso: "2026-11-03", startIso: "2026-09-04", now: new Date(2026, 9, 24, 12) });
+  assert.equal((ics.match(/BEGIN:VALARM/g) || []).length, 1);
+  assert.match(ics, /TRIGGER:-P6DT15H/);
+  assert.match(ics, /METHOD:PUBLISH/);
+  assert.match(ics, /TRANSP:TRANSPARENT/);
+});
+
+test("연도를 치는 중인 값(0202-03-15)은 계산하지 않는다", () => {
+  for (const e of data.events) assert.equal(computeDeadline(e, "0202-03-15", { today }), null, e.id);
 });

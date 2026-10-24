@@ -72,19 +72,22 @@ function fold(line) {
   return out.join("\r\n ");
 }
 export function deadlineIcs({ name, deadlineIso, startIso, url = "", law = "", now = new Date() }) {
+  // 알림 시각(마감일 N일 전 오전 9시)이 이미 지났으면 그 알림은 넣지 않는다
+  const [yy, mm, dd] = deadlineIso.split("-").map(Number);
+  const alarmAt = (days) => new Date(yy, mm - 1, dd - days, 9);
   const d = deadlineIso.replace(/-/g, "");
   const next = addDays(deadlineIso, 1).replace(/-/g, "");
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
   const desc = [`${name} 마감일입니다.`, law && `근거: ${law}`, "결과는 참고용입니다. 사정마다 다를 수 있으니 확인하세요.", url].filter(Boolean).join("\n");
   const alarm = (trig, t) => ["BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc(`${name} ${t}`)}`, `TRIGGER:${trig}`, "END:VALARM"];
   const lines = [
-    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//hanadeo//deadline//KO", "CALSCALE:GREGORIAN",
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//hanadeo//deadline//KO", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `UID:${d}-${startIso.replace(/-/g, "")}-${encodeURIComponent(name).replace(/%/g, "").slice(0, 24)}@semusatax.vercel.app`,
-    `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${next}`,
+    `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${next}`, "TRANSP:TRANSPARENT",
     `SUMMARY:${icsEsc(`${name} 마감`)}`, `DESCRIPTION:${icsEsc(desc)}`, ...(url ? [`URL:${url}`] : []),
     // 마감일 0시 기준 — 29일 15시간 전 = 30일 전 오전 9시
-    ...alarm("-P29DT15H", "30일 전"), ...alarm("-P6DT15H", "7일 전"),
+    ...(alarmAt(30) > now ? alarm("-P29DT15H", "30일 전") : []), ...(alarmAt(7) > now ? alarm("-P6DT15H", "7일 전") : []),
     "END:VEVENT", "END:VCALENDAR",
   ];
   return lines.map(fold).join("\r\n") + "\r\n";

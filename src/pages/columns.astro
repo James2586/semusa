@@ -9,6 +9,7 @@ import site from "../data/site.json";
 import home from "../data/home.json";
 import videoData from "../data/videos.json";
 import press from "../data/press.json";
+import PlusList from "../components/PlusList.astro";
 import { fetchBlogPosts } from "../lib/blogFeed.js";
 
 // 네이버 블로그 최신 글: 빌드할 때 한 번 읽는다. 못 읽으면 블로그 카드만 빠지고 페이지는 그대로 만든다.
@@ -26,7 +27,7 @@ const cards: Card[] = [
 ];
 const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼럼");
 const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
-// 지면에 실린 칼럼(src/data/press.json) — 지면 그림 + 제목 그대로, 누르면 이코노미조선 칼럼 모아 보기
+// 지면에 실린 칼럼(src/data/press.json) — 지면 그림 + 제목 그대로, 이코노미조선 기사로. 연재 목록은 articles(제목·날짜 그대로)
 const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
 ---
 <Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그, 영상.`}>
@@ -62,16 +63,26 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
         <h2 class="sec-h" id="h-press">{press.items[0].outlet} 「{press.items[0].series}」</h2>
         <div class="press-list">
           {press.items.map((p) => (
-            <a class="press" href={ch["이코노미조선 칼럼"]} target="_blank" rel="noopener">
-              <img src={`/img/press/${p.image}-1600.webp`} srcset={`/img/press/${p.image}-800.webp 800w, /img/press/${p.image}-1600.webp 1600w`} sizes="(min-width: 1080px) 640px, 100vw" width={p.size[0]} height={p.size[1]} alt={`${p.outlet} ${pressDate(p.date)} ${p.pages} 「${p.series} <${p.no}>」 지면`} loading="lazy" decoding="async" />
-              <span class="press-meta">
+            <article class="press">
+              <a class="press-img" href={`/img/press/${p.image}-1600.webp`} target="_blank" rel="noopener">
+                <img src={`/img/press/${p.image}-1600.webp`} srcset={`/img/press/${p.image}-800.webp 800w, /img/press/${p.image}-1600.webp 1600w`} sizes="(min-width: 1080px) 640px, 100vw" width={p.size[0]} height={p.size[1]} alt={`${p.outlet} ${pressDate(p.date)} ${p.pages} 「${p.series} <${p.no}>」 지면`} loading="lazy" decoding="async" />
+                <span class="press-zoom">지면 크게 보기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></span>
+              </a>
+              <div class="press-meta">
                 <small>{p.outlet} · {pressDate(p.date)} · {p.pages} · 「{p.series} &lt;{p.no}&gt;」</small>
-                <b class="press-t">{p.title}</b>
-                <span class="go">이코노미조선에서 칼럼 모아 보기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></span>
-              </span>
-            </a>
+                <a class="press-t" href={p.url} target="_blank" rel="noopener">{p.title}<span class="sr-only">(이코노미조선, 새 창)</span></a>
+                <a class="go" href={p.url} target="_blank" rel="noopener">이코노미조선에서 읽기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a>
+              </div>
+            </article>
           ))}
         </div>
+        {press.articles?.length > 0 && (
+          <>
+            <h3 class="press-h">연재한 칼럼 {press.articles.length}편</h3>
+            <PlusList label="이코노미조선 칼럼" items={press.articles.map((a) => ({ href: a.url, ext: true, kicker: pressDate(a.date), title: a.title }))} />
+            <p class="more"><a class="more-link" href={ch["이코노미조선 칼럼"]} target="_blank" rel="noopener">이코노미조선에서 전체 보기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a></p>
+          </>
+        )}
       </div>
     </section>
   )}
@@ -122,13 +133,20 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
   .feat-sec { padding-bottom: 40px; }
   .press-sec { padding-bottom: 48px; }
   .press-list { margin-top: 16px; display: grid; gap: 20px; }
-  .press { display: grid; gap: 14px; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; transition: border-color .2s; }
-  .press:hover { border-color: var(--moss); }
+  .press { display: grid; gap: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .press-img { display: grid; gap: 6px; text-decoration: none; }
+  .press-zoom { justify-self: end; font-size: 14px; font-weight: 600; color: var(--gold-text); }
+  .press-img:hover .press-zoom { text-decoration: underline; text-underline-offset: 4px; }
+  .press-t { color: var(--ink); text-decoration: none; }
+  .press-t:hover { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
+  .press .go { justify-self: start; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
+  .press-h { margin-top: 36px; font-size: 18px; }
+  .press-sec .more { margin-top: 20px; }
   .press img { width: 100%; height: auto; display: block; border-radius: 4px; box-shadow: 0 10px 24px -18px rgba(21, 25, 21, .5); }
   .press-meta { display: grid; gap: 6px; align-content: center; padding: 0 4px 4px; }
   .press-meta small { font-size: 14px; color: var(--muted); }
   .press-t { font-family: var(--f-display); font-size: 22px; line-height: 1.4; }
-  .press:hover .go { text-decoration: underline; text-underline-offset: 4px; }
+  .press .go:hover { text-decoration: underline; text-underline-offset: 4px; }
   .feat { display: grid; gap: 12px; align-content: start; background: var(--moss); color: var(--on-moss); border-radius: 6px; padding: 28px 22px; text-decoration: none; }
   a.feat:hover .feat-go { text-decoration: underline; text-underline-offset: 4px; }
   .feat-t { font-family: var(--f-display); font-weight: 700; font-size: 26px; line-height: 1.35; }

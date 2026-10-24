@@ -17,7 +17,7 @@ const evs = data.events;
 
   <section class="gut dc-sec" data-dc>
     <div class="wrap dc-in">
-      <noscript><p class="dc-nojs">이 달력은 자바스크립트가 켜져 있어야 보입니다. <a href="/#h-hero">홈의 기한 계산</a>에서 같은 계산을 할 수 있습니다.</p></noscript>
+      <noscript><style>.dc-form { display: none; }</style><p class="dc-nojs">이 달력은 자바스크립트가 켜져 있어야 보입니다. <a href="/#h-hero">홈의 기한 계산</a>에서 같은 계산을 할 수 있습니다.</p></noscript>
       <form class="dc-form" data-form aria-label="기한 달력 조건">
         <fieldset class="dc-f">
           <legend>무슨 일이 있었나요?</legend>
@@ -32,14 +32,14 @@ const evs = data.events;
         </div>
       </form>
 
-      <div class="dc-stage" data-stage>
+      <div class="dc-stage" data-stage hidden>
         <div class="dc-top">
           <p class="dc-ev"><b data-name></b><span data-start></span><span class="dc-ex" data-ex hidden>예시 날짜</span></p>
           <button type="button" class="dc-replay" data-replay>다시 보기</button>
         </div>
         <div class="dc-months" data-months></div>
         <div class="dc-legend" aria-hidden="true">
-          <span><i class="lg-cnt"></i>센 날</span><span><i class="lg-rest"></i>쉬는 날</span><span><i class="lg-raw"></i>원래 마감일</span><span><i class="lg-final"></i>진짜 마감일</span><span><i class="lg-today"></i>오늘</span>
+          <span><i class="lg-start"></i>시작일</span><span><i class="lg-mend"></i>그 달 마지막 날</span><span><i class="lg-cnt"></i>센 날</span><span><i class="lg-rest"></i>쉬는 날</span><span><i class="lg-raw"></i>원래 마감일</span><span><i class="lg-final"></i>진짜 마감일</span><span><i class="lg-today"></i>오늘</span>
         </div>
         <div class="dc-out" data-out>
           <div class="dc-big"><span class="dc-dd" aria-hidden="true"><span class="dc-num" data-num></span><small data-unit></small></span><span class="dc-date" data-dt></span></div>
@@ -51,20 +51,20 @@ const evs = data.events;
         <ul class="sr-only" data-srlist></ul>
       </div>
 
-      <div class="dc-fact">
+      <div class="dc-fact" data-fact-box hidden>
         <span class="dc-fact-t">하나 더 확인할 것</span>
         <span data-fact></span>
         <span class="dc-fact-l" data-fact-law></span>
       </div>
 
-      <div class="dc-acts" data-acts>
+      <div class="dc-acts" data-acts hidden>
         <button type="button" class="btn btn-moss" data-share>가족에게 보내기</button>
         <button type="button" class="btn btn-line" data-ics>내 달력에 넣기</button>
         <button type="button" class="btn btn-line" data-print>인쇄 한 장</button>
         <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 기한으로 상담하기</a>
         <p class="dc-note" role="status" data-status>보내는 것은 일 종류와 날짜가 담긴 주소뿐입니다. 결과는 참고용입니다.</p>
       </div>
-      <p class="dc-print-note">상담 때 이 종이를 가져오세요. 결과는 참고용이며, 사정마다 다를 수 있으니 상담 때 함께 확인합니다. {site.name} · {site.siteUrl}</p>
+      <p class="dc-print-note"><span data-print-day></span>상담 때 이 종이를 가져오세요. 결과는 참고용이며, 사정마다 다를 수 있으니 상담 때 함께 확인합니다. {site.name} · {site.siteUrl}</p>
     </div>
     <script type="application/json" data-dc-data set:html={JSON.stringify({ events: evs, holidays }).replace(/</g, "\\u003c")} />
   </section>
@@ -89,7 +89,7 @@ const evs = data.events;
   .dc-chk input { width: 20px; height: 20px; accent-color: var(--moss); }
 
   /* 장면 판 */
-  .dc-stage { --rest: #E3E5DD; --hop: #B8553A; background: var(--moss); color: var(--on-moss); border-radius: 12px; padding: 18px 14px 18px; display: grid; gap: 14px; }
+  .dc-stage { --rest: #E8E2D6; --cnt: #C5D6C9; --hop: #B8553A; background: var(--moss); color: var(--on-moss); border-radius: 12px; padding: 18px 14px 18px; display: grid; gap: 14px; }
   .dc-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: center; }
   .dc-ev { font-size: 15px; color: var(--on-moss2); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
   .dc-ev b { color: var(--on-moss); font-size: 16.5px; }
@@ -105,8 +105,10 @@ const evs = data.events;
   .dc-d { position: relative; aspect-ratio: 1 / 1; max-height: 52px; border-radius: 5px; display: grid; place-items: center; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--ink2); }
   .dc-d.wk { color: var(--muted); }
   .dc-d.hol { background: var(--rest); }
-  .dc-d.cnt { background: rgba(30, 58, 42, .14); color: var(--ink); }
+  .dc-d.cnt { background: var(--cnt); color: var(--ink); }
   .dc-d.start, .dc-d.mend { box-shadow: inset 0 0 0 2px var(--gold); color: var(--ink); font-weight: 700; }
+  /* 그 달 마지막 날: 시작일과 같은 금색 테두리 + 아래 점(시작일과 구별) */
+  .dc-d.mend::before { content: ""; position: absolute; bottom: 5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--gold-text); }
   .dc-d.raw { box-shadow: inset 0 0 0 2px var(--hop); }
   .dc-d.dc-skip { background: var(--rest); }
   .dc-d.dc-skip::after { content: ""; position: absolute; left: 18%; right: 18%; top: 50%; border-top: 1.5px solid var(--hop); transform: rotate(-35deg); }
@@ -116,9 +118,11 @@ const evs = data.events;
   .dc-ft { font-family: var(--f-display); font-size: 17px; }
   .dc-fold span { font-size: 14px; color: var(--on-moss2); }
   .dc-fold button { margin-top: 4px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(243, 240, 231, .4); background: transparent; color: var(--on-moss); font: 600 14.5px var(--f-body); cursor: pointer; }
-  .dc-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--on-moss2); }
-  .dc-legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; }
-  .lg-cnt { background: #D6DDD6; } .lg-rest { background: var(--rest); } .lg-raw { background: var(--surface); box-shadow: inset 0 0 0 2px var(--hop); } .lg-final { background: var(--moss); box-shadow: 0 0 0 2px var(--gold-hi); } .lg-today { outline: 2px dashed var(--gold-hi); outline-offset: -2px; }
+  .dc-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--ink2); background: var(--surface); border-radius: 8px; padding: 8px 12px; }
+  .dc-legend span { white-space: nowrap; }
+  .dc-legend i { position: relative; display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: -3px; margin-right: 6px; }
+  .lg-start, .lg-mend { box-shadow: inset 0 0 0 2px var(--gold); } .lg-mend::before { content: ""; position: absolute; bottom: 2px; left: 6px; width: 4px; height: 4px; border-radius: 50%; background: var(--gold-text); }
+  .lg-cnt { background: var(--cnt); } .lg-rest { background: var(--rest); } .lg-raw { box-shadow: inset 0 0 0 2px var(--hop); } .lg-final { background: var(--moss); box-shadow: 0 0 0 2px var(--gold-hi); } .lg-today { outline: 2px dashed var(--gold-text); outline-offset: -2px; }
   .dc-out { display: grid; gap: 6px; border-top: 1px solid rgba(243, 240, 231, .16); padding-top: 14px; }
   .dc-big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
   .dc-dd { display: inline-flex; align-items: baseline; gap: 8px; }
@@ -168,7 +172,7 @@ const evs = data.events;
     body { background: #fff; }
     .dc-sec { padding: 0; }
     .dc-stage { background: #fff; color: #000; border: 1px solid #000; }
-    .dc-stage *, .dc-ev b, .dc-num { color: #000 !important; }
+    .dc-stage *, .dc-stage *::after, .dc-ev b, .dc-num { color: #000 !important; }
     .dc-mon { border: 1px solid #999; }
     .dc-d.final { background: #000; color: #fff !important; }
     .dc-num { -webkit-mask-image: none; mask-image: none; }
@@ -182,7 +186,7 @@ const evs = data.events;
 
 <script>
   import { computeDeadline } from "../lib/deadlineCalc.js";
-  import { buildHolidayIndex, toIso, unknownYearNote } from "../lib/ntsDeadline.js";
+  import { buildHolidayIndex, toIso, parseIso, unknownYearNote } from "../lib/ntsDeadline.js";
   import { planCalendar, deadlineIcs } from "../lib/deadlineCalendar.js";
 
   const root = document.querySelector<HTMLElement>("[data-dc]")!;
@@ -204,7 +208,7 @@ const evs = data.events;
   const pe = events.find((e) => e.id === params.get("e"));
   if (pe) (q<HTMLInputElement>(`#dc-ev-${pe.id}`)).checked = true;
   const pd = params.get("d");
-  const example = !(pd && /^\d{4}-\d{2}-\d{2}$/.test(pd));
+  const example = !(pd && parseIso(pd) && pd >= "1950-01-01" && pd <= "2100-12-31");
   dateIn.value = example ? toIso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 20)) : pd!;
   if (params.get("a") === "1") abroad.checked = true;
   q("[data-ex]").hidden = !example;
@@ -271,10 +275,18 @@ const evs = data.events;
       if (it.type === "month") { box.appendChild(monthEl(it, noteOf(it))); continue; }
       const f = document.createElement("div"); f.className = "dc-fold";
       const a = it.months[0], b = it.months[it.months.length - 1];
-      const range = it.months.length > 1 ? `${a.y === b.y ? `${a.m}월` : `${a.y}년 ${a.m}월`}~${b.m}월` : `${a.m}월`;
+      const range = it.months.length > 1 ? (a.y === b.y ? `${a.m}월~${b.m}월` : `${a.y}년 ${a.m}월~${b.y}년 ${b.m}월`) : `${a.m}월`;
       f.innerHTML = `<b class="dc-ft">${range}</b><span>${it.counted}일 모두 셈${it.today ? " · 오늘이 이 사이" : ""}</span>`;
       const btn = document.createElement("button"); btn.type = "button"; btn.textContent = `${range} 펼치기`;
-      btn.addEventListener("click", () => { const frag = document.createDocumentFragment(); for (const mo of it.months) frag.appendChild(monthEl(mo, noteOf(mo))); f.replaceWith(frag); });
+      btn.addEventListener("click", () => {
+        stage.classList.remove("play"); // 새로 넣는 달 칸이 한꺼번에 번쩍이지 않게
+        const frag = document.createDocumentFragment();
+        const say = document.createElement("p"); say.className = "sr-only"; say.tabIndex = -1;
+        say.textContent = `${range}을 펼쳤습니다. 날짜별 내용은 아래 요약 목록에 있습니다.`;
+        frag.appendChild(say);
+        for (const mo of it.months) frag.appendChild(monthEl(mo, noteOf(mo)));
+        f.replaceWith(frag); say.focus();
+      });
       f.appendChild(btn); box.appendChild(f);
     }
     // 결과 글
@@ -287,19 +299,26 @@ const evs = data.events;
     q("[data-hop]").innerHTML = r.shifted.length
       ? `<b>${r.shifted.map((x: any) => `${md(x.iso)}(${x.weekday})${/^[토일]요일$/.test(x.reason) ? "" : ` ${x.reason}`}`).join(" · ")}</b> — 쉬는 날이라 ${md(r.deadlineIso)}(${r.weekday})로 미뤄집니다(${r.extLaw}).`
       : "마감일이 쉬는 날이 아니라 미뤄지지 않습니다.";
-    const mid = plan.holidaysInCount.length ? ` 사이의 공휴일(${plan.holidaysInCount.map((h: any) => h.name).join("·")})도 그대로 셉니다.` : "";
-    q("[data-why]").textContent = `${r.why}${r.monthEndIso ? ` — ${md(r.monthEndIso)} 다음 날부터` : " — 다음 날부터"} ${plan.counted}일을 셉니다.${mid}${r.dday < 0 ? " 기한이 지났습니다. 지금 할 수 있는 일을 상담하세요." : ""}`;
+    const mid = plan.holidaysInCount.length ? ` 사이의 쉬는 날(${plan.holidaysInCount.map((h: any) => h.name).join("·")})도 그대로 셉니다.` : "";
+    q("[data-why]").textContent = `${r.why}${r.monthEndIso ? ` — ${md(r.monthEndIso)} 다음 날부터` : ` — ${md(r.startIso)} 다음 날부터`} ${plan.counted}일을 셉니다.${mid}${r.dday < 0 ? " 기한이 지났습니다. 지금 할 수 있는 일을 상담하세요." : ""}`;
     const unk = unknownYearNote(r);
     q("[data-law]").textContent = `근거: ${ev.law}${unk ? ` ${unk}` : ""} · 결과는 참고용입니다.`;
     q("[data-fact]").textContent = ev.fact.text; q("[data-fact-law]").textContent = ev.fact.law;
+    q("[data-ics]").hidden = r.dday < 0; // 지난 기한은 달력에 넣을 일이 없다
+    q("[data-print-day]").textContent = `기준일 ${dot(toIso(today))} — `;
     // 화면 읽기: 달력 칸 대신 요약
     const sr = [`시작일 ${dot(r.startIso)}`, r.monthEndIso && `그 달 마지막 날 ${dot(r.monthEndIso)}`, `${plan.counted}일을 셈`, ...r.shifted.map((x: any) => `${dot(x.iso)} ${x.reason}이라 건너뜀`), `진짜 마감일 ${dot(r.deadlineIso)} ${r.weekday}요일`].filter(Boolean);
     q("[data-srlist]").innerHTML = sr.map((t) => `<li>${t}</li>`).join("");
     q("[data-live]").textContent = `${ev.name} 기한 ${dot(r.deadlineIso)} ${r.weekday}요일, ${r.dday > 0 ? `${r.dday}일 남음` : r.dday === 0 ? "오늘 마감" : `${-r.dday}일 지남`}`;
-    // 장면 재생
+    lastT2 = t2;
+    if (animate) play(); else { stage.classList.remove("play"); roll(Math.abs(r.dday), false); }
+  }
+  let lastT2 = 0;
+  function play() {
+    if (!cur) return;
     stage.classList.remove("play");
-    if (animate && !reduce) { void stage.offsetWidth; stage.classList.add("play"); }
-    roll(Math.abs(r.dday), animate && !reduce, t2);
+    if (!reduce) { void stage.offsetWidth; stage.classList.add("play"); }
+    roll(Math.abs(cur.r.dday), !reduce, lastT2);
   }
 
   function run(animate: boolean, push = false) {
@@ -323,7 +342,8 @@ const evs = data.events;
 
   form.addEventListener("input", () => { q("[data-ex]").hidden = true; run(true, true); });
   form.addEventListener("submit", (e) => e.preventDefault());
-  q("[data-replay]").addEventListener("click", () => cur && draw(true));
+  q("[data-replay]").addEventListener("click", play);
+  q("[data-replay]").hidden = reduce; // 움직임 줄이기면 다시 볼 움직임이 없다
   const status = q("[data-status]");
   q("[data-share]").addEventListener("click", async () => {
     if (!cur) return;
@@ -342,13 +362,14 @@ const evs = data.events;
     a.download = `deadline-${cur.r.deadlineIso}.ics`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    status.textContent = "일정 파일을 받았어요. 열면 휴대폰·구글 달력에 마감일과 30일 전·7일 전 알림이 들어갑니다.";
+    status.textContent = "일정 파일을 받았어요. 열면 휴대폰 달력에 마감일과 알림(30일 전·7일 전, 이미 지난 알림은 빼고)이 들어갑니다. 구글 달력은 알림을 따로 설정해 주세요.";
   });
   q("[data-print]").addEventListener("click", () => window.print());
   // 처음: 판이 화면에 들어왔을 때 한 번 재생
+  for (const sel of ["[data-stage]", "[data-fact-box]", "[data-acts]"]) q(sel).hidden = false;
   run(false);
   if (!reduce && "IntersectionObserver" in window) {
-    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); if (cur) draw(true); } }, { threshold: 0.3 });
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); play(); } }, { threshold: 0.3 });
     io.observe(stage);
   }
 </script>

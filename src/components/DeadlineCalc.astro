@@ -246,7 +246,9 @@ const first = evs[0];
       out.classList.remove("stale");
       last = r;
       q("[data-dt]").textContent = `${dotDate(r.deadlineIso)} (${r.weekday})`;
-      q<HTMLAnchorElement>("[data-cal]").href = `/deadline?e=${ev.id}&d=${r.startIso}${abroad?.checked && ev.rule.abroadMonths ? "&a=1" : ""}`;
+      // 아직 예시 날짜면 날짜를 넘기지 않는다(달력 쪽이 자기 예시를 "예시 날짜"로 보임 — 남의 날짜로 오해하지 않게)
+      const isExample = !q<HTMLElement>("[data-ex]").hidden;
+      q<HTMLAnchorElement>("[data-cal]").href = `/deadline?e=${ev.id}${isExample ? "" : `&d=${r.startIso}${abroad?.checked && ev.rule.abroadMonths ? "&a=1" : ""}`}`;
       const unit = r.dday > 0 ? "일 남음" : r.dday === 0 ? "오늘 마감" : "일 지남";
       q("[data-num-l]").textContent = unit;
       out.classList.toggle("late", r.dday < 0);
