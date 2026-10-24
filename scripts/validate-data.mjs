@@ -136,6 +136,24 @@ export function checkPress(text, svcSlugs, calcSlugs) {
   return errors;
 }
 
+// 상황 길잡이(2026-10-24 3차): 상황마다 가리키는 기한·서비스·계산기가 실제로 있는지
+export function checkGuide(text, svcSlugs, calcSlugs, eventIds, yearlyIds) {
+  const errors = [];
+  const { data, error } = parseJsonFile("guide.json", text);
+  if (error) return [error];
+  const all = [...(data.situations || []), ...(data.who || [])];
+  all.forEach((g) => {
+    const at = `guide.json "${g.id}"`;
+    if (!g.id || !g.label) errors.push(`${at}: id와 label이 있어야 합니다.`);
+    if (g.event && !eventIds.has(g.event)) errors.push(`${at}: event "${g.event}"는 deadlines.json events에 없습니다.`);
+    for (const y of g.yearly || []) if (!yearlyIds.has(y)) errors.push(`${at}: yearly "${y}"는 deadlines.json yearly에 없습니다.`);
+    for (const x of g.services || []) if (!svcSlugs.has(x)) errors.push(`${at}: services "${x}"는 services.json에 없습니다.`);
+    for (const c of g.calculators || []) if (!calcSlugs.has(c)) errors.push(`${at}: calculators "${c}"는 calculators.json에 없습니다.`);
+  });
+  if (!(data.situations || []).length) errors.push("guide.json: situations가 비었습니다.");
+  return errors;
+}
+
 export function checkSite(text) {
   const errors = [];
   const { data, error } = parseJsonFile("site.json", text);
@@ -193,7 +211,8 @@ export function validateAll(root = ROOT) {
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
   errors.push(...checkHome(read("src/data/home.json"), svcSlugs, root));
   errors.push(...checkPress(read("src/data/press.json"), svcSlugs, calcSlugs));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json"]) {
+  errors.push(...checkGuide(read("src/data/guide.json"), svcSlugs, calcSlugs, eventIds, yearlyIds));
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

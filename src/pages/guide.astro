@@ -1,0 +1,274 @@
+---
+// 상황 길잡이(2026-10-24 3차 A1): 세 가지를 고르면(무슨 일 · 언제 · 누구 일) 기한·서비스·계산기·준비할 것·칼럼을 한 화면에 모은다.
+// 세법 내용은 새로 쓰지 않는다 — 기한은 deadlines.json(computeDeadline·nextYearly), 준비할 것은 services.json prepare, 칼럼은 press.json 주제 칸.
+// 주소엔 s(상황)·w(누구)·d(날짜)만 — 개인정보 금지.
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import KakaoIcon from "../components/KakaoIcon.astro";
+import guide from "../data/guide.json";
+import dl from "../data/deadlines.json";
+import svcData from "../data/services.json";
+import calcData from "../data/calculators.json";
+import press from "../data/press.json";
+import site from "../data/site.json";
+import { fetchHolidayRows } from "../lib/holidays.js";
+const holidays = await fetchHolidayRows();
+
+const svcBy = Object.fromEntries(svcData.services.map((s: any) => [s.slug, s]));
+const calcBy = Object.fromEntries(calcData.calculators.map((c: any) => [c.slug, c]));
+const evBy = Object.fromEntries(dl.events.map((e: any) => [e.id, e]));
+const yearlyBy = Object.fromEntries(dl.yearly.map((y: any) => [y.id, y]));
+const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
+const uniq = (a: any[]) => [...new Set(a)];
+
+// 상황(+누구) 하나의 결과 묶음 — 화면에 미리 그려 두고 JS는 고른 것만 보인다
+function bundle(g: any, extra: any = null) {
+  const services = uniq([...(g.services || []), ...(extra?.services || [])]).map((s) => svcBy[s]);
+  const calcs = uniq([...(g.calculators || []), ...(extra?.calculators || [])]).map((c) => calcBy[c]);
+  const prepare = uniq(services.flatMap((s: any) => s.prepare || []));
+  const cols = (press.articles || []).filter((a: any) => services.some((s: any) => a.services?.includes(s.slug)) || calcs.some((c: any) => a.calculators?.includes(c.slug))).slice(0, 3);
+  return { services, calcs, prepare, cols };
+}
+const corpWho = guide.who.find((w: any) => w.id === "corp");
+const panels = guide.situations.flatMap((g: any) => [
+  { key: `${g.id}`, g, b: bundle(g) },
+  ...(g.services?.includes("corporate") ? [] : [{ key: `${g.id}-corp`, g, b: bundle(g, corpWho), corp: true }]),
+]);
+const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd ?? "");
+---
+<Base title="상황 길잡이" description="무슨 일이 있었는지, 언제인지, 누구 일인지 고르면 기한·맞는 서비스·먼저 해 볼 계산기·준비할 서류를 한 화면에 모아 드립니다.">
+  <PageHead tag="상황 길잡이" title="세 가지만 고르세요" crumbs={[{ name: "상황 길잡이" }]}
+    lead="무슨 일인지, 언제인지, 누구 일인지 고르면 기한과 먼저 볼 것을 한 화면에 모아 드립니다." />
+
+  <section class="gut gd-sec" data-gd>
+    <div class="wrap gd-in">
+      <noscript><style>.gd-q2, .gd-q3, .gd-acts, .gd-dl-live { display: none !important; } .gd-res { display: grid !important; } .gd-panel { display: grid !important; } .gd-panel[data-corp] { display: none !important; }</style>
+        <p class="gd-nojs">자바스크립트가 꺼져 있어 상황별 안내를 모두 펼쳐 둡니다. 기한은 <a href="/deadline">기한 달력</a>에서 셀 수 있습니다.</p></noscript>
+      <form class="gd-form" data-form aria-label="상황 길잡이 질문">
+        <fieldset class="gd-q">
+          <legend><span class="gd-n" aria-hidden="true">1</span>무슨 일인가요?</legend>
+          <div class="gd-chips">
+            {guide.situations.map((g: any) => <label><input type="radio" name="gd-s" value={g.id} id={`gd-s-${g.id}`} /><span>{g.label}</span></label>)}
+          </div>
+        </fieldset>
+        <div class="gd-q gd-q2" data-q2 hidden>
+          <p class="gd-lg"><span class="gd-n" aria-hidden="true">2</span><label for="gd-date" data-date-label>언제인가요?</label></p>
+          <input type="date" id="gd-date" data-date min="1950-01-01" max="2100-12-31" />
+          <p class="gd-hint">비워 두면 기한 규칙만 보여 드립니다.</p>
+        </div>
+        <fieldset class="gd-q gd-q3" data-q3 hidden>
+          <legend><span class="gd-n" aria-hidden="true" data-q3n>3</span>누구 일인가요?</legend>
+          <div class="gd-chips">
+            {guide.who.map((w: any, i: number) => <label><input type="radio" name="gd-w" value={w.id} id={`gd-w-${w.id}`} checked={i === 0} /><span>{w.label}</span></label>)}
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="gd-res" data-res hidden aria-labelledby="h-gd-res">
+        <h2 class="gd-res-h" id="h-gd-res">이 상황이라면<span class="gd-res-s" data-res-s></span></h2>
+        <p class="gd-family" data-family hidden>{guide.who.find((w: any) => w.id === "family")?.note}</p>
+        {panels.map(({ key, g, b, corp }: any) => (
+          <div class="gd-panel" data-panel={key} data-corp={corp ? "" : undefined} hidden>
+            <noscript><h3 class="gd-nojs-h">{g.label}</h3></noscript>
+            {(g.event || g.yearly) && (
+              <div class="gd-box gd-dl">
+                <h3 class="gd-bh">기한</h3>
+                {g.event && (() => { const ev = evBy[g.event]; return (
+                  <div class="gd-ev" data-ev={g.event}>
+                    <p class="gd-ev-n"><b>{ev.name}</b></p>
+                    <p class="gd-dl-live" data-live-dl hidden><span class="gd-big" data-big></span><span class="gd-dd" data-dd></span></p>
+                    <p class="gd-why">{whyOf(ev)}{ev.rule.abroadMonths ? ` (${ev.abroadLabel}이면 ${ev.rule.abroadMonths}개월)` : ""}</p>
+                    <p class="gd-shift" data-shift hidden></p>
+                    <p class="gd-law">근거 {ev.law}</p>
+                    <a class="go gd-go" href={`/deadline?e=${g.event}`} data-cal>달력으로 보기 ›</a>
+                  </div>
+                ); })()}
+                {g.yearly && (
+                  <ul class="gd-yearly">
+                    {g.yearly.map((y: string) => <li data-y={y}><b>{yearlyBy[y].name}</b><span class="gd-ynext" data-ynext></span><small>근거 {yearlyBy[y].law}</small></li>)}
+                  </ul>
+                )}
+                {g.yearly && <a class="go gd-go" href="/tax-calendar">올해 세금 달력 ›</a>}
+              </div>
+            )}
+            {b.services.length > 0 && (
+              <div class="gd-box">
+                <h3 class="gd-bh">맞는 서비스</h3>
+                <ul class="gd-links">{b.services.map((s: any) => <li><a href={`/services/${s.slug}`}><b>{s.name}</b><span>{s.short}</span></a></li>)}</ul>
+              </div>
+            )}
+            {b.calcs.length > 0 && (
+              <div class="gd-box">
+                <h3 class="gd-bh">먼저 계산해 보기</h3>
+                <ul class="gd-links">{b.calcs.map((c: any) => <li><a href={`/calculators/${c.slug}`}><b>{c.name}</b><span>{c.short}</span></a></li>)}</ul>
+                <p class="gd-note">계산 결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.</p>
+              </div>
+            )}
+            {b.prepare.length > 0 && (
+              <div class="gd-box">
+                <h3 class="gd-bh">상담 때 있으면 좋은 것</h3>
+                <ul class="gd-prep">{b.prepare.map((p: string) => <li>{p}</li>)}</ul>
+              </div>
+            )}
+            {b.cols.length > 0 && (
+              <div class="gd-box">
+                <h3 class="gd-bh">이 일에 대한 칼럼</h3>
+                <ul class="gd-links">{b.cols.map((a: any) => <li><a href={a.url} target="_blank" rel="noopener"><b>{a.title}</b><span>이코노미조선 · {dot(a.date)}</span></a></li>)}</ul>
+              </div>
+            )}
+          </div>
+        ))}
+        <div class="gd-acts" data-acts>
+          <button type="button" class="btn btn-moss" data-share>이 화면 보내기</button>
+          <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />이 상황으로 상담하기</a>
+          <p class="gd-st" role="status" data-status>보내는 것은 고른 상황과 날짜가 담긴 주소뿐입니다.</p>
+        </div>
+      </div>
+    </div>
+    <script type="application/json" data-gd-data set:html={JSON.stringify({ situations: guide.situations, events: dl.events, yearly: dl.yearly, holidays }).replace(/</g, "\\u003c")} />
+  </section>
+</Base>
+
+<style is:global>
+  .gd-sec { padding-block: 24px 64px; }
+  .gd-in { display: grid; gap: 20px; }
+  .gd-nojs { padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .gd-nojs-h { font-size: 19px; margin-top: 8px; }
+  .gd-form { display: grid; gap: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 16px; }
+  .gd-q { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 10px; }
+  .gd-q legend, .gd-lg { padding: 0; font-size: 17px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
+  .gd-n { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--moss); color: var(--on-moss); font-size: 15px; font-weight: 700; flex: none; }
+  .gd-chips { display: flex; flex-wrap: wrap; gap: 8px 6px; }
+  .gd-chips label { position: relative; }
+  .gd-chips input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .gd-chips span { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border: 1px solid var(--line2); border-radius: 22px; font-size: 15.5px; line-height: 1.4; background: var(--surface); }
+  .gd-chips input:checked + span { background: var(--moss); border-color: var(--moss); color: var(--on-moss); font-weight: 700; }
+  .gd-chips input:focus-visible + span { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .gd-q2 input[type="date"] { min-height: 52px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 8px; background: var(--paper); font: 500 17px var(--f-body); color: var(--ink); max-width: 320px; }
+  .gd-q2 input[type="date"]:focus-visible { outline: 3px solid var(--moss); outline-offset: 1px; }
+  .gd-hint { font-size: 14.5px; color: var(--ink2); }
+
+  .gd-res { display: grid; gap: 14px; }
+  .gd-res-h { font-family: var(--f-display); font-size: 26px; line-height: 1.3; }
+  .gd-res-s { display: block; font: 600 16px/1.5 var(--f-body); color: var(--ink2); margin-top: 4px; }
+  .gd-family { background: var(--surface); border-left: 3px solid var(--gold); padding: 12px 14px; font-size: 15.5px; }
+  .gd-panel { display: grid; gap: 14px; }
+  .gd-panel[hidden] { display: none; }
+  @media (min-width: 900px) { .gd-panel { grid-template-columns: 1fr 1fr; align-items: start; } .gd-panel > .gd-dl { grid-column: 1 / -1; } }
+  .gd-box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+  .gd-bh { font-size: 16px; font-weight: 700; padding-left: 10px; border-left: 3px solid var(--gold); line-height: 1.3; }
+  .gd-dl { background: var(--moss); color: var(--on-moss); border-color: var(--moss); }
+  .gd-dl .gd-bh { color: var(--on-moss); border-left-color: var(--gold-hi); }
+  .gd-ev { display: grid; gap: 6px; }
+  .gd-ev-n b { font-size: 18px; }
+  .gd-dl-live { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+  .gd-dl-live[hidden] { display: none; }
+  .gd-big { font-family: var(--f-display); font-size: 30px; line-height: 1.2; }
+  .gd-dd { font-size: 17px; font-weight: 700; color: var(--gold-hi); }
+  .gd-why, .gd-shift { font-size: 15.5px; color: var(--on-moss2); }
+  .gd-law, .gd-yearly small { font-size: 14px; color: var(--on-moss2); }
+  .gd-dl .go { color: var(--gold-hi); min-height: 44px; display: inline-flex; align-items: center; }
+  .gd-dl :focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+  .gd-yearly { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .gd-yearly li { display: grid; gap: 2px; padding-top: 10px; border-top: 1px solid rgba(243, 240, 231, .18); }
+  .gd-yearly li:first-child { border-top: 0; padding-top: 0; }
+  .gd-ynext { font-size: 15.5px; color: var(--on-moss); }
+  .gd-links { list-style: none; padding: 0; margin: 0; display: grid; }
+  .gd-links a { display: grid; gap: 2px; padding: 10px 0; border-top: 1px solid var(--line); color: var(--ink); text-decoration: none; min-height: 44px; }
+  .gd-links li:first-child a { border-top: 0; padding-top: 2px; }
+  .gd-links a b { font-size: 16.5px; }
+  .gd-links a span { font-size: 14.5px; color: var(--ink2); }
+  .gd-links a:hover b { text-decoration: underline; text-underline-offset: 3px; }
+  .gd-note { font-size: 14px; color: var(--ink2); }
+  .gd-prep { padding-left: 1.2em; margin: 0; display: grid; gap: 6px; font-size: 15.5px; }
+  .gd-acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .gd-st { flex-basis: 100%; font-size: 14px; color: var(--ink2); }
+</style>
+
+<script>
+  import { computeDeadline, nextYearly } from "../lib/deadlineCalc.js";
+  import { buildHolidayIndex, parseIso } from "../lib/ntsDeadline.js";
+
+  const root = document.querySelector<HTMLElement>("[data-gd]")!;
+  const q = <T extends Element = HTMLElement>(s: string, el: ParentNode = root) => el.querySelector<T>(s)!;
+  const json = JSON.parse(q("[data-gd-data]").textContent || "{}");
+  const sits: any[] = json.situations || [];
+  const evBy = Object.fromEntries((json.events || []).map((e: any) => [e.id, e]));
+  const yBy = Object.fromEntries((json.yearly || []).map((y: any) => [y.id, y]));
+  const holidays = buildHolidayIndex(json.holidays || []);
+  const form = q<HTMLFormElement>("[data-form]"), dateIn = q<HTMLInputElement>("[data-date]");
+  const res = q("[data-res]"), status = q("[data-status]");
+  const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
+  const ddText = (n: number) => (n > 0 ? `D-${n}` : n === 0 ? "오늘 마감" : `${-n}일 지남`);
+  const okDate = (v: string) => !!(v && parseIso(v) && v >= "1950-01-01" && v <= "2100-12-31");
+
+  const params = new URLSearchParams(location.search);
+  const ps = sits.find((g) => g.id === params.get("s"));
+  if (ps) q<HTMLInputElement>(`#gd-s-${ps.id}`).checked = true;
+  const pw = params.get("w");
+  if (pw && root.querySelector(`#gd-w-${CSS.escape(pw)}`)) q<HTMLInputElement>(`#gd-w-${CSS.escape(pw)}`).checked = true;
+  if (okDate(params.get("d") || "")) dateIn.value = params.get("d")!;
+
+  const val = (name: string) => (form.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value || "");
+
+  function render() {
+    const g = sits.find((s) => s.id === val("gd-s"));
+    q("[data-q2]").hidden = !g?.event;
+    q("[data-q3]").hidden = !g;
+    q("[data-q3n]").textContent = g?.event ? "3" : "2";
+    res.hidden = !g;
+    if (!g) return;
+    const ev = g.event ? evBy[g.event] : null;
+    if (ev) q("[data-date-label]").textContent = `언제인가요? — ${g.dateLabel || ev.dateLabel}`;
+    const who = val("gd-w");
+    const key = who === "corp" && root.querySelector(`[data-panel="${g.id}-corp"]`) ? `${g.id}-corp` : g.id;
+    root.querySelectorAll<HTMLElement>("[data-panel]").forEach((p) => { p.hidden = p.dataset.panel !== key; });
+    q("[data-family]").hidden = who !== "family";
+    q("[data-res-s]").textContent = g.label;
+    const panel = q(`[data-panel="${key}"]`);
+    // 기한: 날짜를 넣었으면 계산, 아니면 규칙만
+    const evBox = panel.querySelector<HTMLElement>("[data-ev]");
+    if (evBox && ev) {
+      const d = dateIn.value, r = okDate(d) ? computeDeadline(ev, d, { holidays }) : null;
+      const live = q("[data-live-dl]", evBox), shift = q("[data-shift]", evBox);
+      live.hidden = !r; shift.hidden = !(r && r.shifted.length);
+      if (r) {
+        q("[data-big]", evBox).textContent = `${dot(r.deadlineIso)}(${r.weekday})`;
+        q("[data-dd]", evBox).textContent = ddText(r.dday);
+        if (r.shifted.length) shift.textContent = `원래 마감일 ${dot(r.rawIso)}이 쉬는 날(${r.shifted.map((s: any) => s.reason).join("·")})이라 다음 일하는 날로 넘어갔습니다. 근거 ${r.extLaw}`;
+      }
+      q<HTMLAnchorElement>("[data-cal]", evBox).href = `/deadline?e=${g.event}${r ? `&d=${d}` : ""}`;
+    }
+    // 매년 기한: 다음 마감이 가까운 순서로 다시 놓는다
+    const ys = [...panel.querySelectorAll<HTMLElement>("[data-y]")].map((li) => {
+      const n = nextYearly(yBy[li.dataset.y!], { holidays });
+      q("[data-ynext]", li).textContent = n ? `다음 마감 ${dot(n.deadlineIso)}(${n.weekday}) · ${ddText(n.dday)}` : "";
+      return { li, d: n?.dday ?? 1e9 };
+    });
+    ys.sort((a, b) => a.d - b.d).forEach(({ li }) => li.parentElement!.append(li));
+    history.replaceState(null, "", shareUrl());
+  }
+  function shareUrl() {
+    const u = new URL(location.href);
+    u.search = "";
+    const s = val("gd-s"); if (s) u.searchParams.set("s", s);
+    const w = val("gd-w"); if (w && w !== "me") u.searchParams.set("w", w);
+    const g = sits.find((x) => x.id === s);
+    if (g?.event && okDate(dateIn.value)) u.searchParams.set("d", dateIn.value);
+    u.hash = "";
+    return u.toString();
+  }
+  form.addEventListener("change", () => render());
+  dateIn.addEventListener("input", () => render());
+  q("[data-share]").addEventListener("click", async () => {
+    const url = shareUrl(), g = sits.find((x) => x.id === val("gd-s"));
+    try {
+      if (navigator.share) { await navigator.share({ title: `${g?.label || "상황 길잡이"} — 하나 더 세무회계`, url }); return; }
+      await navigator.clipboard.writeText(url);
+      status.textContent = "주소를 복사했습니다. 카카오톡 대화창에 붙여 넣으세요.";
+    } catch (e: any) {
+      if (e?.name !== "AbortError") status.textContent = `주소: ${url}`;
+    }
+  });
+  render();
+</script>

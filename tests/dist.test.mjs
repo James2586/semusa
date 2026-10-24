@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 30개(색인 27 + 공지·개인정보 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 30);
+test("페이지 31개(색인 28 + 공지·개인정보 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 31);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 27);
+  assert.equal((sm.match(/<loc>/g) || []).length, 28);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -153,4 +153,17 @@ test("올해 세금 달력(2026-10-24 3차): 12달 × 두 해, 근거 조문, �
   assert.equal((h.match(/class="tc-mon"/g) || []).length, 24);
   assert.match(h, /국세기본법 제5조 제1항/);
   assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /href="\/tax-calendar"/);
+});
+
+test("상황 길잡이: 상황마다 결과 묶음 · 법인 묶음 · 근거 조문 · 참고용 문구", { skip: !has }, () => {
+  const html = readFileSync(join(DIST, "guide.html"), "utf8");
+  const guide = JSON.parse(readFileSync("src/data/guide.json", "utf8"));
+  for (const g of guide.situations) {
+    assert.match(html, new RegExp(`data-panel="${g.id}"`), g.id);
+    if (!g.services.includes("corporate")) assert.match(html, new RegExp(`data-panel="${g.id}-corp"`), `${g.id}-corp`);
+  }
+  assert.match(html, /근거 상속세 및 증여세법 제67조/);
+  assert.match(html, /계산 결과는 참고용입니다/);
+  assert.match(html, /보내는 것은 고른 상황과 날짜가 담긴 주소뿐입니다/);
+  assert.match(html, /href="\/deadline\?e=inherit"/);
 });

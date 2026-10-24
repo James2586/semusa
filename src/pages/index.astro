@@ -52,6 +52,7 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
           <li><a href={`/services/${s.slug}`}><Fragment set:html={PLUS} /><b style={`view-transition-name:svc-${s.slug}`}>{s.name}</b><span class="k">{(s.keyDeadlines || []).map(([l, v], i) => <>{i > 0 && " · "}<span class="kp">{l} <em>{v}</em></span></>)}</span></a></li>
         ))}
       </ul>
+      <p class="more"><a class="more-link" href="/guide">어느 일인지 모르겠다면 · 상황 길잡이 ›</a></p>
     </div>
   </section>
 
