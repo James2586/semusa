@@ -67,6 +67,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
 
       <div class="gd-res" data-res hidden aria-labelledby="h-gd-res">
         <h2 class="gd-res-h" id="h-gd-res">이 상황이라면<span class="gd-res-s" data-res-s></span></h2>
+        <p class="sr-only" aria-live="polite" data-res-live></p>
         <p class="gd-family" data-family hidden>{guide.who.find((w: any) => w.id === "family")?.note}</p>
         {panels.map(({ key, g, b, corp }: any) => (
           <div class="gd-panel" data-panel={key} data-corp={corp ? "" : undefined} hidden>
@@ -226,6 +227,7 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
     root.querySelectorAll<HTMLElement>("[data-panel]").forEach((p) => { p.hidden = p.dataset.panel !== key; });
     q("[data-family]").hidden = who !== "family";
     q("[data-res-s]").textContent = g.label;
+    // 화면 읽기: 결과가 바뀌었음을 한 줄로(기한 날짜가 있으면 같이)
     const panel = q(`[data-panel="${key}"]`);
     // 기한: 날짜를 넣었으면 계산, 아니면 규칙만
     const evBox = panel.querySelector<HTMLElement>("[data-ev]");
@@ -247,11 +249,14 @@ const whyOf = (ev: any) => String(ev.why || "").replace("{n}", ev.rule.monthEnd 
       return { li, d: n?.dday ?? 1e9 };
     });
     ys.sort((a, b) => a.d - b.d).forEach(({ li }) => li.parentElement!.append(li));
+    const big = panel.querySelector<HTMLElement>("[data-live-dl]:not([hidden]) [data-big]")?.textContent;
+    const live = q("[data-res-live]"), msg = `아래에 「${g.label}」 안내가 있습니다.${big ? ` 마감 ${big}.` : ""}`;
+    if (live.textContent !== msg) live.textContent = msg;
     history.replaceState(null, "", shareUrl());
   }
   function shareUrl() {
     const u = new URL(location.href);
-    u.search = "";
+    for (const k of ["s", "w", "d"]) u.searchParams.delete(k); // 다른 주소 값(utm 등)은 그대로 둔다
     const s = val("gd-s"); if (s) u.searchParams.set("s", s);
     const w = val("gd-w"); if (w && w !== "me") u.searchParams.set("w", w);
     const g = sits.find((x) => x.id === s);

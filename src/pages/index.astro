@@ -190,6 +190,8 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
   .svc .k { grid-column: 1; font-size: 15.5px; color: var(--ink2); }
   .svc .k em { font-style: normal; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
   .kp { white-space: nowrap; }
+  /* 글자 크게(1.15배)일 때 900~1199px에선 다섯 칸이 좁아 「1월 25일 · 7월 25일」 같은 묶음이 칸을 넘었다 — 그때만 줄바꿈 허용 */
+  @media (max-width: 1199px) { :global(html[data-fs="lg"]) .kp { white-space: normal; } }
   .svc :global(svg) { grid-row: 1 / span 2; grid-column: 2; width: 16px; height: 16px; transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
   .svc a:hover :global(svg), .svc a:focus-visible :global(svg) { transform: rotate(90deg); }
   .svc a:hover b { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }

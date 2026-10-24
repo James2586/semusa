@@ -15,7 +15,7 @@ const faqs = mods.map(([path, m]) => ({ ...m.frontmatter, id: faqId(path), Conte
   ))}
 </div>
 <style>
-  .faq details { border-bottom: 1px solid var(--line); }
+  .faq details { border-bottom: 1px solid var(--line); scroll-margin-top: calc(var(--header-h) + 16px); }
   .faq { border-top: 1px solid var(--line); }
   .faq details[hidden] { display: none; }
   .faq summary { display: flex; gap: 12px; align-items: flex-start; padding: 18px 0; cursor: pointer; list-style: none; font-size: 17.5px; font-weight: 600; }
@@ -31,10 +31,13 @@ const faqs = mods.map(([path, m]) => ({ ...m.frontmatter, id: faqId(path), Conte
     const id = decodeURIComponent(location.hash.slice(1));
     const d = id && document.getElementById(id);
     if (!(d instanceof HTMLDetailsElement) || !d.closest(".faq")) return;
+    // 다른 분야 칩으로 거른 채면 「전체」로 돌려 칩과 목록을 맞춘다
+    if (d.hidden) document.querySelector<HTMLButtonElement>('.fchip[data-cat="전체"]')?.click();
     d.hidden = false; d.open = true;
-    d.querySelector("summary")?.focus({ preventScroll: true });
     d.scrollIntoView({ block: "start" });
+    d.querySelector("summary")?.focus({ preventScroll: true });
   }
-  openHash();
+  // 첫 열기: 다른 스크립트(칩)가 붙은 뒤에
+  if (document.readyState === "complete") openHash(); else addEventListener("load", openHash, { once: true });
   addEventListener("hashchange", openHash);
 </script>

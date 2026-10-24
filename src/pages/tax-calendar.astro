@@ -96,13 +96,13 @@ const kinds = data.yearly;
   .tc-now { font-weight: 700; color: var(--gold-text); min-height: 44px; display: inline-flex; align-items: center; padding: 0 6px; text-underline-offset: 4px; }
   .tc-status { margin-top: 8px; font-size: 14.5px; color: var(--muted); min-height: 1.4em; }
   .tc-warn { margin: 10px 0 0; font-size: 15px; color: var(--ink2); padding: 10px 14px; background: var(--surface); border-left: 3px solid var(--moss); border-radius: 0 8px 8px 0; }
-  .tc-grid { margin-top: 16px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .tc-grid { margin-top: 16px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); }
   .tc-mon { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 14px 12px; display: grid; gap: 10px; align-content: start; scroll-margin-top: calc(var(--header-h) + 16px); }
   .tc-mon.now { border-color: var(--moss); box-shadow: 0 0 0 1px var(--moss); }
   .tc-mt { font-family: var(--f-display); font-size: 20px; display: flex; justify-content: space-between; align-items: baseline; }
   .tc-mt small { font-family: var(--f-body); font-size: 14px; font-weight: 700; color: var(--moss); }
   .tc-g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
-  .tc-wd { font-size: 14px; color: var(--muted); text-align: center; transform: scale(.86); }
+  .tc-wd { font-size: 14px; color: var(--muted); text-align: center; }
   .tc-d { position: relative; height: 28px; border-radius: 5px; display: grid; place-items: center; font-size: 14px; color: var(--ink2); font-variant-numeric: tabular-nums; }
   .tc-d.we { color: var(--muted); }
   .tc-d.hol { background: #E8E2D6; }
@@ -144,7 +144,9 @@ const kinds = data.yearly;
   const chips = [...root.querySelectorAll<HTMLButtonElement>("[data-year]")];
   const panels = [...root.querySelectorAll<HTMLElement>("[data-panel]")];
   const status = root.querySelector<HTMLElement>("[data-status]")!;
-  let year = Number(chips[0].dataset.year);
+  // 빌드한 해가 아니라 오늘이 속한 해로 연다(1월 1일 뒤 다시 배포하기 전·오프라인 저장본에서도 맞게)
+  const nowY = new Date().getFullYear();
+  let year = Number((chips.find((c) => Number(c.dataset.year) === nowY) || chips[0]).dataset.year);
   // 지난 날·오늘·이번 달
   root.querySelectorAll<HTMLElement>(".tc-d[data-iso]").forEach((c) => { if (c.dataset.iso! < todayIso) c.classList.add("past"); if (c.dataset.iso === todayIso) c.classList.add("today"); });
   root.querySelectorAll<HTMLElement>(".tc-list li[data-iso]").forEach((li) => { if (li.dataset.iso! < todayIso) li.classList.add("done"); });

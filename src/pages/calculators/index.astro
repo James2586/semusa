@@ -36,9 +36,9 @@ const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]))
 <style>
   .calc-list { padding-block: 28px 64px; }
   .tools { display: grid; gap: 16px; }
-  .find { display: grid; gap: 6px; max-width: 420px; }
+  .find { display: grid; gap: 6px; max-width: 420px; min-width: 0; }
   .find label { font-weight: 600; font-size: 16px; }
-  .find input { min-height: 52px; border: 1px solid var(--line2); border-radius: 8px; padding: 0 14px; font: 17px var(--f-body); color: var(--ink); background: var(--surface); transition: border-color .2s; }
+  .find input { width: 100%; min-width: 0; box-sizing: border-box; min-height: 52px; border: 1px solid var(--line2); border-radius: 8px; padding: 0 14px; font: 17px var(--f-body); color: var(--ink); background: var(--surface); transition: border-color .2s; }
   .find input:hover { border-color: var(--moss); }
   .find input:focus-visible { outline: 3px solid var(--moss); outline-offset: 1px; border-color: var(--moss); }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }

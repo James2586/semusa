@@ -55,7 +55,7 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
       <button type="button" class="tool" id="sxBtn" data-sx-open aria-label="찾기" aria-haspopup="dialog" aria-controls="sx" aria-keyshortcuts="Control+K /" title="찾기 (Ctrl+K)">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="tool-l">찾기</span>
       </button>
-      <button type="button" class="tool tool-fs" id="fsBtn" aria-pressed="false" title="글자 크게">
+      <button type="button" class="tool tool-fs" id="fsBtn" data-fs-btn aria-pressed="false" title="글자 크게">
         <span aria-hidden="true" class="fs-g"><span>가</span><span>가</span></span><span class="sr-only">글자 크게</span>
       </button>
     </div>
@@ -92,6 +92,7 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
     <a href="/faq">자주 묻는 질문<span aria-hidden="true">›</span></a>
     <a href="/location">오시는 길<span aria-hidden="true">›</span></a>
   </nav>
+  <button type="button" class="drawer-fs" data-fs-btn aria-pressed="false"><span>글자 크게</span><span class="drawer-fs-st" aria-hidden="true"></span></button>
   <a class="btn btn-kakao btn-block drawer-cta" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
 </dialog>
 <SiteSearch />
@@ -124,6 +125,9 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   .mega-foot a { color: var(--gold-text); font-weight: 600; white-space: nowrap; }
   .tools { display: flex; align-items: center; gap: 0; margin-left: auto; }
   @media (max-width: 1023px) { .hdr-in { gap: 4px; } }
+  /* 320px 화면: 로고·찾기·메뉴만 머리글에(「가가」는 메뉴 안 「글자 크게」로) */
+  @media (max-width: 359px) { .tools .tool-fs { display: none; } }
+  @media (max-width: 699px) { html[data-fs="lg"] .drawer nav > a, html[data-fs="lg"] .drawer summary { font-size: 20px; } html[data-fs="lg"] .drawer-sub a { font-size: 18px; } }
   .tool { min-width: 44px; height: 44px; padding: 0 8px; border: 0; border-radius: 8px; background: none; color: var(--ink2); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font: 600 15px var(--f-body); }
   .tool svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
   .tool:hover { color: var(--ink); background: var(--gold-soft); }
@@ -133,7 +137,7 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   .fs-g span:first-child { font-size: 14px; }
   .fs-g span:last-child { font-size: 20px; }
   .tool-fs[aria-pressed="true"] { background: var(--moss); color: var(--on-moss); }
-  .menu-btn { width: 48px; height: 48px; border: none; background: none; display: grid; place-items: center; cursor: pointer; margin-right: -10px; }
+  .menu-btn { flex: none; width: 48px; height: 48px; border: none; background: none; display: grid; place-items: center; cursor: pointer; margin-right: -10px; }
   .menu-btn svg { width: 26px; height: 26px; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 
   .drawer { margin: 0 0 0 auto; height: 100%; max-height: 100%; width: min(88vw, 380px); max-width: 100%; border: none; padding: calc(env(safe-area-inset-top, 0px) + 8px) var(--gutter-r) calc(env(safe-area-inset-bottom, 0px) + 20px) 20px; background: var(--surface); color: var(--ink); }
@@ -150,6 +154,12 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   .drawer-sub a { min-height: 46px; display: flex; align-items: center; font-size: 16px; color: var(--ink2); text-decoration: none; }
   .drawer-h { font-size: 14px; font-weight: 700; color: var(--gold-text); margin-top: 8px; }
   .drawer-cta { margin-top: 20px; }
+  .drawer-fs { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 56px; padding: 0; border: 0; border-bottom: 1px solid var(--line); background: none; font: 400 18px var(--f-body); color: var(--ink); cursor: pointer; text-align: left; }
+  .drawer-fs-st { font-size: 15px; font-weight: 700; color: var(--ink2); border: 1px solid var(--line2); border-radius: 999px; padding: 2px 12px; }
+  .drawer-fs-st::after { content: "끔"; }
+  .drawer-fs[aria-pressed="true"] .drawer-fs-st { background: var(--moss); border-color: var(--moss); color: var(--on-moss); }
+  .drawer-fs[aria-pressed="true"] .drawer-fs-st::after { content: "켬"; }
+  .drawer-fs:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
 
   /* 큰 메뉴는 1024부터 — 900~1023에선 메뉴 글자가 두 줄로 꺾였다(2026-10-24 3차 검토) */
   @media (min-width: 1024px) {
@@ -202,13 +212,15 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   drawer.addEventListener("close", () => menuBtn.focus());
 
   // 글자 크게(2026-10-24 3차 D2): 이 기기에만 기억(localStorage) — 처음 그리기 전 적용은 Base.astro 머리의 작은 스크립트
-  const fsBtn = document.getElementById("fsBtn")!;
+  // 머리글 「가가」와 휴대폰 메뉴 안 「글자 크게」가 같은 상태
+  const fsBtns = [...document.querySelectorAll<HTMLElement>("[data-fs-btn]")];
   const root = document.documentElement;
-  fsBtn.setAttribute("aria-pressed", String(root.dataset.fs === "lg"));
-  fsBtn.addEventListener("click", () => {
+  const syncFs = () => fsBtns.forEach((b) => b.setAttribute("aria-pressed", String(root.dataset.fs === "lg")));
+  syncFs();
+  fsBtns.forEach((b) => b.addEventListener("click", () => {
     const on = root.dataset.fs !== "lg";
     if (on) root.dataset.fs = "lg"; else delete root.dataset.fs;
-    fsBtn.setAttribute("aria-pressed", String(on));
+    syncFs();
     try { if (on) localStorage.setItem("fs", "lg"); else localStorage.removeItem("fs"); } catch {}
-  });
+  }));
 </script>

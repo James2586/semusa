@@ -27,15 +27,16 @@ const q = encodeURIComponent(site.address.full.replace(/^서울시/, "서울"));
   </div>
 </div>
 <style>
-  .loc { display: grid; gap: 24px; }
-  dl { margin: 16px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; font-size: 17px; }
+  .loc { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  dl { margin: 16px 0 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 20px; font-size: 17px; }
+  dd { overflow-wrap: anywhere; }
   dt { color: var(--muted); font-size: 15.5px; padding-top: 1px; }
   dd { margin: 0; }
   .acts { display: grid; gap: 10px; align-content: start; }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; }
   .two .btn { white-space: nowrap; padding-inline: 10px; }
   .copy-ok { font-size: 15px; color: var(--moss2); min-height: 1.5em; }
-  @media (min-width: 900px) { .loc { grid-template-columns: 1fr 1fr; gap: 48px; } .acts { padding-top: 8px; } }
+  @media (min-width: 900px) { .loc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; } .acts { padding-top: 8px; } }
 </style>
 <script>
   document.querySelectorAll<HTMLElement>(".loc").forEach((loc) => {
