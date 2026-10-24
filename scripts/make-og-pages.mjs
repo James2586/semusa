@@ -11,7 +11,7 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const FS = join(ROOT, "node_modules/@fontsource/noto-serif-kr");
 const read = (p) => JSON.parse(readFileSync(join(ROOT, p), "utf8"));
 const svc = read("src/data/services.json"), calc = read("src/data/calculators.json"), home = read("src/data/home.json");
-const pages = ogPagesFrom({ services: svc.services, calculators: calc.calculators, groups: calc.groups, booksTotal: home.booksTotal });
+const pages = ogPagesFrom({ services: svc.services, calculators: calc.calculators, groups: calc.groups, booksTotal: home.booksTotal, topics: read("src/data/topics.json").topics });
 const MOSS = "#1E3A2A", CREAM = "#F3F0E7", GOLD = "#E8C46A", MOSS2 = "#C3CDC6";
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 

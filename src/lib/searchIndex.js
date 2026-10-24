@@ -14,7 +14,7 @@ export const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, "");
 const strip = (md) => String(md || "").replace(/\*\*|__|`|#+\s?/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/\s+/g, " ").trim();
 const clip = (s, n = 90) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
-export function buildSearchIndex({ services = [], calculators = [], faqs = [], articles = [], events = [], yearly = [], situations = [], pages = [], terms = [] }) {
+export function buildSearchIndex({ services = [], calculators = [], faqs = [], articles = [], events = [], yearly = [], situations = [], pages = [], terms = [], topics = [] }) {
   const items = [];
   const add = (it) => {
     const hay = [it.t, it.d, it.x].join(" ");
@@ -24,6 +24,7 @@ export function buildSearchIndex({ services = [], calculators = [], faqs = [], a
     items.push({ ...it, x: [it.x, extra].filter(Boolean).join(" "), ...(a ? { a } : {}) });
   };
   for (const p of pages) add({ k: "쪽", t: p.t, d: p.d, u: p.u, x: p.x || "" });
+  for (const t of topics) add({ k: "주제", t: `${t.name} 모아 보기`, d: t.lead, u: `/topics/${t.slug}`, x: t.name });
   for (const s of services) add({ k: "서비스", t: s.name, d: s.short, u: `/services/${s.slug}`, x: [...(s.forWho || []), ...(s.does || []), ...(s.deadlines || []).map((d) => d.title)].join(" ") });
   for (const c of calculators) add({ k: "계산기", t: c.name, d: c.short, u: `/calculators/${c.slug}`, x: [c.intro, ...(c.covers || [])].join(" ") });
   for (const f of faqs) add({ k: "자주 묻는 질문", t: f.q, d: clip(strip(f.body)), u: `/faq#${f.id}`, x: [f.category, strip(f.body), f.law].join(" ") });
