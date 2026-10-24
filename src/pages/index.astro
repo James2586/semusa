@@ -8,87 +8,105 @@ import KakaoIcon from "../components/KakaoIcon.astro";
 import FaqList from "../components/FaqList.astro";
 import LocationBlock from "../components/LocationBlock.astro";
 import VideoCard from "../components/VideoCard.astro";
+import DeadlineCalc from "../components/DeadlineCalc.astro";
+import UpcomingDeadlines from "../components/UpcomingDeadlines.astro";
+import { shelfSpines, inkFor } from "../lib/shelf.js";
 import Pager from "../components/Pager.astro";
 
-const svcName = Object.fromEntries(svcData.services.map((s) => [s.slug, s.name]));
+const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]));
 const calcCount = calcData.calculators.length;
+// 홈은 최신 몇 권만(home.json homeBooks — books는 최신순), 칼럼·책 페이지는 전부
+const homeBooks = home.books.slice(0, home.homeBooks || 4);
+const shelf = shelfSpines(homeBooks.slice(0, 2).map((b) => b.color), 9);
+const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼럼");
+const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="#806020" stroke-width="1.6" stroke-linecap="round"/></svg>';
 ---
 <Base cta={false}>
-  <!-- 1 첫 화면 -->
-  <section class="sec-dark gut hero" aria-labelledby="h-hero">
+  <!-- 1 첫 화면: 신고 기한 계산(시안 D) -->
+  <section class="hero gut plusgrid" aria-labelledby="h-hero">
     <div class="wrap hero-in">
       <div class="hero-text">
+        <p class="eyebrow">{site.repTitle} {site.rep} · 저서 {home.booksTotal}권</p>
+        <h1 class="hero-h" id="h-hero">세금은 날짜부터<br />하나 더 봅니다<span class="pl" aria-hidden="true">+</span></h1>
+        <p class="hero-lead">무슨 일이 있었는지 고르고 날짜를 넣으면, 신고 기한과 남은 날을 바로 계산합니다.</p>
         <div class="who">
-          <img class="ph-sm" src="/img/profile-360.webp" width="92" height="129" alt="" fetchpriority="high" />
-          <p><b>{site.rep}</b>{site.repTitle} · {site.column}</p>
+          <img src="/img/profile-360.webp" width="92" height="129" alt="" loading="lazy" />
+          <div>
+            <p class="who-n"><b>{site.rep}</b> {site.repTitle}</p>
+            <ul>{home.facts.map((f) => <li>{f}</li>)}</ul>
+            <a class="tlink" href="/about">전문가 소개 ›</a>
+          </div>
         </div>
-        <h1 class="hero-h" id="h-hero">
-          상속·증여·부동산 세금,<br />
-          책을 쓴<span class="ipic ipic-books" aria-hidden="true">{home.books.map((b) => <i style={`--c:${b.color}`}></i>)}</span><em>{site.repTitle}<svg class="sig" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C40 2, 90 12, 140 5 S190 6, 198 4" /></svg></em>가<br />
-          직접 봅니다.
-        </h1>
-        <p class="hero-lead">계산기로 먼저 확인하고, 필요할 때 상담하세요.</p>
-        <div class="hero-acts">
-          <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
-          <a class="tlink" href="/calculators">내 세금 먼저 계산해 보기 ›</a>
-        </div>
-        <ul class="facts">{home.facts.map((f) => <li>{f}</li>)}</ul>
       </div>
-      <img class="ph-lg" src="/img/profile.webp" srcset="/img/profile-360.webp 360w, /img/profile.webp 591w" sizes="300px" width="591" height="827" alt={`${site.repTitle} ${site.rep}`} />
+      <DeadlineCalc uid="home" heading="신고 기한 계산" />
     </div>
   </section>
 
-  <!-- 2 상황 고르기 -->
-  <section class="sec gut" aria-labelledby="h-situ">
+  <!-- 2 서비스 -->
+  <section class="sec gut ruled" aria-labelledby="h-svc">
     <div class="wrap">
-      <span class="tag">어떤 상황이세요?</span>
-      <h2 class="sec-h" id="h-situ">지금 상황을 고르면<br />맞는 안내로 바로 갑니다</h2>
-      <ul class="situ">
-        {home.situations.map((s: any) => (
-          <li class:list={[s.desktopOnly && "desk-only"]}>
-            <a class:list={["row-link", s.urgent && "urgent"]} href={`/services/${s.service}`}>
-              <span>{s.text}{s.sub && <small>{s.sub}</small>}<span class="sr-only"> — {svcName[s.service]} 안내로 이동</span></span>
-              <span class="arr" aria-hidden="true">›</span>
-            </a>
-          </li>
+      <span class="tag">서비스</span>
+      <h2 class="sec-h" id="h-svc">일마다 먼저 볼 기한이 다릅니다</h2>
+      <ul class="svc">
+        {svcData.services.map((s) => (
+          <li><a href={`/services/${s.slug}`}><Fragment set:html={PLUS} /><b>{s.name}</b><span class="k">{(s.keyDeadlines || []).map(([l, v], i) => <>{i > 0 && " · "}<span class="kp">{l} <em>{v}</em></span></>)}</span></a></li>
         ))}
       </ul>
-      <p class="more"><a class="more-link" href="/calculators">세금 계산기 {calcCount}종 전체 보기 ›</a></p>
     </div>
   </section>
 
-  <!-- 3 책과 칼럼 -->
-  <section class="sec sec-dark gut" aria-labelledby="h-books">
-    <div class="wrap books">
+  <!-- 3 다가오는 기한 · 계산기 -->
+  <section class="sec gut ruled" aria-labelledby="h-up">
+    <div class="wrap two">
       <div>
-        <span class="tag">칼럼·책</span>
-        <h2 class="sec-h" id="h-books">책과 칼럼으로<br />먼저 만나 보세요</h2>
-        <p class="sec-sub">상속·증여, 법인, 부동산 세금을 다룬 책 {home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.</p>
-        <div class="vid"><VideoCard id="portfolio" dark /></div>
+        <span class="tag">다가오는 기한</span>
+        <h2 class="sec-h" id="h-up">매년 돌아오는 날</h2>
+        <p class="sec-sub">오늘부터 남은 날 순서입니다.</p>
+        <UpcomingDeadlines />
       </div>
-      <div class="books-r">
-        <ul class="covers" id="home-covers" aria-label="책 목록">
-          {home.books.map((b) => (
-            <li><a class="cv" style={`--c:${b.color}`} href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-t">{b.title}</span><span class="cv-a">{site.rep}</span></a></li>
-          ))}
-          <li><a class="cv cv-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="cv-stack" aria-hidden="true">{[...home.books.map((b) => b.color), "#806020", "#1E3A2A", "#5F5A4C"].map((c, i) => <i style={`--c:${c};--h:${[78, 92, 70, 86, 64][i % 5]}%`}></i>)}</span><span class="cv-t">{home.booksTotal}권<br />전체 보기</span><span class="cv-a">교보문고 ↗</span></a></li>
-        </ul>
-        <Pager target="home-covers" label="책 목록" dark />
-        <ul class="chan">
-          {site.channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
+      <div>
+        <span class="tag">세금 계산기 {calcCount}종</span>
+        <h2 class="sec-h">직접 만든 계산기로 먼저</h2>
+        <p class="sec-sub">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.</p>
+        <ul class="cal">
+          {calcData.calculators.map((c) => <li><a href={`/calculators/${c.slug}`}><small>{groupName[c.group]}</small><b>{c.name}</b></a></li>)}
+          <li class="all"><a href="/calculators"><small>전체</small><b>{calcCount}종 모두 보기</b></a></li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- 4 상담은 이렇게 -->
-  <section class="sec sec-alt gut" aria-labelledby="h-how">
+  <!-- 4 칼럼·책 -->
+  <section class="sec gut ruled" aria-labelledby="h-books">
+    <div class="wrap">
+      <span class="tag">칼럼·책</span>
+      <h2 class="sec-h" id="h-books">책 {home.booksTotal}권을 직접 썼습니다</h2>
+      <p class="sec-sub">상속·증여, 법인, 부동산 세금을 다룬 책을 쓰고, 이코노미조선에 칼럼을 연재합니다.</p>
+      <div class="bks" id="home-bks" aria-label="책 목록">
+        {homeBooks.map((b) => b.cover
+          ? <a class="bk bk-img" href={site.booksUrl} target="_blank" rel="noopener"><img src={b.cover} width="400" height="571" alt={`『${b.title}』 표지`} loading="lazy" decoding="async" /></a>
+          : <a class="bk" style={`background:${b.color};color:${inkFor(b.color)}`} href={site.booksUrl} target="_blank" rel="noopener"><b>{b.title}</b><small>{site.rep}</small></a>)}
+        <a class="bk bk-all" href={site.booksUrl} target="_blank" rel="noopener"><span class="shelf" aria-hidden="true">{shelf.map((b) => <i style={`--c:${b.c};--h:${Math.round(b.h * 100)}%;--w:${b.w}`}></i>)}</span><b>{home.booksTotal}권<br />전체 보기</b><small>교보문고 ↗</small></a>
+      </div>
+      <Pager target="home-bks" label="책 목록" />
+      <div class="two books-2">
+        <ul class="chan">
+          {channels.map((c) => <li><a href={c.url} target="_blank" rel="noopener"><span>{c.name}</span><span aria-hidden="true">↗</span></a></li>)}
+          <li><a href="/columns"><span>칼럼·책 모두 보기</span><span aria-hidden="true">›</span></a></li>
+        </ul>
+        <div class="vid"><VideoCard id="portfolio" /></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 상담은 이렇게 -->
+  <section class="sec gut ruled" aria-labelledby="h-how">
     <div class="wrap">
       <span class="tag">상담은 이렇게</span>
       <h2 class="sec-h" id="h-how">상담 전에 궁금한 것</h2>
       <div class="how">
         {home.consult.map((c) => (
-          <div class="card how-c">
+          <div class="how-c">
             <h3>{c.title}</h3>
             <p>{c.text}</p>
             {c.more && <button type="button" class="more-btn" data-open="dlg-prep">자세히 보기</button>}
@@ -107,7 +125,6 @@ const calcCount = calcData.calculators.length;
           <ul class="reviews">
             {home.reviews.map((r) => (
               <li class="card rv">
-                <p class="rv-top"><span class="stars" aria-label="별 다섯 개">★★★★★</span><span class="ind">{r.industry}</span></p>
                 <p>{r.text}</p>
                 <p class="rv-by">{r.name} · {r.industry}</p>
               </li>
@@ -118,8 +135,8 @@ const calcCount = calcData.calculators.length;
     </div>
   </section>
 
-  <!-- 5 자주 묻는 질문 -->
-  <section class="sec gut" aria-labelledby="h-faq">
+  <!-- 6 자주 묻는 질문 -->
+  <section class="sec gut ruled" aria-labelledby="h-faq">
     <div class="wrap narrow">
       <span class="tag">자주 묻는 질문</span>
       <h2 class="sec-h" id="h-faq">많이 물어보시는 것</h2>
@@ -128,8 +145,15 @@ const calcCount = calcData.calculators.length;
     </div>
   </section>
 
-  <!-- 6 오시는 길 -->
-  <section class="sec sec-alt gut" aria-labelledby="h-loc">
+  <!-- 7 하나 더 물어보세요 · 오시는 길 -->
+  <section class="ask sec-dark gut" aria-labelledby="h-ask">
+    <div class="wrap ask-in">
+      <h2 class="sec-h" id="h-ask">하나 더 물어보세요</h2>
+      <p>카카오톡으로 상황을 먼저 알려 주세요. 방문 상담은 미리 예약합니다.</p>
+      <div><a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a></div>
+    </div>
+  </section>
+  <section class="sec gut" aria-labelledby="h-loc">
     <div class="wrap">
       <span class="tag">오시는 길</span>
       <h2 class="sec-h" id="h-loc">찾아오시는 길</h2>
@@ -147,78 +171,94 @@ const calcCount = calcData.calculators.length;
 </Base>
 
 <style>
-  /* 1 */
-  .hero { padding-block: 32px 40px; }
-  .hero-in { display: grid; gap: 22px; }
-  .hero-text { display: grid; gap: 22px; }
-  .who { display: flex; gap: 16px; align-items: center; }
-  .ph-sm { width: 92px; height: 118px; object-fit: cover; object-position: top; border-radius: 4px; background: var(--moss2); }
-  .who p { color: var(--on-moss2); font-size: 15.5px; line-height: 1.6; }
-  .who b { display: block; color: var(--on-moss); font-size: 20px; }
-  .hero-h { font-family: var(--f-display); font-size: 30px; line-height: 1.4; }
-  .hero-h em { font-style: normal; color: var(--gold-hi); position: relative; white-space: nowrap; }
-  .sig { position: absolute; left: 0; bottom: -8px; width: 100%; height: 12px; overflow: visible; }
-  .sig path { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 300; stroke-dashoffset: 0; animation: sign 1s cubic-bezier(.4, 0, .2, 1) .35s both; }
-  @keyframes sign { from { stroke-dashoffset: 300; } to { stroke-dashoffset: 0; } }
-  .hero-lead { color: var(--on-moss2); }
-  .hero-acts { display: grid; gap: 14px; justify-items: start; }
-  .hero-acts .btn { width: 100%; }
-  .hero-acts .tlink { color: var(--on-moss); }
-  .facts { list-style: none; margin: 0; padding: 16px 0 0; border-top: 1px solid rgba(243, 240, 231, .16); display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 15px; color: var(--on-moss2); }
-  .facts li::before { content: ""; display: inline-block; width: 6px; height: 6px; border: 1.5px solid var(--gold-hi); transform: rotate(45deg); margin-right: 8px; vertical-align: 2px; }
-  .ph-lg { display: none; }
+  /* 1 첫 화면 */
+  .hero { padding-block: 20px 44px; }
+  .ruled { border-top: 1px solid var(--line); }
+  .hero-in { display: grid; gap: 26px; }
+  .eyebrow { font-size: 15px; color: var(--ink2); display: flex; gap: 10px; align-items: center; }
+  .eyebrow::before { content: ""; width: 20px; height: 1px; background: var(--gold); }
+  .hero-h { margin-top: 12px; font-family: var(--f-display); font-size: clamp(30px, 8.4vw, 56px); line-height: 1.3; letter-spacing: -.025em; }
+  .pl { color: var(--gold); font-weight: 400; margin-left: .06em; }
+  .hero-lead { margin-top: 12px; color: var(--ink2); max-width: 30em; }
+  /* 컴퓨터 화면 왼쪽 단: 사진·이력 한 줄(휴대폰에선 계산 카드를 먼저 보이려고 숨김) */
+  .who { display: none; }
+  .who img { width: 92px; height: 118px; object-fit: cover; object-position: top; border-radius: 6px; flex: none; }
+  .who-n { font-size: 17px; } .who-n b { font-size: 19px; }
+  .who ul { list-style: none; margin: 6px 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 15px; color: var(--muted); }
+  .who li::before { content: ""; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); margin-right: 7px; vertical-align: 3px; }
+  .who .tlink { font-size: 15.5px; display: inline-flex; align-items: center; min-height: 44px; }
 
-  /* 2 */
-  .situ { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
-  .situ .row-link { height: 100%; min-height: 60px; font-size: 17.5px; }
-  .situ .urgent { background: var(--gold-soft); border-color: rgba(160, 120, 40, .35); }
-  .desk-only { display: none; }
-  .more { margin-top: 24px; }
+  /* 2 서비스 */
+  .svc { list-style: none; margin: 22px 0 0; padding: 0; border-top: 1px solid var(--ink); }
+  .svc a { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+  .svc b { font-size: 18.5px; }
+  .svc .k { grid-column: 1; font-size: 15.5px; color: var(--ink2); }
+  .svc .k em { font-style: normal; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kp { white-space: nowrap; }
+  .svc :global(svg) { grid-row: 1 / span 2; grid-column: 2; width: 16px; height: 16px; transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+  .svc a:hover :global(svg), .svc a:focus-visible :global(svg) { transform: rotate(90deg); }
+  .svc a:hover b { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
 
-  /* 3 */
-  .books { display: grid; gap: 24px; }
-  .books .sec-sub { margin-top: 4px; }
-  .vid { margin-top: 24px; }
-  .books-r { min-width: 0; }
-  .covers { list-style: none; margin: 0; padding: 6px 2px 14px; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; }
-  .covers li { flex: none; scroll-snap-align: start; }
-  .cv { width: 132px; aspect-ratio: 3 / 4.3; border-radius: 2px 4px 4px 2px; padding: 14px 12px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; background: var(--c); color: #FFF7E6; box-shadow: 0 10px 18px -12px rgba(0, 0, 0, .7), inset 4px 0 0 rgba(0, 0, 0, .18); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
-  .cv:hover, .cv:focus-visible { transform: translateY(-6px); }
-  .cv-t { font-family: var(--f-body); font-weight: 700; font-size: 15.5px; line-height: 1.4; }
-  .cv-a { font-size: 14px; opacity: .9; }
-  /* 전체 보기 표지: 크림 바탕 + 책등이 꽂힌 책장 그림(예전엔 점선 테두리만 있어 빈 상자처럼 보였다) */
-  .cv-all { background: var(--on-moss); color: var(--ink); justify-content: flex-start; gap: 8px; }
-  .cv-stack { display: flex; align-items: flex-end; gap: 4px; height: 44%; padding-bottom: 4px; border-bottom: 2px solid var(--gold); }
-  .cv-stack i { flex: 1; height: var(--h); background: var(--c); border-radius: 2px 2px 0 0; box-shadow: inset 2px 0 0 rgba(0, 0, 0, .18); }
-  .cv-all .cv-t { margin-top: 6px; font-size: 17px; }
-  .cv-all .cv-a { margin-top: auto; color: var(--gold-text); font-weight: 700; opacity: 1; }
-  .chan { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid rgba(243, 240, 231, .16); }
-  .chan a { display: flex; justify-content: space-between; align-items: center; min-height: 58px; border-bottom: 1px solid rgba(243, 240, 231, .16); text-decoration: none; font-size: 17px; }
-  .chan a span:last-child { color: var(--gold-hi); }
+  /* 3 계산기 */
+  .two { display: grid; gap: 48px; }
+  .cal { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .cal a { display: grid; gap: 4px; align-content: start; height: 100%; min-height: 92px; padding: 12px 12px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; text-decoration: none; transition: border-color .2s; }
+  .cal a:hover { border-color: var(--moss); }
+  .cal small { font-size: 14px; color: var(--muted); }
+  .cal b { font-size: 15.5px; line-height: 1.45; }
+  .cal .all a { background: var(--moss); border-color: var(--moss); color: var(--on-moss); }
+  .cal .all small { color: var(--gold-hi); }
 
-  /* 4 */
+  /* 4 칼럼·책 */
+  /* 책 표지 줄: 휴대폰은 옆으로 넘긴다(권수가 늘어도 표지가 작아지지 않게) */
+  .bks { margin-top: 22px; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 16px; scrollbar-width: none; }
+  .bks::-webkit-scrollbar { display: none; }
+  .bks > .bk { flex: none; width: 136px; scroll-snap-align: start; padding: 16px 14px; }
+  .two > * { min-width: 0; } /* 표지 줄이 단 폭을 밀어 화면이 옆으로 넘치지 않게 */
+  .bks > .bk-img { padding: 0; overflow: hidden; background: var(--paper2); }
+  .bk-img img { width: 100%; height: 100%; object-fit: cover; }
+  .bk { aspect-ratio: 3 / 4.2; max-width: 100%; border-radius: 2px 6px 6px 2px; padding: 12% 11%; display: flex; flex-direction: column; justify-content: space-between; color: #FFF6E4; text-decoration: none; box-shadow: inset 3px 0 0 rgba(0, 0, 0, .18), 0 14px 22px -16px rgba(0, 0, 0, .55); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
+  .bk:hover, .bk:focus-visible { transform: translateY(-4px); }
+  .bk b { font-size: clamp(14px, 3.6vw, 16.5px); line-height: 1.4; }
+  .bk small { font-size: 14px; opacity: .9; }
+  /* 33권 전체 보기: 크림 바탕 표지에 책등이 꽂힌 책장(운영자 지적 — 빈 상자처럼 보이지 않게) */
+  .bk-all { background: var(--on-moss); color: var(--ink); justify-content: flex-start; gap: 8px; }
+  .shelf { display: flex; align-items: flex-end; gap: 2px; height: 42%; padding-bottom: 3px; border-bottom: 3px solid var(--gold); }
+  .shelf i { flex: var(--w) 1 0; min-width: 0; height: var(--h); background: var(--c); border-radius: 1px 1px 0 0; box-shadow: inset 1.5px 0 0 rgba(0, 0, 0, .18), inset 0 4px 0 -2.5px rgba(232, 196, 106, .6); }
+  .bk-all b { margin-top: 6px; font-size: clamp(14.5px, 3.9vw, 17px); }
+  .bk-all small { margin-top: auto; color: var(--gold-text); font-weight: 700; opacity: 1; }
+  .books-2 { margin-top: 28px; }
+  .chan { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .chan a { display: flex; justify-content: space-between; align-items: center; min-height: 52px; border-bottom: 1px solid var(--line); text-decoration: none; }
+  .chan a span:last-child { color: var(--gold-text); }
+  .vid { min-width: 0; }
+
+  /* 5 상담 */
   .how { display: grid; gap: 12px; margin-top: 22px; }
-  .how-c { display: grid; gap: 4px; }
+  .how-c { display: grid; gap: 4px; align-content: start; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
   .how-c h3 { font-size: 17px; }
   .how-c p { font-size: 16px; color: var(--ink2); }
-  .more-btn { justify-self: start; margin-top: 4px; background: none; border: none; padding: 8px 0; font: 600 16px var(--f-body); color: var(--gold-text); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .more-btn { justify-self: start; margin-top: 4px; background: none; border: none; padding: 0; min-height: 44px; font: 600 16px var(--f-body); color: var(--gold-text); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
   .how-2 { display: grid; gap: 32px; margin-top: 36px; }
   .sub-h { font-size: 18px; margin-bottom: 10px; }
-  .steps { list-style: none; margin: 0; padding: 0; counter-reset: st; }
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: st; border-top: 1px solid var(--ink); }
   .steps li { display: grid; grid-template-columns: 36px 1fr; column-gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .steps li::before { counter-increment: st; content: counter(st); grid-row: span 2; width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--gold); display: grid; place-items: center; color: var(--gold-text); font-weight: 700; font-size: 15px; }
+  .steps li::before { counter-increment: st; content: counter(st); grid-row: span 2; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--gold); display: grid; place-items: center; color: var(--gold-text); font-size: 15px; }
   .steps b { font-size: 17px; }
   .steps span { font-size: 15.5px; color: var(--muted); }
   .reviews { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-  .rv { display: grid; gap: 10px; padding: 20px; }
-  .rv-top { display: flex; justify-content: space-between; align-items: center; }
-  .stars { color: var(--gold-text); letter-spacing: 2px; font-size: 15px; }
-  .ind { font-size: 14px; background: var(--gold-soft); color: var(--gold-text); padding: 2px 10px; border-radius: 999px; font-weight: 600; }
-  .rv p { font-size: 16.5px; color: var(--ink2); }
-  .rv .rv-by { font-size: 15px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+  .rv { display: grid; gap: 10px; padding: 20px 18px; border-radius: 10px; }
+  .rv p { font-size: 16.5px; line-height: 1.8; color: var(--ink); }
+  .rv .rv-by { font-size: 14.5px; color: var(--muted); }
+  .more { margin-top: 24px; }
+
+  /* 7 */
+  .ask { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 11v6M11 14h6' stroke='%23F3F0E7' stroke-opacity='.06' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E"); }
+  .ask-in { padding-block: 52px; display: grid; gap: 12px; }
+  .ask p { color: var(--on-moss2); }
 
   /* dialog */
-  .dlg { border: none; border-radius: 8px; padding: 0; width: min(560px, calc(100vw - 32px)); color: var(--ink); background: var(--surface); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .5); }
+  .dlg { border: none; border-radius: 10px; padding: 0; width: min(560px, calc(100vw - 32px)); color: var(--ink); background: var(--surface); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .5); }
   .dlg::backdrop { background: rgba(17, 21, 17, .5); }
   .dlg[open] { animation: pop .22s cubic-bezier(.2, .7, .2, 1); }
   @keyframes pop { from { opacity: 0; transform: scale(.97) translateY(6px); } to { opacity: 1; transform: none; } }
@@ -229,19 +269,26 @@ const calcCount = calcData.calculators.length;
   .dlg-b ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
 
   @media (min-width: 900px) {
-    .hero { padding-block: 64px 72px; }
-    .hero-in { grid-template-columns: 1.3fr .7fr; align-items: center; gap: 56px; }
-    .who .ph-sm { display: none; }
-    .ph-lg { display: block; width: 100%; max-width: 300px; justify-self: end; object-fit: cover; object-position: top; border-radius: 4px; box-shadow: 0 24px 40px -24px rgba(0, 0, 0, .6); }
-    .hero-h { font-size: 46px; }
-    .hero-acts { grid-template-columns: auto auto; align-items: center; gap: 24px; }
-    .hero-acts .btn { width: auto; }
-    .situ { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .desk-only { display: block; }
-    .books { grid-template-columns: .9fr 1.1fr; gap: 56px; align-items: start; }
+    .hero { padding-block: 56px 96px; }
+    .hero-in { grid-template-columns: minmax(0, 1fr) 460px; column-gap: 64px; align-items: start; }
+    .hero-text { padding-top: 48px; position: sticky; top: calc(var(--header-h) + 40px); }
+    .who { display: flex; gap: 18px; align-items: center; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
+    .svc { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .svc li { display: flex; }
+    .svc a { flex: 1; grid-template-columns: 1fr; align-content: start; gap: 8px; padding: 22px 20px 26px 0; border-bottom: 0; }
+    .svc li + li a { padding-left: 20px; border-left: 1px solid var(--line); }
+    .svc :global(svg) { grid-row: 1; grid-column: 1; }
+    .two { grid-template-columns: 1fr 1fr; gap: 72px; }
+    .bks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; max-width: 820px; overflow: visible; padding-bottom: 0; }
+    .bks > .bk { width: auto; padding: 18px 16px; }
+    .books-2 { align-items: start; }
+    .bks > .bk-img { padding: 0; }
+    .cal { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .vid { justify-self: center; align-self: center; }
     .how { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .how-2 { grid-template-columns: 1fr 1fr; gap: 48px; }
   }
+  @media (prefers-reduced-motion: reduce) { .svc :global(svg), .bk { transition: none; } }
 </style>
 
 <script>

@@ -5,6 +5,7 @@ import svcData from "../../data/services.json";
 import calcData from "../../data/calculators.json";
 import home from "../../data/home.json";
 import site from "../../data/site.json";
+import DeadlineCalc from "../../components/DeadlineCalc.astro";
 
 export function getStaticPaths() {
   return svcData.services.map((s) => ({ params: { slug: s.slug }, props: { svc: s } }));
@@ -24,11 +25,12 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
     <div class="wrap narrow">
       <span class="tag">기한부터 확인하세요</span>
       <h2 class="sec-h" id="h-dl">신고·청구 기한</h2>
+      {svc.calcEvents && <div class="svc-calc"><DeadlineCalc events={svc.calcEvents} uid={`s-${svc.slug}`} heading={`${svc.name} 기한 계산`} /></div>}
       <div class="dls">
         {svc.deadlines.map((d: any) => (
           <div class="card dl">
             <h3>{d.title}</h3>
-            {d.track && (
+            {d.track && !svc.calcEvents && (
               <div class="track" aria-hidden="true">
                 <span class="ln"></span><span class="fl"></span>
                 <span class="dot" style="left:0"></span>
@@ -92,7 +94,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
       <p class="note">상담을 빠르게 하려는 목록이며, 법에서 정한 신고 첨부서류 목록은 아닙니다. 없는 것이 있어도 괜찮습니다.</p>
       {book && (
         <a class="book" href={site.booksUrl} target="_blank" rel="noopener">
-          <span class="bk" style={`--c:${book.color}`} aria-hidden="true"></span>
+          {book.cover ? <img class="bk bk-img" src={book.cover} width="400" height="571" alt="" loading="lazy" /> : <span class="bk" style={`--c:${book.color}`} aria-hidden="true"></span>}
           <span><small>관련 책</small><b>『{book.title}』</b><span>{site.rep} 지음 · 교보문고 ↗</span></span>
         </a>
       )}
@@ -104,6 +106,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
 <style>
   .urgent-band { background: var(--gold-soft); border-bottom: 1px solid rgba(160, 120, 40, .3); }
   .urgent-band p { padding-block: 14px; font-weight: 600; color: var(--ink); }
+  .svc-calc { margin-top: 18px; }
   .dls { display: grid; gap: 14px; margin-top: 18px; }
   .dl { display: grid; gap: 8px; }
   .dl h3 { font-size: 18px; }
@@ -133,6 +136,7 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
   .book { margin-top: 24px; display: flex; gap: 16px; align-items: center; text-decoration: none; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
   .book:hover { border-color: var(--gold); }
   .bk { flex: none; width: 56px; height: 80px; background: var(--c); border-radius: 1px 3px 3px 1px; box-shadow: inset 3px 0 0 rgba(0, 0, 0, .18); position: relative; }
+  .bk-img { width: 56px; height: 80px; object-fit: cover; }
   .bk::after { content: ""; position: absolute; left: 8px; right: 8px; top: 14px; height: 2px; background: rgba(255, 247, 230, .7); }
   .book small { display: block; font-size: 14px; color: var(--gold-text); font-weight: 600; }
   .book b { display: block; font-size: 17px; }

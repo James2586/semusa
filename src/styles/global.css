@@ -1,12 +1,12 @@
-/* 하나 더 세무회계 — 디자인 토큰과 공용 모양 (설계서 v2 · 5장)
-   단일 밝은 화면(종이색). 금색은 선·확인 표시에만, 버튼은 카카오 노랑과 숲색 두 가지. */
+/* 하나 더 세무회계 — 디자인 토큰과 공용 모양 (설계서 v2 · 5장, 2026-10-24 시안 D로 종이색을 풀빛 도는 회색으로)
+   단일 밝은 화면(종이색). 금색은 선·확인 표시에만, 버튼은 카카오 노랑과 숲색 두 가지. + 기호는 로고·마감 표시·옅은 모눈에만. */
 :root {
-  --paper: #F9F7F3;
-  --paper2: #F2EFE8;
+  --paper: #F2F3EE;
+  --paper2: #E8EBE3;
   --surface: #FFFFFF;
-  --ink: #1A1710;
-  --ink2: #3C3828;
-  --muted: #5F5A4C;
+  --ink: #151915;
+  --ink2: #3D463F;
+  --muted: #545D56;
   --moss: #1E3A2A;
   --moss2: #2C5040;
   --on-moss: #F3F0E7;
@@ -17,8 +17,8 @@
   --gold-soft: #F5EDD4;
   --kakao: #FEE500;
   --kakao-ink: #191600;
-  --line: rgba(60, 56, 40, 0.14);
-  --line2: rgba(60, 56, 40, 0.28);
+  --line: rgba(21, 25, 21, 0.12);
+  --line2: rgba(21, 25, 21, 0.26);
   --f-display: "Hanadeo Serif", "Noto Serif KR", "Nanum Myeongjo", serif;
   /* 본문은 기기 글꼴(내려받기 0) — iOS·Mac Apple SD Gothic Neo, 안드로이드 Noto Sans KR, 윈도 맑은 고딕 */
   --f-body: Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "맑은 고딕", sans-serif;
@@ -32,6 +32,8 @@
 /* 제목 글꼴: 빌드 뒤 scripts/subset-fonts.mjs가 쓰인 글자만 잘라 만든다 */
 @font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-la-700.woff2") format("woff2"); unicode-range: U+0000-024F, U+2000-206F, U+20AC, U+2190-21FF; }
 @font-face { font-family: "Hanadeo Serif"; font-weight: 700; font-display: swap; src: url("/fonts/serif-ko-700.woff2") format("woff2"); unicode-range: U+1100-11FF, U+3000-303F, U+3130-318F, U+AC00-D7AF, U+FF00-FFEF; }
+/* 남은 날 큰 숫자: 명조 숫자 열 개만(약 3KB) */
+@font-face { font-family: "Hanadeo Num"; font-weight: 400; font-display: swap; src: url("/fonts/serif-num-400.woff2") format("woff2"); unicode-range: U+0030-0039; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -51,7 +53,9 @@ img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; }
 h1, h2, h3 { margin: 0; text-wrap: balance; }
 p { margin: 0; }
-:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+/* 포커스: 밝은 바탕엔 숲색, 어두운 바탕엔 밝은 금색(금색 #C4993C는 밝은 바탕 대비 3:1이 안 됨 — 2026-10-24 검토) */
+:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+.sec-dark :focus-visible, .foot :focus-visible { outline-color: var(--gold-hi); }
 
 .gut { padding-left: var(--gutter); padding-right: var(--gutter-r); }
 .wrap { max-width: 1080px; margin: 0 auto; }
@@ -60,9 +64,11 @@ p { margin: 0; }
 .skip { position: absolute; left: -9999px; top: 0; background: var(--moss); color: var(--on-moss); padding: 10px 14px; z-index: 100; }
 .skip:focus { left: 12px; top: calc(env(safe-area-inset-top, 0px) + 8px); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* 첫 화면 바탕의 아주 옅은 + 모눈(원고지 느낌) */
+.plusgrid { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 11v6M11 14h6' stroke='%231E3A2A' stroke-opacity='.1' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E"); background-size: 28px 28px; }
 
 /* 버튼 */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; font: 700 17px var(--f-body); text-decoration: none; border: none; border-radius: 4px; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; font: 700 17px var(--f-body); text-decoration: none; border: none; border-radius: 8px; cursor: pointer; }
 .btn svg { width: 20px; height: 20px; flex: none; }
 .btn-kakao { background: var(--kakao); color: var(--kakao-ink); }
 .btn-moss { background: var(--moss); color: var(--on-moss); }
@@ -92,14 +98,14 @@ p { margin: 0; }
 .sec-dark .page-lead { color: var(--on-moss2); }
 
 /* 카드 · 목록 */
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 18px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
 .rows { display: grid; gap: 10px; }
-.row-link { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 60px; padding: 12px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; text-decoration: none; color: var(--ink); font-size: 17px; font-weight: 500; }
+.row-link { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 60px; padding: 12px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 17px; font-weight: 500; }
 .row-link:hover { border-color: var(--gold); }
 .row-link .arr { color: var(--gold-text); font-size: 22px; flex: none; }
 .row-link small { display: block; font-size: 14.5px; color: var(--muted); font-weight: 400; }
 .grid-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.calc-card { display: flex; flex-direction: column; gap: 2px; padding: 14px; min-height: 92px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; text-decoration: none; transition: transform .25s, box-shadow .25s, border-color .25s; }
+.calc-card { display: flex; flex-direction: column; gap: 2px; padding: 14px; min-height: 92px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; text-decoration: none; transition: transform .25s, box-shadow .25s, border-color .25s; }
 .calc-card:hover, .calc-card:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 22px -14px rgba(26, 23, 16, .45); border-color: var(--gold); }
 .calc-card b { font-size: 16.5px; line-height: 1.45; border-left: 3px solid var(--gold); padding-left: 9px; margin-bottom: 2px; }
 .calc-card span { font-size: 14.5px; color: var(--muted); line-height: 1.5; }
@@ -119,7 +125,7 @@ p { margin: 0; }
 .ipic-books i:last-child { right: 0; transform: rotate(5deg); }
 .ipic-books i::after { content: ""; position: absolute; left: 18%; right: 18%; top: 18%; height: 0.05em; background: rgba(255, 247, 230, .75); }
 
-.pending { border: 1.5px dashed var(--line2); border-radius: 4px; padding: 16px; color: var(--muted); font-size: 15.5px; background: var(--surface); }
+.pending { border: 1.5px dashed var(--line2); border-radius: 8px; padding: 16px; color: var(--muted); font-size: 15.5px; background: var(--surface); }
 .law { font-size: 14.5px; color: var(--muted); }
 .prose { display: grid; gap: 14px; }
 .prose p, .prose li { color: var(--ink2); }

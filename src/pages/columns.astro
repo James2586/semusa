@@ -14,11 +14,11 @@ const posts = await fetchBlogPosts("https://rss.blog.naver.com/semusatax.xml", 7
 const [featured, ...restPosts] = posts;
 const ch = Object.fromEntries(site.channels.map((c) => [c.name, c.url]));
 
-type Card = { kind: string; title: string; text?: string; date?: string; href: string; external: boolean; go: string; thumb: "art" | "book" | "video"; topic?: { id: string; label: string }; image?: string; color?: string; poster?: string };
+type Card = { kind: string; title: string; text?: string; date?: string; href: string; external: boolean; go: string; thumb: "art" | "book" | "video"; topic?: { id: string; label: string }; image?: string; color?: string; poster?: string; cover?: string };
 const cards: Card[] = [
   ...restPosts.map((p) => ({ kind: "블로그", title: p.title, text: p.excerpt, date: p.date, href: p.link, external: true, go: "블로그에서 읽기", thumb: "art" as const, topic: topicOf(p.title), image: p.image })),
   { kind: "칼럼", title: "이코노미조선 칼럼 모아 보기", text: "이코노미조선에 연재한 세금 칼럼을 한곳에서 읽어 보세요.", href: ch["이코노미조선 칼럼"], external: true, go: "칼럼 읽기", thumb: "art", topic: { id: "column", label: "이코노미조선 칼럼" } },
-  ...home.books.map((b) => ({ kind: "책", title: b.title, text: `${site.rep} 지음`, href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "book" as const, color: b.color })),
+  ...home.books.map((b) => ({ kind: "책", title: b.title, text: `${site.rep} 지음`, href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "book" as const, color: b.color, cover: (b as any).cover })),
   { kind: "책", title: `책 ${home.booksTotal}권 전체 보기`, text: "상속·증여, 법인, 부동산, 업종별 세무관리까지 직접 쓴 책 목록입니다.", href: site.booksUrl, external: true, go: "교보문고에서 보기", thumb: "art", topic: { id: "books", label: `책 ${home.booksTotal}권` } },
   ...videoData.videos.map((v) => ({ kind: "영상", title: v.title, text: v.note, href: `/about#video-${v.id}`, external: false, go: "영상 보기", thumb: "video" as const, poster: v.poster })),
 ];
@@ -65,8 +65,8 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
           <li data-kind={c.kind}>
             <a class="card-a" href={c.href} {...(c.external ? { target: "_blank", rel: "noopener" } : {})}>
               <span class:list={["thumb", `thumb-${c.thumb}`]} aria-hidden="true">
-                {c.thumb === "art" && <Thumb topic={c.topic!.id} label={c.topic!.label} image={c.image} books={home.books.map((b) => b.color)} />}
-                {c.thumb === "book" && <span class="tb" style={`--c:${c.color}`}></span>}
+                {c.thumb === "art" && <Thumb topic={c.topic!.id} label={c.topic!.label} image={c.image} books={home.books.slice(0, 2).map((b) => b.color)} />}
+                {c.thumb === "book" && (c.cover ? <img class="tbi" src={c.cover} alt="" width="400" height="571" loading="lazy" decoding="async" /> : <span class="tb" style={`--c:${c.color}`}></span>)}
                 {c.thumb === "video" && <img src={c.poster} alt="" loading="lazy" width="540" height="960" />}
               </span>
               <span class="chip">{c.kind}</span>
@@ -118,6 +118,8 @@ const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
   .thumb-book { display: grid; place-items: center; background: var(--paper2); }
   .tb { width: 27%; aspect-ratio: 3 / 4.3; background: var(--c); color: #FFF7E6; border-radius: 1px 3px 3px 1px; box-shadow: 0 12px 20px -12px rgba(0, 0, 0, .6), inset 3px 0 0 rgba(0, 0, 0, .18); padding: 8%; display: flex; }
   .tb::after { content: ""; display: block; width: 100%; height: 2px; margin-top: 18%; background: rgba(255, 247, 230, .7); }
+  /* 표지 사진: 칸 높이의 86%로 가운데(높이 % 가 먹도록 절대 위치) */
+  .tbi { position: absolute; top: 7%; left: 0; right: 0; margin: 0 auto; height: 86%; width: auto; max-width: none; border-radius: 2px 4px 4px 2px; box-shadow: 0 12px 20px -12px rgba(0, 0, 0, .6); }
   .thumb-video img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
   .ct { font-size: 19px; font-weight: 700; line-height: 1.45; border-left: 3px solid var(--gold); padding-left: 11px; }
   .card-a:hover .go, .card-a:focus-visible .go { text-decoration: underline; text-underline-offset: 4px; }

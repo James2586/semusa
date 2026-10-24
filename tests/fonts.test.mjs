@@ -27,7 +27,7 @@ test("serifText는 제목·표시 클래스의 글자만 모은다", () => {
 });
 
 test("잘라 낸 제목 글꼴은 60KB 이하", { skip: !existsSync(join(DIST, "fonts")) }, () => {
-  for (const f of ["serif-ko-700.woff2", "serif-la-700.woff2"]) {
+  for (const f of ["serif-ko-700.woff2", "serif-la-700.woff2", "serif-num-400.woff2"]) {
     const n = statSync(join(DIST, "fonts", f)).size;
     assert.ok(n > 1000 && n < 60 * 1024, `${f}: ${n} bytes`);
   }

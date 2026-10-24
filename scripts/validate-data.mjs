@@ -1,6 +1,6 @@
 // 빌드 전에 운영자가 고치는 파일(src/data/*.json, src/content/faq/*.md)을 검사한다.
 // 틀린 곳이 있으면 파일 이름과 줄 번호를 한국어로 알려 주고 빌드를 멈춘다.
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -52,7 +52,7 @@ export function checkCalculators(text) {
   return errors;
 }
 
-export function checkServices(text, calcSlugs) {
+export function checkServices(text, calcSlugs, eventIds = null) {
   const errors = [];
   const { data, error } = parseJsonFile("services.json", text);
   if (error) return [error];
@@ -70,11 +70,35 @@ export function checkServices(text, calcSlugs) {
     for (const c of s.calculators || []) {
       if (!calcSlugs.has(c)) errors.push(`${at}: 계산기 "${c}"는 calculators.json에 없습니다.`);
     }
+    if (s.keyDeadlines !== undefined && !(Array.isArray(s.keyDeadlines) && s.keyDeadlines.every((k) => Array.isArray(k) && k.length === 2 && k.every((t) => typeof t === "string" && t.trim())))) errors.push(`${at}: keyDeadlines는 [["상속세", "말일부터 6개월"], …] 모양이어야 합니다.`);
+    for (const e of s.calcEvents || []) if (eventIds && !eventIds.has(e)) errors.push(`${at}: calcEvents "${e}"는 deadlines.json events에 없습니다.`);
   });
   return errors;
 }
 
-export function checkHome(text, svcSlugs) {
+// 첫 화면·서비스 페이지 기한 계산(2026-10-24): 일마다 계산 규칙·근거 조문·"하나 더 확인할 것"과 그 근거가 다 있어야 한다.
+export function checkDeadlines(text) {
+  const errors = [];
+  const { data, error } = parseJsonFile("deadlines.json", text);
+  if (error) return [error];
+  const seen = new Set();
+  (data.events || []).forEach((e, i) => {
+    const at = `deadlines.json ${findLine(text, `"id": "${e.id}"`) ?? "?"}번째 줄 (${i + 1}번째 일)`;
+    for (const k of ["id", "chip", "dateLabel", "name", "why", "law"]) if (!e[k] || typeof e[k] !== "string") errors.push(`${at}: ${k}가 비었습니다.`);
+    if (!(Number.isInteger(e.rule?.monthEnd) || Number.isInteger(e.rule?.days))) errors.push(`${at}: rule은 { "monthEnd": 개월 } 또는 { "days": 일 }이어야 합니다.`);
+    if (!e.fact?.text || !e.fact?.law) errors.push(`${at}: fact(하나 더 확인할 것)에는 text와 law(근거 조문)가 둘 다 있어야 합니다.`);
+    if (seen.has(e.id)) errors.push(`${at}: id "${e.id}"가 두 번 나옵니다.`);
+    seen.add(e.id);
+  });
+  if (!seen.size) errors.push("deadlines.json: events가 비었습니다.");
+  (data.yearly || []).forEach((y, i) => {
+    if (!y.name || !y.when || !y.law) errors.push(`deadlines.json: yearly ${i + 1}번째에 name·when·law(근거 조문)가 다 있어야 합니다.`);
+    if (!(y.rule?.monthDay || /^\d{2}-\d{2}$/.test(y.rule?.md || ""))) errors.push(`deadlines.json: yearly ${i + 1}번째 rule은 { "md": "MM-DD" } 또는 { "monthDay": 일 }이어야 합니다.`);
+  });
+  return errors;
+}
+
+export function checkHome(text, svcSlugs, root = ROOT) {
   const errors = [];
   const { data, error } = parseJsonFile("home.json", text);
   if (error) return [error];
@@ -84,6 +108,12 @@ export function checkHome(text, svcSlugs) {
   });
   if (!(data.situations || []).length) errors.push("home.json: situations가 비었습니다.");
   if (!Number.isInteger(data.booksTotal) || data.booksTotal < 1) errors.push("home.json: booksTotal은 책 권수(숫자)여야 합니다.");
+  (data.books || []).forEach((b, i) => {
+    if (!b.title || !/^#[0-9A-Fa-f]{6}$/.test(b.color || "")) errors.push(`home.json: ${i + 1}번째 책에 title과 color("#RRGGBB")가 있어야 합니다.`);
+    if (b.date !== undefined && !/^\d{4}-\d{2}$/.test(b.date)) errors.push(`home.json: ${i + 1}번째 책 date는 "YYYY-MM"이어야 합니다.`);
+    // 표지 사진(선택): public/ 아래 실제 파일이어야 한다
+    if (b.cover !== undefined && !(/^\/img\/books\/[a-z0-9-]+\.(webp|png|jpg)$/.test(b.cover) && existsSync(join(root, "public", b.cover)))) errors.push(`home.json: ${i + 1}번째 책 cover "${b.cover}" 파일이 public/img/books/에 없습니다.`);
+  });
   for (const k of ["consult", "steps", "prepare"]) if (!(data[k] || []).length) errors.push(`home.json: ${k}가 비었습니다.`);
   return errors;
 }
@@ -134,12 +164,16 @@ export function validateAll(root = ROOT) {
   errors.push(...checkCalculators(calcText));
   let calcSlugs = new Set();
   try { calcSlugs = new Set(JSON.parse(calcText).calculators.map((c) => c.slug)); } catch {}
-  errors.push(...checkServices(read("src/data/services.json"), calcSlugs));
+  const dlText = read("src/data/deadlines.json");
+  errors.push(...checkDeadlines(dlText));
+  let eventIds = new Set();
+  try { eventIds = new Set(JSON.parse(dlText).events.map((e) => e.id)); } catch {}
+  errors.push(...checkServices(read("src/data/services.json"), calcSlugs, eventIds));
   errors.push(...checkSite(read("src/data/site.json")));
   let svcSlugs = new Set();
   try { svcSlugs = new Set(JSON.parse(read("src/data/services.json")).services.map((s) => s.slug)); } catch {}
-  errors.push(...checkHome(read("src/data/home.json"), svcSlugs));
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json"]) {
+  errors.push(...checkHome(read("src/data/home.json"), svcSlugs, root));
+  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");

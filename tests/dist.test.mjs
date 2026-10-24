@@ -57,13 +57,26 @@ test("계산기 상세 페이지에는 휴대폰 아래 막대가 없다", { ski
   assert.ok(readFileSync(join(DIST, "index.html"), "utf8").includes('class="bbar"'));
 });
 
-test("홈: 6구역, 상황 칸은 있는 서비스 페이지로, 책 33권·후기 2건·카카오톡 버튼", { skip: !has }, () => {
+test("홈(시안 D): 기한 계산이 첫 화면, 구역 7개, 서비스·계산기 링크는 있는 페이지로, 책 33권·후기 2건·카카오톡 버튼", { skip: !has }, () => {
   const h = readFileSync(join(DIST, "index.html"), "utf8");
-  for (const id of ["h-hero", "h-situ", "h-books", "h-how", "h-faq", "h-loc"]) assert.match(h, new RegExp(`id="${id}"`), id);
+  for (const id of ["h-hero", "h-svc", "h-up", "h-books", "h-how", "h-faq", "h-loc"]) assert.match(h, new RegExp(`id="${id}"`), id);
   for (const m of h.matchAll(/href="\/services\/([a-z-]+)"/g)) assert.ok(existsSync(join(DIST, "services", `${m[1]}.html`)), m[1]);
+  for (const m of h.matchAll(/href="\/calculators\/([a-z-]+)"/g)) assert.ok(existsSync(join(DIST, "calculators", `${m[1]}.html`)), m[1]);
+  assert.match(h, /data-dlcalc/);
   assert.match(h, /책 33권/);
   assert.equal((h.match(/class="card rv"/g) || []).length, 2);
   assert.match(h, /class="btn btn-kakao"/);
+  // 기한 계산 자료의 근거 조문이 화면 자료에 그대로 실린다
+  const dl = JSON.parse(readFileSync(new URL("../src/data/deadlines.json", import.meta.url), "utf8"));
+  for (const e of dl.events) assert.ok(h.includes(e.law), e.id);
+});
+
+test("서비스 페이지 기한 계산: calcEvents가 있는 서비스만, 그 일만", { skip: !has }, () => {
+  const svcs = JSON.parse(readFileSync(new URL("../src/data/services.json", import.meta.url), "utf8")).services;
+  for (const s of svcs) {
+    const h = readFileSync(join(DIST, "services", `${s.slug}.html`), "utf8");
+    assert.equal(h.includes("data-dlcalc"), !!s.calcEvents, s.slug);
+  }
 });
 
 test("계산기 13페이지: 계산 화면(iframe·제목), 새 창 링크, 참고용 문구, 상담 버튼", { skip: !has }, () => {
