@@ -4,6 +4,7 @@ import calcData from "../data/calculators.json";
 import svcData from "../data/services.json";
 import KakaoIcon from "./KakaoIcon.astro";
 import Logo from "./Logo.astro";
+import SiteSearch from "./SiteSearch.astro";
 
 const groups = calcData.groups.map((g) => ({
   ...g,
@@ -48,8 +49,17 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
         <li><a class="gnb-a" href="/faq" aria-current={on("/faq")}>자주 묻는 질문</a></li>
         <li><a class="gnb-a" href="/location" aria-current={on("/location")}>오시는 길</a></li>
       </ul>
-      <a class="btn btn-kakao gnb-cta" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
     </nav>
+
+    <div class="tools">
+      <button type="button" class="tool" id="sxBtn" data-sx-open aria-label="찾기" aria-haspopup="dialog" aria-controls="sx" aria-keyshortcuts="Control+K /" title="찾기 (Ctrl+K)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="tool-l">찾기</span>
+      </button>
+      <button type="button" class="tool tool-fs" id="fsBtn" aria-pressed="false" title="글자 크게">
+        <span aria-hidden="true" class="fs-g"><span>가</span><span>가</span></span><span class="sr-only">글자 크게</span>
+      </button>
+    </div>
+    <a class="btn btn-kakao gnb-cta" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
 
     <button class="menu-btn" type="button" aria-label="메뉴 열기" aria-haspopup="dialog" aria-controls="drawer" id="menuBtn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -84,6 +94,7 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   </nav>
   <a class="btn btn-kakao btn-block drawer-cta" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
 </dialog>
+<SiteSearch />
 
 <style>
   .hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: var(--surface); border-bottom: 1px solid var(--line); }
@@ -91,10 +102,10 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   .gnb { display: none; align-items: center; gap: 8px; height: 100%; }
   .gnb > ul { display: flex; list-style: none; margin: 0; padding: 0; height: 100%; }
   .gnb li { position: relative; display: flex; align-items: center; }
-  .gnb-btn, .gnb-a { font: 500 15.5px var(--f-body); color: var(--ink2); background: none; border: none; padding: 8px 11px; text-decoration: none; cursor: pointer; height: 100%; display: flex; align-items: center; }
+  .gnb-btn, .gnb-a { white-space: nowrap; font: 500 15.5px var(--f-body); color: var(--ink2); background: none; border: none; padding: 8px 11px; text-decoration: none; cursor: pointer; height: 100%; display: flex; align-items: center; }
   .gnb-btn::after { content: ""; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); margin: -4px 0 0 7px; opacity: .6; }
   .gnb-btn:hover, .gnb-a:hover, [aria-current="page"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--gold); }
-  .gnb-cta { min-height: 42px; padding: 0 16px; font-size: 15.5px; margin-left: 6px; }
+  .gnb-cta { display: none; white-space: nowrap; min-height: 42px; padding: 0 16px; font-size: 15.5px; margin-left: 6px; }
   .mega { display: none; position: absolute; top: 100%; left: -12px; background: var(--surface); border: 1px solid var(--line); border-top: 2px solid var(--gold); box-shadow: 0 20px 40px -24px rgba(26, 23, 16, .4); padding: 18px; z-index: 60; }
   .has-menu.open .mega { display: block; }
   @media (hover: hover) { .has-menu:hover .mega { display: block; } }
@@ -111,6 +122,17 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   .mega-cols a:hover, .mega-cols a:focus-visible { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
   .mega-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted); }
   .mega-foot a { color: var(--gold-text); font-weight: 600; white-space: nowrap; }
+  .tools { display: flex; align-items: center; gap: 0; margin-left: auto; }
+  @media (max-width: 1023px) { .hdr-in { gap: 4px; } }
+  .tool { min-width: 44px; height: 44px; padding: 0 8px; border: 0; border-radius: 8px; background: none; color: var(--ink2); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font: 600 15px var(--f-body); }
+  .tool svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .tool:hover { color: var(--ink); background: var(--gold-soft); }
+  .tool:focus-visible { outline: 3px solid var(--moss); outline-offset: 1px; }
+  .tool-l { display: none; }
+  .fs-g { display: inline-flex; align-items: baseline; gap: 1px; font-weight: 700; line-height: 1; }
+  .fs-g span:first-child { font-size: 14px; }
+  .fs-g span:last-child { font-size: 20px; }
+  .tool-fs[aria-pressed="true"] { background: var(--moss); color: var(--on-moss); }
   .menu-btn { width: 48px; height: 48px; border: none; background: none; display: grid; place-items: center; cursor: pointer; margin-right: -10px; }
   .menu-btn svg { width: 26px; height: 26px; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 
@@ -129,10 +151,17 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   .drawer-h { font-size: 14px; font-weight: 700; color: var(--gold-text); margin-top: 8px; }
   .drawer-cta { margin-top: 20px; }
 
-  @media (min-width: 900px) {
+  /* 큰 메뉴는 1024부터 — 900~1023에선 메뉴 글자가 두 줄로 꺾였다(2026-10-24 3차 검토) */
+  @media (min-width: 1024px) {
     .gnb { display: flex; }
     .menu-btn { display: none; }
+    .gnb { margin-left: auto; }
+    .tools { margin-left: 0; }
+    .gnb-cta { display: inline-flex; margin-left: 0; }
+    .hdr-in { gap: 8px; }
   }
+  @media (min-width: 1024px) and (max-width: 1199px) { .gnb-btn, .gnb-a { padding-inline: 8px; } .gnb-cta { padding: 0 12px; } }
+  @media (min-width: 1200px) { .tool-l { display: inline; } }
 </style>
 
 <script>
@@ -171,4 +200,15 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
     if (t === drawer || t.closest("[data-close]")) drawer.close();
   });
   drawer.addEventListener("close", () => menuBtn.focus());
+
+  // 글자 크게(2026-10-24 3차 D2): 이 기기에만 기억(localStorage) — 처음 그리기 전 적용은 Base.astro 머리의 작은 스크립트
+  const fsBtn = document.getElementById("fsBtn")!;
+  const root = document.documentElement;
+  fsBtn.setAttribute("aria-pressed", String(root.dataset.fs === "lg"));
+  fsBtn.addEventListener("click", () => {
+    const on = root.dataset.fs !== "lg";
+    if (on) root.dataset.fs = "lg"; else delete root.dataset.fs;
+    fsBtn.setAttribute("aria-pressed", String(on));
+    try { if (on) localStorage.setItem("fs", "lg"); else localStorage.removeItem("fs"); } catch {}
+  });
 </script>

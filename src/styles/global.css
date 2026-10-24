@@ -183,3 +183,7 @@ input:not([type="checkbox"]):not([type="radio"]):hover, select:hover, textarea:h
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* 글자 크게(2026-10-24 3차 D2): 글자가 px라 쪽 전체를 1.15배로(zoom) — 머리글 「가가」, 이 기기에만 기억 */
+/* 머리글은 그대로 둔다(휴대폰에서 로고·찾기·메뉴가 한 줄에 들어가게) */
+html[data-fs="lg"] :is(main, .foot, dialog) { zoom: 1.15; }

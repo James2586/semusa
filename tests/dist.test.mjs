@@ -167,3 +167,14 @@ test("상황 길잡이: 상황마다 결과 묶음 · 법인 묶음 · 근거 �
   assert.match(html, /보내는 것은 고른 상황과 날짜가 담긴 주소뿐입니다/);
   assert.match(html, /href="\/deadline\?e=inherit"/);
 });
+
+test("사이트 찾기: search.json · 머리글 찾기·글자 크게 · 질문 자리 id", { skip: !has }, () => {
+  const j = JSON.parse(readFileSync(join(DIST, "search.json"), "utf8"));
+  assert.ok(j.items.length > 40);
+  assert.ok(j.items.some((i) => i.u.startsWith("/faq#q-")));
+  const home = readFileSync(join(DIST, "index.html"), "utf8");
+  assert.match(home, /id="sx"/);
+  assert.match(home, /id="fsBtn"[^>]*aria-pressed="false"/);
+  assert.match(home, /localStorage\.getItem\("fs"\)/);
+  for (const i of j.items.filter((x) => x.u.startsWith("/faq#"))) assert.match(readFileSync(join(DIST, "faq.html"), "utf8"), new RegExp(`id="${i.u.slice(5)}"`));
+});

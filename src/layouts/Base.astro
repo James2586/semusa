@@ -53,6 +53,8 @@ const org = {
     <meta name="theme-color" content="#FFFFFF" />
     {/* 페이지 넘김 전환 켜기: 바깥 CSS 파일에 두면 첫 화면(기한 계산 스크립트가 있는 쪽)으로 넘어갈 때 Chromium이 켜짐을 놓쳐 전환을 끊는다(2026-10-24 실측) — 머리의 작은 style로 */}
     <style is:inline>@view-transition{navigation:auto}</style>
+    {/* 글자 크게(3차 D2): 그리기 전에 붙여 깜빡임 없이 — 저장소를 막은 브라우저는 그냥 지나감 */}
+    <script is:inline>try{if(localStorage.getItem("fs")==="lg")document.documentElement.dataset.fs="lg"}catch(e){}</script>
     <link rel="preload" href="/fonts/serif-ko-700.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/serif-logo-900.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
