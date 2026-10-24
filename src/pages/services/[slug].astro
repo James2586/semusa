@@ -25,9 +25,12 @@ const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
 // 그 분야 질문이 하나뿐이면 구역을 만들지 않는다(질문 한 줄짜리 구역은 비어 보임)
 const faqMods = Object.values(import.meta.glob("../../content/faq/*.md", { eager: true })) as any[];
 const faqCount = svc.faq ? faqMods.filter((m) => svc.faq.includes(m.frontmatter.category)).length : 0;
+// 검색 노출(5차 B1): 서비스 — 제공자는 Base의 사무소(@id)
+const svcLd = { "@context": "https://schema.org", "@type": "Service", name: svc.name, description: svc.short, serviceType: svc.name,
+  provider: { "@id": `${site.siteUrl}/#org` }, areaServed: "KR", url: new URL(`/services/${svc.slug}`, site.siteUrl).href };
 const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : undefined;
 ---
-<Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"}>
+<Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"} jsonLd={[svcLd]}>
   <PageHead tag="서비스" vt={`svc-${svc.slug}`} title={svc.name} lead={svc.short} chips={svc.keyDeadlines} photo={photo}
     crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
 

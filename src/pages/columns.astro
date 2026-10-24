@@ -26,11 +26,15 @@ const cards: Card[] = [
   ...videoData.videos.map((v) => ({ kind: "영상", title: v.title, text: v.note, href: `/about#video-${v.id}`, external: false, go: "영상 보기", thumb: "video" as const, poster: v.poster })),
 ];
 const channels = site.channels.filter((c) => c.name !== "이코노미조선 칼럼");
+// 검색 노출(5차 B1): 저서(Book — 제목·출간 연월은 home.json 그대로)와 지면 칼럼(Article — 지면 제목·날짜 그대로)
+const author = { "@type": "Person", name: site.rep, jobTitle: site.repTitle };
+const booksLd = home.books.map((b) => ({ "@context": "https://schema.org", "@type": "Book", name: b.title, author, ...(b.date ? { datePublished: b.date } : {}), url: site.booksUrl }));
+const articlesLd = (press.articles || []).map((a: any) => ({ "@context": "https://schema.org", "@type": "Article", headline: a.title, datePublished: a.date, url: a.url, author, publisher: { "@type": "Organization", name: "이코노미조선" } }));
 const kinds = ["전체", ...new Set(cards.map((c) => c.kind))];
 // 지면에 실린 칼럼(src/data/press.json) — 지면 그림 + 제목 그대로, 이코노미조선 기사로. 연재 목록은 articles(제목·날짜 그대로)
 const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
 ---
-<Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그, 영상.`}>
+<Base title="칼럼·책" description={`${site.repTitle} ${site.rep}의 책 ${home.booksTotal}권과 이코노미조선 칼럼, 블로그, 영상.`} jsonLd={[...booksLd, ...articlesLd]}>
   <PageHead tag="칼럼·책" photo={{ name: "own-face", w: [600, 900], ratio: "6 / 5" }} title="칼럼·책" crumbs={[{ name: "칼럼·책" }]} lead={`상속·증여, 법인, 부동산 세금을 다룬 책 ${home.booksTotal}권을 직접 썼고, 이코노미조선에 칼럼을 연재합니다.`} />
 
   <section class="gut feat-sec" aria-label="대표 글">

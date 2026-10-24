@@ -274,3 +274,27 @@ test("세율·공제 한눈에: 고른 조문마다 원문 줄·표 칸이 그�
   assert.doesNotMatch(h, /┌|│|┘/); // 선 문자가 그대로 남지 않음
   assert.match(readFileSync(join(DIST, "topics/transfer.html"), "utf8"), /href="\/rates#r-transfer"/);
 });
+
+test("구조화 데이터: 모든 JSON-LD가 읽히고, 위치 표시가 있는 쪽엔 BreadcrumbList · 서비스·책·칼럼 · RSS", { skip: !has }, () => {
+  for (const f of htmlFiles(DIST)) {
+    const h = readFileSync(f, "utf8");
+    const blocks = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+    const types = blocks.flatMap((b) => (Array.isArray(b) ? b : [b])).map((b) => b["@type"]);
+    assert.ok(types.includes("AccountingService"), f);
+    if (/class="crumb"/.test(h)) {
+      const bc = blocks.flat().find((b) => b["@type"] === "BreadcrumbList");
+      assert.ok(bc, `${f}: BreadcrumbList`);
+      assert.equal(bc.itemListElement[0].item, "https://semusatax.vercel.app/");
+      bc.itemListElement.forEach((e, i) => { assert.equal(e.position, i + 1); assert.match(e.item, /^https:\/\/semusatax\.vercel\.app\//); });
+    }
+  }
+  assert.match(readFileSync(join(DIST, "services/appeal.html"), "utf8"), /"@type":"Service"/);
+  const col = readFileSync(join(DIST, "columns.html"), "utf8");
+  assert.match(col, /"@type":"Book"/);
+  assert.match(col, /"@type":"Article"/);
+  const rss = readFileSync(join(DIST, "rss.xml"), "utf8");
+  const press = JSON.parse(readFileSync("src/data/press.json", "utf8")).articles;
+  assert.equal((rss.match(/<item>/g) || []).length, press.length);
+  assert.match(rss, /<pubDate>[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} 00:00:00 GMT<\/pubDate>/);
+  assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /rel="alternate" type="application\/rss\+xml"/);
+});

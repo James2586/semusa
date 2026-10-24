@@ -3,10 +3,12 @@
 // chips: 그 일의 핵심 기한(서비스 쪽 — services.json keyDeadlines), photo: 컴퓨터 화면 오른쪽 장식 사진(public/img/photos — 휴대폰에선 숨김).
 interface Photo { name: string; w: number[]; ratio?: string; pos?: string }
 interface Props { vt?: string; title: string; lead?: string; crumbs?: { name: string; href?: string }[]; tag?: string; chips?: [string, string][]; photo?: Photo }
+import CrumbLd from "./CrumbLd.astro";
 const { title, lead, crumbs = [], tag, chips, photo, vt } = Astro.props;
 const src = photo ? `/img/photos/${photo.name}-${photo.w[photo.w.length - 1]}.webp` : "";
 const srcset = photo ? photo.w.map((w) => `/img/photos/${photo.name}-${w}.webp ${w}w`).join(", ") : "";
 ---
+<CrumbLd crumbs={crumbs} />
 <section class:list={["page-head gut plusgrid", photo && "ph-has-photo"]}>
   <div class="wrap ph-in">
     <div class="ph-text">

@@ -1,0 +1,14 @@
+---
+// 검색 노출(5차 B1): 위치 표시와 같은 이동 경로를 BreadcrumbList JSON-LD로(마지막 칸은 지금 쪽 주소). PageHead와 위치 표시를 직접 그리는 쪽(소개)이 같이 쓴다.
+import site from "../data/site.json";
+interface Props { crumbs: { name: string; href?: string }[] }
+const { crumbs } = Astro.props;
+const here = new URL(Astro.url.pathname.replace(/\.html$/, ""), site.siteUrl).href;
+const ld = {
+  "@context": "https://schema.org", "@type": "BreadcrumbList",
+  itemListElement: [{ name: "홈", href: "/" }, ...crumbs].map((c, i, all) => ({
+    "@type": "ListItem", position: i + 1, name: c.name, item: i === all.length - 1 ? here : new URL(c.href || "/", site.siteUrl).href,
+  })),
+};
+---
+{crumbs.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
