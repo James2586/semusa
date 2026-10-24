@@ -8,7 +8,7 @@ const n = calcData.calculators.length;
 const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]));
 ---
 <Base title="세금 계산기" description={`상속세·증여세·양도소득세·취득세·종합부동산세 등 모의 세금 계산기 ${n}종.`}>
-  <PageHead tag="직접 만든 계산기" title={`세금 계산기 ${n}종`} crumbs={[{ name: "세금 계산기" }]} lead="결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다." />
+  <PageHead buki="calculated" tag="직접 만든 계산기" title={`세금 계산기 ${n}종`} crumbs={[{ name: "세금 계산기" }]} lead="결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다." />
   <section class="gut calc-list">
     <div class="wrap">
       <div class="tools">

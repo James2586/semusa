@@ -38,7 +38,7 @@ const dataset = { "@context": "https://schema.org", "@type": "Dataset", name: "�
   isBasedOn: Object.values(S).map((a: any) => ({ "@type": "Legislation", name: /^부칙/.test(a.article) ? `${a.law} ${a.article}` : `${a.law} ${a.article}(법률 제${a.promulgationNo}호)` })), creator: { "@type": "Organization", name: "하나 더 세무회계" } };
 ---
 <Base title="세율·공제 한눈에" description="상속세·증여세·양도소득세·취득세·종합부동산세·종합소득세·법인세의 세율과 주요 공제를 법조문 원문 그대로 모았습니다." jsonLd={[dataset]}>
-  <PageHead tag="세율·공제 한눈에" title="세율과 공제, 원문 그대로" crumbs={[{ name: "세율·공제 한눈에" }]}
+  <PageHead buki="warning" tag="세율·공제 한눈에" title="세율과 공제, 원문 그대로" crumbs={[{ name: "세율·공제 한눈에" }]}
     lead="법조문 원문을 그대로 옮겼습니다. 표도 원문 표를 그대로 풀었고, 풀이나 계산은 붙이지 않았습니다." />
 
   <nav class="gut rt-nav" aria-label="세목">

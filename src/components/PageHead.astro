@@ -2,14 +2,15 @@
 // 안쪽 페이지 머리(2026-10-24 2차 개편): 옅은 + 모눈 바탕, 위치 표시, 금색 짧은 선 꼬리표, 명조 제목, 한 줄 설명.
 // chips: 그 일의 핵심 기한(서비스 쪽 — services.json keyDeadlines), photo: 컴퓨터 화면 오른쪽 장식 사진(public/img/photos — 휴대폰에선 숨김).
 interface Photo { name: string; w: number[]; ratio?: string; pos?: string }
-interface Props { vt?: string; title: string; lead?: string; crumbs?: { name: string; href?: string }[]; tag?: string; chips?: [string, string][]; photo?: Photo }
+interface Props { vt?: string; title: string; lead?: string; crumbs?: { name: string; href?: string }[]; tag?: string; chips?: [string, string][]; photo?: Photo; buki?: "hello" | "deadline" | "calculated" | "found" | "warning" | "default" }
 import CrumbLd from "./CrumbLd.astro";
-const { title, lead, crumbs = [], tag, chips, photo, vt } = Astro.props;
+import Buki from "./Buki.astro";
+const { title, lead, crumbs = [], tag, chips, photo, vt, buki } = Astro.props;
 const src = photo ? `/img/photos/${photo.name}-${photo.w[photo.w.length - 1]}.webp` : "";
 const srcset = photo ? photo.w.map((w) => `/img/photos/${photo.name}-${w}.webp ${w}w`).join(", ") : "";
 ---
 <CrumbLd crumbs={crumbs} />
-<section class:list={["page-head gut plusgrid", photo && "ph-has-photo"]}>
+<section class:list={["page-head gut plusgrid", photo && "ph-has-photo", !photo && buki && "ph-has-buki"]}>
   <div class="wrap ph-in">
     <div class="ph-text">
       <nav aria-label="현재 위치"><ol class="crumb">
@@ -26,6 +27,7 @@ const srcset = photo ? photo.w.map((w) => `/img/photos/${photo.name}-${w}.webp $
       )}
       <slot />
     </div>
+    {!photo && buki && <div class="ph-buki"><Buki pose={buki} sizes="(min-width: 900px) 150px, 76px" eager /></div>}
     {photo && (
       <div class="ph-photo" style={`aspect-ratio:${photo.ratio || "4 / 5"}`} aria-hidden="true">
         <picture>
@@ -45,9 +47,14 @@ const srcset = photo ? photo.w.map((w) => `/img/photos/${photo.name}-${w}.webp $
   .ph-chips li { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--line2); border-radius: 999px; font-size: 15px; color: var(--ink2); }
   .ph-chips b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
   .ph-photo { display: none; }
+  /* 부기(6차 C): 사진이 없는 쪽의 머리 오른쪽 — 휴대폰은 작게(제목 줄을 덜 좁히게) */
+  .ph-has-buki .ph-in { grid-template-columns: minmax(0, 1fr) 76px; column-gap: 12px; align-items: end; }
+  .ph-buki :global(.buki) { display: block; width: 100%; height: auto; }
   @media (min-width: 900px) {
     .page-head { padding-block: 40px 56px; }
     .ph-has-photo .ph-in { grid-template-columns: minmax(0, 1fr) 340px; column-gap: 64px; }
+    .ph-has-buki .ph-in { grid-template-columns: minmax(0, 1fr) 150px; column-gap: 48px; }
+    .ph-buki { margin-bottom: -34px; }
     .ph-photo { display: block; overflow: hidden; border-radius: 10px; box-shadow: 0 30px 50px -36px rgba(21, 25, 21, .55); }
     .ph-photo picture, .ph-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
   }

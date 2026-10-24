@@ -1,0 +1,61 @@
+---
+// 첫 화면 「부기와 1분 세금」(2026-10-25 6차 C): 유튜브 @성셈 Shorts 중 세금 주제 최신 몇 개 — 제목은 유튜브 제목 그대로, 누르면 유튜브로.
+// 썸네일·재생기는 싣지 않는다(바깥 그림·구글로 가는 요청 없음, 첫 화면 가볍게). 목록을 못 읽으면 구역째 숨긴다(빌드는 멈추지 않음).
+import site from "../data/site.json";
+import cfg from "../data/shorts.json";
+import Buki from "./Buki.astro";
+import { fetchShorts } from "../lib/shortsFeed.js";
+const shorts = await fetchShorts(cfg);
+const yt = site.channels.find((c: any) => c.url.includes("youtube.com")) as any;
+const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
+---
+{shorts.length > 0 && yt && (
+  <section class="sec gut ruled sh-sec" aria-labelledby="h-shorts">
+    <div class="wrap sh-in">
+      <div class="sh-head">
+        <Buki pose="hello" cls="sh-buki" sizes="(min-width: 900px) 150px, 96px" />
+        <div>
+          <span class="tag">유튜브 {yt.name.replace(/^유튜브\s*/, "")}</span>
+          <h2 class="sec-h" id="h-shorts">부기와 1분 세금</h2>
+          <p class="sec-sub">돋보기 낀 부엉이 부기가 세금 쟁점 하나를 1분 안에 짚습니다.</p>
+          <a class="more-link" href={yt.link || yt.url} target="_blank" rel="noopener">Shorts 모두 보기 <span aria-hidden="true">↗</span><span class="sr-only">(유튜브, 새 창)</span></a>
+        </div>
+      </div>
+      <ul class="sh-list">
+        {shorts.map((v) => (
+          <li><a class="sh-card" href={v.link} target="_blank" rel="noopener">
+            <span class="sh-kind" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>Shorts</span>
+            <b>{v.title}</b>
+            <small>{v.date && dot(v.date)}<span class="sr-only"> 유튜브 Shorts, 새 창</span></small>
+          </a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+<style>
+  .sh-in { display: grid; gap: 24px; }
+  .sh-head { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px; align-items: end; }
+  .sh-head :global(.sh-buki) { width: 96px; height: auto; display: block; }
+  .sh-head .more-link { margin-top: 14px; }
+  .sh-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .sh-card { display: grid; grid-template-rows: auto 1fr auto; gap: 10px; min-height: 172px; height: 100%; padding: 14px; border-radius: 10px; background: var(--moss); color: var(--on-moss); text-decoration: none;
+    box-shadow: inset 0 0 0 1px rgba(243, 240, 231, .08); transition: transform .2s cubic-bezier(.2, .7, .2, 1); }
+  .sh-card:hover, .sh-card:focus-visible { transform: translateY(-3px); }
+  .sh-card:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .sh-kind { display: inline-flex; align-items: center; gap: 4px; justify-self: start; font-size: 14px; font-weight: 700; color: var(--gold-hi); }
+  .sh-kind svg { width: 14px; height: 14px; }
+  .sh-card b { font-size: 16px; line-height: 1.5; font-weight: 700; word-break: keep-all; overflow-wrap: anywhere; }
+  .sh-card small { font-size: 14px; color: var(--on-moss2); font-variant-numeric: tabular-nums; }
+  /* 휴대폰은 4개만(세로로 길어지지 않게) — 나머지는 「Shorts 모두 보기」로 */
+  @media (max-width: 899px) { .sh-list li:nth-child(n + 5) { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .sh-card { transition: none; } }
+  @media (min-width: 900px) {
+    .sh-in { grid-template-columns: 300px minmax(0, 1fr); column-gap: 48px; align-items: start; }
+    .sh-head { grid-template-columns: 1fr; align-items: start; }
+    .sh-head :global(.sh-buki) { width: 150px; }
+    .sh-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .sh-card { min-height: 200px; padding: 18px; }
+    .sh-card b { font-size: 17px; }
+  }
+</style>

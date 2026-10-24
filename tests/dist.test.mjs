@@ -354,3 +354,19 @@ test("이 사이트가 일하는 방식(6차 B): 원칙·기한 계산 단계(�
   assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /href="\/how"/);
   assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /href="\/how"/);
 });
+
+test("부기(6차 C): 한 쪽에 한 마리 이하 · 장식(alt 빈칸) · 기한 달력·계산기·길잡이·세율·404에 · 오프라인은 「연결 안 됨」 그림을 쪽 안에", { skip: !has }, () => {
+  for (const f of htmlFiles(DIST)) {
+    const h = readFileSync(f, "utf8");
+    const n = (h.match(/class="buki[ "]/g) || []).length;
+    assert.ok(n <= 1, `${f}: 부기 ${n}마리`);
+    for (const m of h.matchAll(/<img class="buki[^>]*>/g)) assert.match(m[0], /alt=""/, f);
+  }
+  for (const [p, pose] of [["deadline.html", "deadline"], ["calculators/index.html", "calculated"], ["guide.html", "found"], ["rates.html", "warning"], ["404.html", "default"]]) {
+    const file = existsSync(join(DIST, p)) ? join(DIST, p) : join(DIST, p.replace("/index.html", ".html"));
+    assert.match(readFileSync(file, "utf8"), new RegExp(`/img/buki/buki-${pose}-200\\.webp`), p);
+  }
+  const off = readFileSync(join(DIST, "offline.html"), "utf8");
+  assert.match(off, /class="off-buki"[^>]*>\s*<svg/);
+  assert.doesNotMatch(off, /\/img\/buki\/buki-offline\.svg/);
+});

@@ -1,12 +1,14 @@
 ---
 import Base from "../layouts/Base.astro";
 import PlusList from "../components/PlusList.astro";
+import Buki from "../components/Buki.astro";
 import site from "../data/site.json";
 import calcData from "../data/calculators.json";
 ---
 <Base title="페이지를 찾을 수 없어요" noindex cta={false}>
   <section class="nf gut plusgrid">
     <div class="wrap narrow">
+      <Buki pose="default" cls="nf-buki" sizes="120px" eager />
       <p class="ph-tag">404</p>
       <h1 class="page-h">찾는 페이지가 없습니다</h1>
       <p class="page-lead">주소가 바뀌었거나 지워진 페이지입니다. 아래에서 다시 찾아 보세요.</p>
@@ -21,6 +23,7 @@ import calcData from "../data/calculators.json";
 </Base>
 <style>
   .nf { padding-block: 40px 72px; min-height: 60vh; }
+  .nf :global(.nf-buki) { display: block; width: 120px; height: auto; margin-bottom: 12px; }
   .ph-tag { margin-top: 0; font-variant-numeric: tabular-nums; }
   .page-h { margin-top: 8px; }
   @media (min-width: 900px) { .nf { padding-block: 80px 112px; } }
