@@ -51,6 +51,8 @@ const org = {
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#FFFFFF" />
+    {/* 페이지 넘김 전환 켜기: 바깥 CSS 파일에 두면 첫 화면(기한 계산 스크립트가 있는 쪽)으로 넘어갈 때 Chromium이 켜짐을 놓쳐 전환을 끊는다(2026-10-24 실측) — 머리의 작은 style로 */}
+    <style is:inline>@view-transition{navigation:auto}</style>
     <link rel="preload" href="/fonts/serif-ko-700.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/serif-logo-900.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />

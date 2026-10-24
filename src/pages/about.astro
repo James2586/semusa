@@ -68,8 +68,8 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
     <div class="wrap two">
       <div>
         <span class="tag">약력</span>
-        <h2 class="sec-h" id="h-cv">걸어온 길</h2>
-        <p class="sec-sub">연도를 확인한 것은 책 출간뿐이라, 다른 이력은 연도 없이 적었습니다.</p>
+        <h2 class="sec-h" id="h-cv">약력과 최근 출간</h2>
+        <p class="sec-sub">연도를 확인한 것은 최근 책 출간뿐이라, 다른 이력은 연도 없이 적었습니다. 저서 {home.booksTotal}권 전체는 아래 책장에서.</p>
       </div>
       <ol class="tl reveal">
         <li class="tl-y"><span class="tl-k">학력·활동</span>
@@ -105,7 +105,7 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
               <BookCover book={b} width={150} />
               <div>
                 <p class="pv-t">『{b.title}』</p>
-                <p class="pv-m">{site.rep}{b.title === "병·의원 세무 관리" ? " · 조성식" : ""} 지음{b.date && ` · ${b.date.replace("-", ". ")}.`}</p>
+                <p class="pv-m">{[site.rep, ...((b as any).coauthors || [])].join(" · ")} 지음{b.date && <span class="nw"> · {b.date.replace("-", ". ")}.</span>}</p>
               </div>
             </div>
           ))}
@@ -113,7 +113,10 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
         </div>
       </div>
       <figure class="store">
-        <img src="/img/photos/own-store-1600.webp" srcset="/img/photos/own-store-800.webp 800w, /img/photos/own-store-1600.webp 1600w" sizes="(min-width: 1080px) 1080px, 100vw" width="1600" height="456" alt="서점 세금 서가 매대에 놓인 「병·의원 세무 관리」" loading="lazy" decoding="async" />
+        <picture>
+          <source media="(max-width: 699px)" srcset="/img/photos/own-face-600.webp 600w, /img/photos/own-face-900.webp 900w" sizes="100vw" width="900" height="765" />
+          <img src="/img/photos/own-store-1600.webp" srcset="/img/photos/own-store-800.webp 800w, /img/photos/own-store-1600.webp 1600w" sizes="(min-width: 1080px) 1080px, 100vw" width="1600" height="456" alt="서점 세금 서가 매대에 놓인 「병·의원 세무 관리」" loading="lazy" decoding="async" />
+        </picture>
         <figcaption>서점 세금 서가 매대의 『병·의원 세무 관리』</figcaption>
       </figure>
     </div>
@@ -166,17 +169,19 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
   .tl-k { display: block; font-size: 15px; font-weight: 700; color: var(--gold-text); }
   .tl-num { font-family: "Hanadeo Num", "Noto Serif KR", serif; font-weight: 400; font-size: 28px; line-height: 1.2; color: var(--ink); }
   .tl ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; font-size: 16.5px; }
-  .tl-m { display: inline-block; min-width: 3.2em; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tl ul li:has(.tl-m) { display: grid; grid-template-columns: 3.2em minmax(0, 1fr); }
+  .tl-m { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .nw { white-space: nowrap; }
   /* 서가 */
   .shelf-wrap { margin-top: 24px; display: grid; gap: 24px; }
-  .shelf { --row: 216px; display: grid; grid-template-columns: repeat(auto-fill, 30px); grid-auto-rows: var(--row); align-items: end; column-gap: 3px; justify-content: start;
+  .shelf { --row: 216px; display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); grid-auto-rows: var(--row); align-items: end; column-gap: 3px;
     background: repeating-linear-gradient(to bottom, transparent 0 calc(var(--row) - 8px), #6B4E2E calc(var(--row) - 8px) var(--row)); padding: 0 6px; border-radius: 4px; }
-  .sp { display: block; width: 30px; height: calc((var(--row) - 14px) * var(--h) / 100); margin-bottom: 8px; border-radius: 2px 2px 0 0; box-shadow: inset 2px 0 0 rgba(0, 0, 0, .18), inset 0 6px 0 -3px rgba(232, 196, 106, .55); }
+  .sp { display: block; width: 100%; height: calc((var(--row) - 14px) * var(--h) / 100); margin-bottom: 8px; border-radius: 2px 2px 0 0; box-shadow: inset 2px 0 0 rgba(0, 0, 0, .18), inset 0 6px 0 -3px rgba(232, 196, 106, .55); }
   .sp-t { height: calc(var(--row) - 14px); border: 0; padding: 10px 0; cursor: pointer; font: 600 14px/1.1 var(--f-body); writing-mode: vertical-rl; text-orientation: mixed; overflow: hidden; transition: transform .2s cubic-bezier(.2, .7, .2, 1); }
   .sp-t span { display: block; white-space: nowrap; max-height: 100%; overflow: hidden; text-overflow: ellipsis; }
   .sp-t:hover, .sp-t[aria-pressed="true"] { transform: translateY(-8px); }
-  .sp-t[aria-pressed="true"] { outline: 2px solid var(--gold); outline-offset: 2px; }
-  .pv { display: grid; gap: 16px; align-content: start; order: -1; } /* 휴대폰: 책장이 길어 표지를 위에 */
+  .sp-t[aria-pressed="true"] { box-shadow: inset 2px 0 0 rgba(0, 0, 0, .18), 0 6px 0 -2px var(--moss); }
+  .pv { display: grid; gap: 16px; align-content: start; order: -1; scroll-margin-top: calc(var(--header-h) + 12px); scroll-margin-bottom: 76px; } /* 휴대폰: 책장이 길어 표지를 위에 */
   .pv-one { display: flex; gap: 18px; align-items: end; }
   .pv-one[hidden] { display: none; }
   .pv-t { font-family: var(--f-display); font-size: 19px; line-height: 1.45; }
@@ -197,6 +202,7 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
     .stats div { padding-block: 30px 32px; }
     .two { grid-template-columns: 340px minmax(0, 1fr); gap: 64px; }
     .shelf-wrap { grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; align-items: start; }
+    .shelf { grid-template-columns: repeat(17, minmax(0, 1fr)); }
     .pv { order: 0; position: sticky; top: calc(var(--header-h) + 24px); }
     .tool .more-link { width: auto; }
   }
@@ -210,5 +216,8 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
   for (const b of btns) b.addEventListener("click", () => {
     for (const o of btns) o.setAttribute("aria-pressed", String(o === b));
     for (const p of pvs) p.hidden = p.dataset.pv !== b.dataset.i;
+    // 휴대폰은 표지가 책장 위에 있어 아래 줄 책등을 누르면 화면 밖에서 바뀐다 — 그때만 표지로 옮긴다(포커스는 책등에 그대로)
+    const pv = document.getElementById("shelf-pv")!, r = pv.getBoundingClientRect();
+    if (r.top < 70 || r.bottom > innerHeight) pv.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   });
 </script>

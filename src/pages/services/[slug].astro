@@ -20,6 +20,9 @@ const { svc } = Astro.props as { svc: any };
 const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]));
 const calcs = svc.calculators.map((slug: string) => calcData.calculators.find((c) => c.slug === slug)!);
 const book = svc.book ? home.books.find((b) => b.title === svc.book) : null;
+// 그 분야 질문이 하나뿐이면 구역을 만들지 않는다(질문 한 줄짜리 구역은 비어 보임)
+const faqMods = Object.values(import.meta.glob("../../content/faq/*.md", { eager: true })) as any[];
+const faqCount = svc.faq ? faqMods.filter((m) => svc.faq.includes(m.frontmatter.category)).length : 0;
 const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : undefined;
 ---
 <Base title={svc.name} description={svc.short} cta={svc.urgent ? "urgent" : "default"}>
@@ -27,7 +30,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
     crumbs={[{ name: "서비스", href: "/services" }, { name: svc.name }]} />
 
   {svc.urgent && (
-    <div class="gut urgent"><p class="wrap"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>{svc.urgent}</p></div>
+    <div class="gut urgent"><p class="wrap">{svc.urgent}</p></div>
   )}
 
   <section class="sec gut" aria-labelledby="h-dl">
@@ -63,9 +66,11 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
   </section>
 
   <section class="sec gut ruled" aria-labelledby="h-who">
-    <div class="wrap narrow">
-      <span class="tag">이런 분께</span>
-      <h2 class="sec-h" id="h-who">이런 상황이라면</h2>
+    <div class="wrap two two-head">
+      <div>
+        <span class="tag">이런 분께</span>
+        <h2 class="sec-h" id="h-who">이런 상황이라면</h2>
+      </div>
       <ul class="checks reveal">{svc.forWho.map((t: string) => <li>{t}</li>)}</ul>
     </div>
   </section>
@@ -119,7 +124,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
     </div>
   </section>
 
-  {svc.faq && (
+  {faqCount >= 2 && (
     <section class="sec gut ruled" aria-labelledby="h-faq">
       <div class="wrap narrow">
         <span class="tag">이 일에 대한 질문</span>
@@ -135,7 +140,6 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
   /* 불복 쪽 띠: 금색 면 대신 숲색 선 */
   .urgent { border-bottom: 1px solid var(--line); background: var(--surface); }
   .urgent p { display: flex; gap: 12px; align-items: flex-start; padding-block: 16px; padding-left: 14px; border-left: 3px solid var(--moss); font-weight: 600; color: var(--ink); }
-  .urgent svg { flex: none; width: 16px; height: 16px; margin-top: 5px; color: var(--moss); }
   .dl-two { display: grid; gap: 36px; margin-top: 20px; }
   .dl-two > * { min-width: 0; }
   .yr .up-list { margin-top: 14px; }
@@ -172,5 +176,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
   @media (min-width: 900px) {
     .dl-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
     .two { grid-template-columns: 1fr 1fr; gap: 72px; }
+    .two-head { grid-template-columns: 340px minmax(0, 1fr); }
+    .two-head .checks { margin-top: 0; }
   }
 </style>

@@ -100,7 +100,7 @@ p { margin: 0; }
 /* 페이지 머리 */
 .crumb { font-size: 15px; color: var(--muted); margin: 0 0 6px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 8px; }
 .crumb li + li::before { content: "›"; margin-right: 8px; color: var(--line2); }
-.crumb a { color: var(--gold-text); text-decoration: none; }
+.crumb a { color: var(--gold-text); text-decoration: none; display: inline-block; padding: 12px 6px; margin: -12px -6px; }
 .page-h { font-family: var(--f-display); font-size: 30px; line-height: 1.35; font-weight: 700; }
 .page-lead { margin-top: 10px; color: var(--ink2); }
 .sec-dark .crumb, .sec-dark .crumb a { color: var(--on-moss2); }
@@ -150,8 +150,8 @@ p { margin: 0; }
 }
 /* ── 움직임(2026-10-24 2차 개편) — 짧게·한 번만·내용은 처음부터 보이게. 움직임 줄이기면 아래 reduce 규칙이 전부 끈다. ── */
 /* 페이지 넘김: 머리글·아래 막대는 그대로, 본문만 살짝(12px) 올라오며 0.3초. 지원하지 않는 브라우저는 바로 바뀜 */
+/* 전환 켜기(@view-transition)는 Base.astro 머리의 작은 style에 — 움직임 줄이기면 아래에서 애니메이션만 끈다 */
 @media (prefers-reduced-motion: no-preference) {
-  @view-transition { navigation: auto; }
   .hdr { view-transition-name: site-hdr; }
   .bbar { view-transition-name: site-bar; }
   ::view-transition-old(root) { animation: vt-out .18s ease-in both; }
@@ -180,5 +180,6 @@ p { margin: 0; }
 input:not([type="checkbox"]):not([type="radio"]):hover, select:hover, textarea:hover { border-color: var(--moss); }
 
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

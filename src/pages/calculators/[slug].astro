@@ -22,7 +22,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
     <p class="meta">검토 {site.repTitle} {site.rep}</p>
   </PageHead>
 
-  <section class="gut">
+  <section class="gut intro-sec">
     <div class="wrap narrow">
       {calc.intro && <p class="intro">{calc.intro}</p>}
       {hasGuide && (
@@ -39,7 +39,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
     <div class="wrap">
       <div class="frame" id="calc-frame-box">
         <div class="frame-hd">
-          <span><svg class="fp" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>{calc.name}</span>
+          <span>{calc.name}</span>
           <a href={calc.url} target="_blank" rel="noopener">새 창에서 열기 ↗<span class="sr-only">(새 창)</span></a>
         </div>
         <div class="frame-body">
@@ -87,6 +87,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
 
 <style>
   .meta { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
+  .intro-sec { padding-top: 26px; }
   .intro { color: var(--ink2); margin-bottom: 18px; }
   .acc { border-top: 1px solid var(--line); }
   .acc details { border-bottom: 1px solid var(--line); }
@@ -97,11 +98,10 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
   .acc ul { margin: 0 0 16px; padding-left: 1.1em; display: grid; gap: 6px; color: var(--ink2); font-size: 16.5px; }
   .acc li::marker { color: var(--gold); }
   .calc-sec { padding-block: 28px 8px; }
-  /* 계산 화면 틀: 결과 판과 같은 숲색, 왼쪽에 +, 오른쪽 "새 창에서 열기" */
+  /* 계산 화면 틀: 결과 판과 같은 숲색, 오른쪽 "새 창에서 열기" */
   .frame { border: 6px solid var(--moss); border-top: 0; border-radius: 10px; overflow: hidden; background: var(--moss); }
-  .frame-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 10px 12px 10px; background: var(--moss); color: var(--on-moss); font-size: 15.5px; font-weight: 600; }
+  .frame-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0 10px; background: var(--moss); color: var(--on-moss); font-size: 15.5px; font-weight: 600; }
   .frame-hd > span { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .fp { width: 15px; height: 15px; flex: none; color: var(--gold-hi); }
   .frame-hd a { color: var(--gold-hi); font-weight: 500; white-space: nowrap; display: inline-flex; align-items: center; min-height: 44px; }
   .frame-body { position: relative; background: var(--surface); border-radius: 4px; overflow: hidden; }
   .frame-wait { position: absolute; inset: 0; display: none; place-content: center; justify-items: center; gap: 14px; background: var(--surface); color: var(--muted); font-size: 15px; }
@@ -111,7 +111,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
   @media (prefers-reduced-motion: reduce) { .frame-wait svg { animation: none; } }
   /* 계산기 결과·보고서 창이 화면에 고정되어 뜨므로, 계산 화면은 휴대폰 화면 한 장 높이로 두고 안에서 스크롤한다(높이를 내용에 맞추면 그 창이 화면 밖에 뜰 수 있음) */
   .calc-sec { scroll-margin-top: var(--header-h); }
-  .calc-frame { display: block; width: 100%; height: max(560px, calc(100svh - var(--header-h) - 70px)); border: 0; background: var(--surface); }
+  .calc-frame { display: block; width: 100%; height: max(560px, calc(100svh - var(--header-h) - 76px)); border: 0; background: var(--surface); }
   .note { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
   .after { padding-block: 24px 64px; }
   .acts { display: grid; gap: 10px; }
