@@ -1,0 +1,210 @@
+---
+// 이 사이트가 일하는 방식(2026-10-25 6차 B): 원칙·원문 대조 현황·기한 계산 원리·접근성과 성능·둘러보기·숫자.
+// 숫자와 기한 예는 모두 자료 파일·계산 함수에서 나온다(손으로 적는 숫자 없음). 성능 점수는 src/data/quality.json —
+// 사람이 Lighthouse로 잰 날의 값 그대로이고, 자동으로 다시 재는 것처럼 쓰지 않는다.
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import gSrc from "../../docs/glossary-sources.json";
+import rSrc from "../../docs/rates-sources.json";
+import glossary from "../data/glossary.json";
+import rates from "../data/rates.json";
+import dl from "../data/deadlines.json";
+import calcData from "../data/calculators.json";
+import svcData from "../data/services.json";
+import press from "../data/press.json";
+import home from "../data/home.json";
+import quality from "../data/quality.json";
+import { computeDeadline } from "../lib/deadlineCalc.js";
+import { civilMonthsEnd } from "../lib/civilPeriod.js";
+import { buildHolidayIndex, unknownYearNote } from "../lib/ntsDeadline.js";
+import { fetchHolidayRows } from "../lib/holidays.js";
+
+const faqCount = Object.keys(import.meta.glob("../content/faq/*.md")).length;
+const srcItems = [...Object.values((gSrc as any).items), ...Object.values((rSrc as any).items)] as any[];
+const laws = [...new Set(srcItems.map((a) => a.law))];
+const fetched = srcItems.map((a) => a.fetchedAt).sort();
+const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
+
+// 기한 계산 예 — 증여받은 날 2026. 11. 10.(말일 2026. 11. 30. → 2027. 2. 28. 일요일 → 공휴일 자료대로 연장)
+const EX_DATE = "2026-11-10";
+const ev = (dl.events as any[]).find((e) => e.id === "gift");
+const holidays = buildHolidayIndex(await fetchHolidayRows());
+const r = computeDeadline(ev, EX_DATE, { holidays })!;
+const startIso = r.monthEndIso!;
+const kisan = (() => { const [y, m, d] = r.monthEndIso!.split("-").map(Number); const t = new Date(Date.UTC(y, m - 1, d + 1)); return t.toISOString().slice(0, 10); })();
+const months = civilMonthsEnd(kisan, ev.rule.monthEnd)!;
+const wd = (iso: string) => "일월화수목금토"[new Date(iso + "T00:00:00Z").getUTCDay()];
+const steps = [
+  { t: "증여받은 날", v: `${dot(EX_DATE)} (${wd(EX_DATE)})`, why: ev.why.replace("{n}", ev.rule.monthEnd), law: "" },
+  { t: "그 달의 마지막 날", v: `${dot(startIso)} (${wd(startIso)})`, why: "이날부터 기간을 셉니다.", law: "" },
+  { t: "기간을 세기 시작하는 날", v: `${dot(kisan)} (${wd(kisan)})`, why: "첫날은 세지 않습니다.", law: "민법 제157조" },
+  { t: `${ev.rule.monthEnd}개월이 끝나는 날`, v: `${dot(months.endIso)} (${wd(months.endIso)})`, why: `${ev.rule.monthEnd}개월 뒤 같은 날의 전날에 끝납니다.`, law: "민법 제160조" },
+  ...(r.shifted.length
+    ? [{ t: "쉬는 날이면 다음 날로", v: r.shifted.map((s: any) => `${dot(s.iso)} (${s.weekday}) ${s.reason}`).join(", "), why: "기한이 토·일요일·공휴일이면 그다음 날까지입니다.", law: "국세기본법 제5조 제1항" }]
+    : [{ t: "쉬는 날 확인", v: "넘길 날 없음", why: "기한이 토·일요일·공휴일이면 그다음 날까지입니다.", law: "국세기본법 제5조 제1항" }]),
+];
+const note = unknownYearNote(r);
+
+const numbers = [
+  { n: dl.events.length + dl.yearly.length, u: "가지", l: "계산하는 기한" },
+  { n: srcItems.length, u: "조문", l: "옮겨 둔 법조문 원문" },
+  { n: glossary.terms.length, u: "개", l: "용어 풀이" },
+  { n: faqCount, u: "개", l: "자주 묻는 질문" },
+  { n: calcData.calculators.length, u: "종", l: "모의 세금 계산기" },
+  { n: (press.articles || []).length, u: "편", l: "연재 칼럼" },
+  { n: home.booksTotal, u: "권", l: "저서" },
+  { n: svcData.services.length, u: "분야", l: "상담 서비스" },
+];
+const tour = [
+  { t: "기한 달력", u: `/deadline?e=gift&d=${EX_DATE}`, d: "위 예를 그대로 넣은 달력입니다. 센 날과 건너뛴 쉬는 날이 칸마다 보입니다." },
+  { t: "상황 길잡이", u: "/guide", d: "무슨 일·언제·누구 일, 세 가지만 고르면 기한·서비스·계산기가 한 화면에 나옵니다." },
+  { t: "세율·공제 한눈에", u: "/rates", d: `${rates.sections.length}개 세목의 세율표가 법조문 원문 칸 그대로입니다. 판이 둘이면 나란히 둡니다.` },
+  { t: "세금 생애 지도", u: "/life", d: "사업을 시작할 때부터 상속까지, 일생의 일마다 먼저 볼 기한입니다." },
+  { t: "책장", u: "/about#h-shelf", d: `저서 ${home.booksTotal}권을 책등으로 꽂았습니다. 누르면 표지와 지은이가 나옵니다.` },
+];
+---
+<Base title="이 사이트가 일하는 방식" description="법조문은 원문 그대로, 계산은 과정까지 — 원문 대조 현황, 기한 계산 원리, 접근성과 성능을 한 쪽에.">
+  <PageHead tag="이 사이트가 일하는 방식" title="법조문은 원문 그대로, 계산은 과정까지" crumbs={[{ name: "이 사이트가 일하는 방식" }]}
+    lead="세금은 숫자와 날짜가 틀리면 소용이 없습니다. 이 사이트가 숫자와 날짜를 어디서 가져오고 어떻게 세는지 적었습니다." />
+
+  <section class="sec gut" aria-labelledby="h-rule">
+    <div class="wrap">
+      <span class="tag">세 가지 원칙</span>
+      <h2 class="sec-h" id="h-rule">지어 쓰지 않고, 숨기지 않고, 가져가지 않습니다</h2>
+      <ul class="hw-rules">
+        <li><b>법조문은 원문 그대로</b><span>세율표와 용어 풀이의 인용은 법제처 원문을 글자 그대로 옮겼고, 판과 받은 날을 함께 적습니다. 풀이에 원문에 없는 숫자가 들어가면 사이트를 만드는 단계에서 멈춥니다.</span><a href="/sources">원문 기준일 보기 ›</a></li>
+        <li><b>계산은 과정까지</b><span>기한은 결과 날짜만이 아니라 규칙·근거 조문·건너뛴 쉬는 날까지 보여 줍니다. 계산기 결과는 참고용이고, 실제 세액은 사실관계에 따라 달라집니다.</span><a href="/deadline">기한 달력 보기 ›</a></li>
+        <li><b>계산은 이 기기 안에서</b><span>기한 계산은 보고 계신 브라우저 안에서 합니다. 준비물 체크 표시는 이 기기에만 남고, 상담 요청 글은 어디에도 저장하지 않습니다.</span><a href="/privacy">개인정보처리방침 ›</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-how-dl">
+    <div class="wrap hw-two">
+      <div>
+        <span class="tag">기한 계산 원리</span>
+        <h2 class="sec-h" id="h-how-dl">{ev.name}, 이렇게 셉니다</h2>
+        <p class="sec-sub">첫 화면과 기한 달력이 쓰는 계산 그대로입니다. 공휴일은 한국천문연구원 특일 정보로 채운 표를 씁니다.</p>
+      </div>
+      <ol class="hw-steps">
+        {steps.map((s) => (
+          <li><span class="hw-st">{s.t}</span><b class="hw-v">{s.v}</b><span class="hw-why">{s.why}{s.law && <em class="hw-law">{s.law}</em>}</span></li>
+        ))}
+        <li class="hw-end"><span class="hw-st">신고·납부 기한</span><b class="hw-v">{dot(r.deadlineIso)} ({r.weekday})까지</b><span class="hw-why">{ev.law}</span></li>
+      </ol>
+      {note && <p class="hw-note">{note}</p>}
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-src">
+    <div class="wrap">
+      <span class="tag">원문 대조 현황</span>
+      <h2 class="sec-h" id="h-src">옮겨 둔 법조문 {srcItems.length}조문</h2>
+      <p class="sec-sub">{laws.join(" · ")}</p>
+      <dl class="hw-facts">
+        <div><dt>쓰는 곳</dt><dd>용어 풀이 {glossary.terms.length}개 · 세율·공제 {rates.sections.length}개 세목</dd></div>
+        <div><dt>받은 날</dt><dd>{fetched.length && (fetched[0] === fetched[fetched.length - 1] ? dot(fetched[0]) : `${dot(fetched[0])} ~ ${dot(fetched[fetched.length - 1])}`)}</dd></div>
+        <div><dt>출처</dt><dd>법제처 국가법령정보</dd></div>
+      </dl>
+      <a class="more-link" href="/sources">조문마다 판과 받은 날 보기 ›</a>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-q">
+    <div class="wrap">
+      <span class="tag">접근성과 성능</span>
+      <h2 class="sec-h" id="h-q">누구나, 느린 휴대폰에서도</h2>
+      <div class="hw-tw" tabindex="0" role="region" aria-label="Lighthouse 측정값">
+        <table>
+          <caption>{quality.tool} 첫 화면 측정 · {dot(quality.measuredOn)} 잰 값</caption>
+          <thead><tr><th scope="col">기기</th><th scope="col">성능</th><th scope="col">접근성</th><th scope="col">권장사항</th><th scope="col">검색 최적화</th></tr></thead>
+          <tbody>{quality.rows.map((q: any) => <tr><th scope="row">{q.device}<small>{q.note}</small></th><td>{q.performance}</td><td>{q.accessibility}</td><td>{q.bestPractices}</td><td>{q.seo}</td></tr>)}</tbody>
+        </table>
+      </div>
+      <ul class="hw-a11y">
+        <li><b>글자 크게</b> 머리글 「가가」 — 이 기기에서 기억합니다.</li>
+        <li><b>키보드만으로</b> 모든 메뉴·창·달력을 쓸 수 있고, 첫 칸은 「본문으로 건너뛰기」입니다.</li>
+        <li><b>움직임 줄이기</b> 기기 설정을 켜면 숫자 바퀴·쪽 넘김 움직임이 모두 멈춥니다.</li>
+        <li><b>화면 읽기</b> 숫자 바퀴는 숫자 글자로, 장식 그림은 건너뛰고 읽습니다.</li>
+        <li><b>끊겨도</b> 기한 달력과 올해 세금 달력은 한 번 본 뒤 인터넷이 끊겨도 열립니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-tour">
+    <div class="wrap">
+      <span class="tag">3분 둘러보기</span>
+      <h2 class="sec-h" id="h-tour">이 순서로 보시면 됩니다</h2>
+      <ol class="hw-tour">
+        {tour.map((t) => <li><a href={t.u}><b>{t.t}</b><span>{t.d}</span></a></li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-num">
+    <div class="wrap">
+      <span class="tag">숫자로</span>
+      <h2 class="sec-h" id="h-num">지금 이 사이트에 있는 것</h2>
+      <dl class="hw-nums">
+        {numbers.map((x) => <div><dt>{x.l}</dt><dd><span class="hw-n">{x.n}</span>{x.u}</dd></div>)}
+      </dl>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hw-rules { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 14px; }
+  .hw-rules li { display: grid; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0; padding: 18px 20px; }
+  .hw-rules b { font-size: 18px; }
+  .hw-rules span { color: var(--ink2); }
+  .hw-rules a { justify-self: start; font-size: 15px; font-weight: 600; color: var(--gold-text); text-underline-offset: 4px; }
+  .hw-two { display: grid; gap: 22px; }
+  .hw-two > * { min-width: 0; }
+  .hw-steps { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); counter-reset: st; }
+  .hw-steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; row-gap: 2px; padding: 14px 0; border-bottom: 1px solid var(--line); counter-increment: st; }
+  .hw-steps li::before { content: counter(st); grid-row: 1 / span 3; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--gold); display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--gold-text); font-variant-numeric: tabular-nums; }
+  .hw-steps li > * { grid-column: 2; }
+  .hw-st { font-size: 14px; color: var(--muted); }
+  .hw-v { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .hw-why { font-size: 15px; color: var(--ink2); }
+  .hw-law { font-style: normal; margin-left: 8px; font-size: 14px; color: var(--muted); white-space: nowrap; }
+  .hw-steps li.hw-end { background: var(--moss); color: var(--on-moss); border-radius: 0 0 10px 10px; padding-inline: 14px; border-bottom: 0; }
+  .hw-steps li.hw-end::before { content: "✓"; border-color: var(--gold-hi); color: var(--gold-hi); }
+  .hw-end .hw-st, .hw-end .hw-why { color: var(--on-moss2); }
+  .hw-end .hw-v { color: #fff; }
+  .hw-note { font-size: 14px; color: var(--muted); }
+  .hw-facts { margin: 20px 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .hw-facts div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .hw-facts dt { font-size: 14px; color: var(--muted); }
+  .hw-facts dd { margin: 0; }
+  .hw-tw { margin-top: 20px; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .hw-tw:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .hw-tw table { border-collapse: collapse; width: 100%; min-width: 480px; font-variant-numeric: tabular-nums; }
+  .hw-tw caption { caption-side: top; text-align: left; padding: 12px 14px 0; font-size: 14px; color: var(--muted); }
+  .hw-tw th, .hw-tw td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .hw-tw td { font-size: 20px; font-weight: 700; color: var(--moss); }
+  .hw-tw thead th { font-size: 14px; color: var(--ink2); }
+  .hw-tw tbody tr:last-child > * { border-bottom: 0; }
+  .hw-tw small { display: block; font-size: 14px; font-weight: 400; color: var(--muted); }
+  .hw-a11y { margin: 20px 0 0; padding-left: 1.2em; display: grid; gap: 8px; color: var(--ink2); }
+  .hw-a11y b { color: var(--ink); margin-right: 6px; }
+  .hw-tour { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; counter-reset: tr; }
+  .hw-tour li { counter-increment: tr; }
+  .hw-tour a { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; row-gap: 2px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); text-decoration: none; }
+  .hw-tour a::before { content: counter(tr); grid-row: 1 / span 2; width: 28px; height: 28px; border-radius: 50%; background: var(--moss); color: var(--on-moss); display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+  .hw-tour a > * { grid-column: 2; }
+  .hw-tour b { font-size: 17px; }
+  .hw-tour span { font-size: 15px; color: var(--ink2); }
+  .hw-tour a:hover b, .hw-tour a:focus-visible b { text-decoration: underline; text-underline-offset: 4px; }
+  .hw-nums { margin: 20px 0 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .hw-nums div { background: var(--surface); padding: 16px; display: grid; gap: 2px; }
+  .hw-nums dt { font-size: 14px; color: var(--muted); order: 2; }
+  .hw-nums dd { margin: 0; font-size: 16px; color: var(--ink2); }
+  .hw-n { font-size: 30px; font-weight: 700; color: var(--moss); margin-right: 2px; font-variant-numeric: tabular-nums; }
+  @media (min-width: 760px) {
+    .hw-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; column-gap: 40px; }
+    .hw-two .hw-note { grid-column: 2; }
+    .hw-rules { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .hw-nums { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+</style>

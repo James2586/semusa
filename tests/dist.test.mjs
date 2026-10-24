@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 43개(색인 39 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 43);
+test("페이지 44개(색인 40 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 44);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 39);
+  assert.equal((sm.match(/<loc>/g) || []).length, 40);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -343,4 +343,14 @@ test("첫 화면 가벼움(6차 A): 그려 둔 요소 1,000개 이하 · 자릿�
   const up = readFileSync(new URL("../src/components/UpcomingDeadlines.astro", import.meta.url), "utf8");
   assert.match(up, /dd\.textContent = label/);
   assert.match(up, /function spin\(\)/);
+});
+
+test("이 사이트가 일하는 방식(6차 B): 원칙·기한 계산 단계(근거 조문)·원문 수·측정값·둘러보기 · 바닥글·소개 쪽에서 잇기", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "how.html"), "utf8");
+  for (const s of ["법조문은 원문 그대로", "계산은 과정까지", "민법 제157조", "민법 제160조", "국세기본법 제5조 제1항", "상속세 및 증여세법 제68조", "Lighthouse", "3분 둘러보기", "/deadline?e=gift&amp;d=2026-11-10"]) assert.ok(h.includes(s), s);
+  const g = JSON.parse(readFileSync(new URL("../docs/glossary-sources.json", import.meta.url), "utf8"));
+  const r = JSON.parse(readFileSync(new URL("../docs/rates-sources.json", import.meta.url), "utf8"));
+  assert.ok(h.includes(`옮겨 둔 법조문 ${Object.keys(g.items).length + Object.keys(r.items).length}조문`));
+  assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /href="\/how"/);
+  assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /href="\/how"/);
 });

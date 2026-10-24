@@ -1,0 +1,9 @@
+{
+  "_note": "이 사이트가 일하는 방식(2026-10-25 6차 B) 쪽의 접근성·성능 표. 사람이 Lighthouse로 운영 사이트 첫 화면을 잰 날의 값 그대로 — 자동으로 다시 재지 않는다. 다시 재면 measuredOn과 값을 같이 바꾼다. 휴대폰 성능은 세 번 잰 가운데 값.",
+  "tool": "Lighthouse 12.2.1",
+  "measuredOn": "2026-10-25",
+  "rows": [
+    { "device": "휴대폰", "note": "성능은 3번 잰 가운데 값", "performance": 99, "accessibility": 100, "bestPractices": 100, "seo": 100 },
+    { "device": "컴퓨터", "note": "", "performance": 100, "accessibility": 100, "bestPractices": 100, "seo": 100 }
+  ]
+}

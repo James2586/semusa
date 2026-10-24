@@ -7,7 +7,7 @@ const lum = (hex) => {
   const ch = [n >> 16, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
   return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
 };
-const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+export const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 export function inkFor(hex) {
   return contrast(hex, "#0A0C0A") > contrast(hex, "#FFF6E4") ? "#0A0C0A" : "#FFF6E4";
 }
