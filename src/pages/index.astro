@@ -86,6 +86,7 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
           {calcData.calculators.map((c) => <li><a href={`/calculators/${c.slug}`}><small>{groupName[c.group]}</small><b>{c.name}</b></a></li>)}
           <li class="all"><a href="/calculators"><small>전체</small><b>{calcCount}종 모두 보기</b></a></li>
         </ul>
+        <p class="cal-tool">실무에서는 직접 만든 「{site.taxSearch.name}」로 근거를 찾고 계산을 확인합니다. <a href="/tools">직접 만든 도구 ›</a></p>
       </div>
     </div>
   </section>
@@ -231,6 +232,8 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
   .cal b { font-size: 15.5px; line-height: 1.45; }
   .cal .all a { background: var(--moss); border-color: var(--moss); color: var(--on-moss); }
   .cal .all small { color: var(--gold-hi); }
+  .cal-tool { margin: 16px 0 0; font-size: 15px; color: var(--ink2); }
+  .cal-tool a { color: var(--gold-text); font-weight: 700; text-underline-offset: 4px; white-space: nowrap; }
 
   /* 4 칼럼·책 */
   /* 책 표지 줄: 휴대폰은 옆으로 넘긴다(권수가 늘어도 표지가 작아지지 않게) */

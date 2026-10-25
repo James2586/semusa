@@ -296,6 +296,24 @@ export function checkFaq(name, text, srcItems = null) {
 
 // 운영자 결정(2026-10-24): 운영자가 말하기 전까지 "세무사" 명칭을 쓰지 않는다.
 export const BANNED_WORDS = ["세무사"];
+export function checkTools(text, videosText) {
+  const errors = [];
+  const { data, error } = parseJsonFile("tools.json", text);
+  if (error) return [error];
+  let videos = [];
+  try { videos = JSON.parse(videosText).videos || []; } catch { return ["videos.json을 읽지 못해 tools.json을 대조하지 못했습니다."]; }
+  const lines = (id) => new Set((videos.find((v) => v.id === id) || {}).transcript || []);
+  // 글은 운영자 영상 글 줄 그대로만(지어 쓰지 않게) — 원칙은 portfolio, 기능은 통합검색 22 영상
+  const port = lines("portfolio");
+  (data.principles || []).forEach((t) => { if (!port.has(t)) errors.push(`tools.json principles: "${t}" — portfolio 영상 글(videos.json)에 같은 줄이 없습니다.`); });
+  const ts = data.taxSearch || {};
+  if (!videos.some((v) => v.id === ts.video)) errors.push(`tools.json taxSearch.video: "${ts.video}" 영상이 videos.json에 없습니다.`);
+  const tl = lines(ts.video);
+  if (!(ts.features || []).length) errors.push("tools.json taxSearch.features가 비었습니다.");
+  (ts.features || []).forEach((t) => { if (!tl.has(t)) errors.push(`tools.json taxSearch.features: "${t}" — ${ts.video} 영상 글(videos.json)에 같은 줄이 없습니다.`); });
+  return errors;
+}
+
 export function checkBannedWords(name, text) {
   return BANNED_WORDS.filter((w) => text.includes(w)).map((w) => `${name}: "${w}" 명칭은 쓰지 않습니다(운영자 결정). "세무전문가"로 바꾸세요.`);
 }
@@ -337,7 +355,8 @@ export function validateAll(root = ROOT) {
       glossaryIds: ids("src/data/glossary.json", (d) => d.terms.map((t) => t.id)),
     }));
   }
-  for (const f of ["src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json", "src/data/topics.json", "src/data/lifemap.json", "src/data/rates.json"]) {
+  errors.push(...checkTools(read("src/data/tools.json"), read("src/data/videos.json")));
+  for (const f of ["src/data/tools.json", "src/data/calculators.json", "src/data/services.json", "src/data/site.json", "src/data/home.json", "src/data/videos.json", "src/data/deadlines.json", "src/data/press.json", "src/data/guide.json", "src/data/glossary.json", "src/data/topics.json", "src/data/lifemap.json", "src/data/rates.json"]) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");
