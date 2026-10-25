@@ -93,6 +93,8 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
     <a href="/location">오시는 길<span aria-hidden="true">›</span></a>
   </nav>
   <button type="button" class="drawer-fs" data-fs-btn aria-pressed="false"><span>글자 크게</span><span class="drawer-fs-st" aria-hidden="true"></span></button>
+  <button type="button" class="drawer-fs drawer-share" data-site-share><span>이 쪽 공유하기<small>카카오톡·문자로 주소 보내기</small></span><span class="drawer-share-i" aria-hidden="true">↗</span></button>
+  <p class="drawer-share-ok" data-site-share-ok role="status"></p>
   <a class="btn btn-kakao btn-block drawer-cta" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 상담</a>
 </dialog>
 <SiteSearch />
@@ -160,6 +162,11 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   .drawer-fs[aria-pressed="true"] .drawer-fs-st { background: var(--moss); border-color: var(--moss); color: var(--on-moss); }
   .drawer-fs[aria-pressed="true"] .drawer-fs-st::after { content: "켬"; }
   .drawer-fs:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .drawer-share small { display: block; font-size: 14px; color: var(--muted); }
+  .drawer-share { padding-block: 8px; }
+  .drawer-share-i { font-size: 20px; font-weight: 700; color: var(--gold-text); }
+  .drawer-share-ok { margin: 8px 0 0; font-size: 15px; color: var(--ink2); overflow-wrap: anywhere; }
+  .drawer-share-ok:empty { display: none; }
 
   /* 큰 메뉴는 1024부터 — 900~1023에선 메뉴 글자가 두 줄로 꺾였다(2026-10-24 3차 검토) */
   @media (min-width: 1024px) {
@@ -223,4 +230,21 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
     syncFs();
     try { if (on) localStorage.setItem("fs", "lg"); else localStorage.removeItem("fs"); } catch {}
   }));
+
+  // 이 쪽 공유하기(2026-10-25 운영자 「공유 안보여」): 휴대폰 공유 창(카카오톡·문자 등)으로 지금 쪽 주소와 제목만 보낸다.
+  // 공유 창이 없으면(컴퓨터·카카오톡 안 브라우저 등) 주소를 복사하고, 복사도 안 되면 주소를 글로 보인다. 카카오 앱 키 없이 됨.
+  document.querySelectorAll<HTMLButtonElement>("[data-site-share]").forEach((btn) => {
+    const ok = btn.parentElement?.querySelector<HTMLElement>("[data-site-share-ok]");
+    btn.addEventListener("click", async () => {
+      const url = location.href.split("#")[0];
+      const say = (t: string) => { if (ok) ok.textContent = t; };
+      try {
+        if (navigator.share) { await navigator.share({ title: document.title, url }); return; }
+        await navigator.clipboard.writeText(url);
+        say("주소를 복사했어요. 카카오톡 대화창에 붙여 넣어 보내세요.");
+      } catch (err) {
+        if ((err as Error)?.name !== "AbortError") say(`주소: ${url}`);
+      }
+    });
+  });
 </script>

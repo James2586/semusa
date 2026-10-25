@@ -34,6 +34,7 @@ import Logo from "./Logo.astro";
         <li><a href="/privacy">개인정보처리방침</a></li>
         {site.channels.map((c) => <li><a href={(c as any).link || c.url} target="_blank" rel="noopener">{c.name}</a></li>)}
         <li><a href={site.taxSearch.url} target="_blank" rel="noopener">{site.taxSearch.name}<span class="f-note"> · {site.taxSearch.note}</span></a></li>
+        <li class="f-share-li"><button type="button" class="f-share" data-site-share>이 쪽 공유하기 <span aria-hidden="true">↗</span></button><p class="f-share-ok" data-site-share-ok role="status"></p></li>
       </ul>
       <p class="f-h f-h2">자주 가는 사이트</p>
       <ul class="foot-links">
@@ -52,6 +53,10 @@ import Logo from "./Logo.astro";
   .f-note { color: #A8A396; }
   .foot-biz { color: #CFCABC; line-height: 1.9; }
   .foot-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 18px; }
+  .f-share { color: #E9E4D6; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(233, 228, 214, .4); }
+  .f-share:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 2px; }
+  .f-share-ok { margin: 0; font-size: 14px; color: #CFCABC; overflow-wrap: anywhere; }
+  .f-share-ok:empty { display: none; }
   .foot-links a { color: #E9E4D6; display: inline-flex; align-items: center; min-height: 44px; padding: 0; text-underline-offset: 4px; text-decoration-color: rgba(233, 228, 214, .4); }
   /* 아래 막대는 1023px까지 보이므로 그 높이만큼 비워 둔다 */
   @media (min-width: 1024px) { .foot { padding-bottom: 56px; } }
