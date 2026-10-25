@@ -1,0 +1,145 @@
+---
+// 경정청구 날짜 계산(2026-10-25 운영자 「세금을 종류별로 보여줘서 선택하면 예상되는 날짜」). 세금 종류는 appeal.json refundCalc,
+// 법정신고기한 규칙은 deadlines.json, 계산은 src/lib/refundDates.js — 세법 글·숫자를 여기 새로 쓰지 않는다.
+// 입력은 이 화면 메모리에만(저장·주소 남기지 않음).
+import appeal from "../data/appeal.json";
+import dl from "../data/deadlines.json";
+import { fetchHolidayRows } from "../lib/holidays.js";
+
+const holidays = await fetchHolidayRows();
+const calc = appeal.refundCalc;
+const row = appeal.rows.find((r) => r.stage === calc.row)!;
+const late = row.file.split(" — ")[1] || "";
+const evById = Object.fromEntries(dl.events.map((e) => [e.id, e]));
+const taxes = calc.taxes.map((t) => {
+  const [kind, id] = t.from.split(":");
+  const ev = kind === "event" ? evById[id] : null;
+  return { ...t, dateLabel: ev?.dateLabel, abroadLabel: ev?.rule?.abroadMonths ? ev.abroadLabel : null };
+});
+---
+<div class="rd" data-rd>
+  <h4 class="rd-h">세금 종류를 고르면 날짜를 계산해 드립니다</h4>
+  <fieldset class="rd-step">
+    <legend>세금 종류</legend>
+    <div class="rd-chips">
+      {taxes.map((t, i) => <label><input type="radio" name="rd-tax" value={t.id} checked={i === 0} /><span>{t.chip}</span></label>)}
+    </div>
+  </fieldset>
+  <div class="rd-step rd-in">
+    <label class="rd-f" data-year-w><span data-year-l>{taxes[0].yearLabel}</span><input type="number" inputmode="numeric" min="1950" max="2099" data-year /></label>
+    <label class="rd-f" data-date-w hidden><span data-date-l></span><input type="date" min="1950-01-01" max="2100-12-31" data-date /></label>
+    <label class="rd-chk" data-alt-w><input type="checkbox" data-alt /><span data-alt-l>{taxes[0].alt?.label}</span></label>
+    <label class="rd-chk" data-abroad-w hidden><input type="checkbox" data-abroad /><span data-abroad-l></span></label>
+  </div>
+  <details class="rd-more">
+    <summary>이미 경정청구를 했다면</summary>
+    <div class="rd-in">
+      <label class="rd-f"><span>경정청구한 날(세무서가 받은 날)</span><input type="date" min="1950-01-01" max="2100-12-31" data-claim /></label>
+      <label class="rd-f"><span>받아들이지 않는다는 통지를 받은 날</span><input type="date" min="1950-01-01" max="2100-12-31" data-refusal /></label>
+    </div>
+  </details>
+  <ol class="rd-out" aria-live="polite">
+    <li data-o="legal" hidden><span class="rd-d" data-d></span><b>법정신고기한</b><small data-w></small></li>
+    <li data-o="end" class="rd-key" hidden><span class="rd-d" data-d></span><b>경정청구 마감</b><small data-w></small></li>
+    <li data-o="two" hidden><span class="rd-d" data-d></span><b>세무서가 결과를 통지할 기간의 끝</b><small data-w></small></li>
+    <li data-o="refusal" hidden><span class="rd-d" data-d></span><b>이의신청·심사청구·심판청구 마감</b><small data-w></small></li>
+  </ol>
+  <p class="rd-empty" data-empty>위에서 해·날짜를 넣으면 계산합니다.</p>
+  <p class="rd-note">{late && <>후발적 사유: {late}(국세기본법 제45조의2 제2항). </>}{calc.note} 참고용 계산입니다.</p>
+  <noscript><p class="rd-note">이 계산은 자바스크립트가 켜져 있어야 합니다.</p></noscript>
+  <script type="application/json" data-rd-data set:html={JSON.stringify({ taxes, yearly: dl.yearly, events: dl.events, holidays }).replace(/</g, "\\u003c")} />
+</div>
+
+<style>
+  .rd { margin-top: 18px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); display: grid; gap: 16px; max-width: 760px; }
+  .rd-h { margin: 0; font-size: 18px; font-weight: 700; }
+  .rd-step { border: 0; padding: 0; margin: 0; min-width: 0; }
+  .rd-step legend { font-size: 15px; color: var(--ink2); font-weight: 600; margin-bottom: 8px; padding: 0; }
+  .rd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .rd-chips label { position: relative; }
+  .rd-chips input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .rd-chips span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--moss); border-radius: 999px; font-size: 15px; font-weight: 600; color: var(--moss); background: var(--surface); }
+  .rd-chips input:checked + span { background: var(--moss); color: var(--on-moss); }
+  .rd-chips input:focus-visible + span { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .rd-in { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+  .rd-f { display: grid; gap: 6px; font-size: 15px; color: var(--ink2); min-width: 0; }
+  .rd-f input { min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 17px; color: var(--ink); background: var(--paper); max-width: 100%; }
+  .rd-f input[type="number"] { width: 9em; }
+  .rd-f input:focus-visible { outline: 3px solid var(--moss); outline-offset: 1px; }
+  .rd-chk { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 15px; }
+  .rd-chk input { width: 20px; height: 20px; accent-color: var(--moss); }
+  [hidden] { display: none !important; }
+  .rd-more summary { cursor: pointer; font-size: 15px; font-weight: 600; color: var(--moss); min-height: 44px; display: flex; align-items: center; }
+  .rd-more .rd-in { padding-top: 8px; }
+  .rd-out { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .rd-out li { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr); gap: 2px 16px; padding: 12px 14px; border-radius: 10px; background: var(--paper); }
+  .rd-out li.rd-key { background: var(--gold-soft); }
+  .rd-d { grid-row: span 2; font-size: 18px; font-weight: 700; color: var(--ink); }
+  .rd-out b { font-size: 16px; }
+  .rd-out small { font-size: 14px; color: var(--ink2); line-height: 1.55; }
+  .rd-out small :global(em) { font-style: normal; font-weight: 700; color: var(--ink); }
+  .rd-empty, .rd-note { margin: 0; font-size: 14px; color: var(--ink2); line-height: 1.6; }
+  @media (max-width: 599px) {
+    .rd { padding: 16px; }
+    .rd-out li { grid-template-columns: minmax(0, 1fr); }
+    .rd-d { grid-row: auto; }
+  }
+</style>
+
+<script>
+  import { computeRefundDates } from "../lib/refundDates.js";
+  import { buildHolidayIndex, unknownYearNote } from "../lib/ntsDeadline.js";
+
+  const fmt = (iso: string, wd: string) => { const [y, m, d] = iso.split("-").map(Number); return `${y}. ${m}. ${d}.(${wd})`; };
+  const md = (iso: string, wd: string) => { const [, m, d] = iso.split("-").map(Number); return `${m}. ${d}.(${wd})`; };
+  const moved = (x: any, law = "국세기본법 제5조 제1항") => x.shifted.length ? ` · ${x.shifted.map((s: any) => md(s.iso, s.weekday)).join("·")}이 쉬는 날이라 다음 날로(${law})` : "";
+  const left = (n: number) => n > 0 ? ` · ${n.toLocaleString("ko-KR")}일 남음` : n === 0 ? " · 오늘까지" : " · 지났습니다";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-rd]")) {
+    const json = JSON.parse(root.querySelector("[data-rd-data]")!.textContent || "{}");
+    const holidays = buildHolidayIndex(json.holidays || []);
+    const q = <T extends Element = HTMLInputElement>(s: string) => root.querySelector(s) as unknown as T;
+    const yearIn = q("[data-year]"), dateIn = q("[data-date]"), alt = q("[data-alt]"), abroad = q("[data-abroad]");
+    const claimIn = q("[data-claim]"), refIn = q("[data-refusal]");
+    yearIn.value = String(new Date().getFullYear() - 1);
+    const li = (k: string) => q<HTMLElement>(`[data-o="${k}"]`);
+    const put = (k: string, date: string, why: string) => { const e = li(k); e.hidden = false; e.querySelector("[data-d]")!.textContent = date; e.querySelector("[data-w]")!.innerHTML = why; };
+    const cur = () => json.taxes.find((t: any) => t.id === (root.querySelector<HTMLInputElement>('input[name="rd-tax"]:checked')?.value));
+
+    function setup() {
+      const t = cur();
+      const isYear = t.input === "year";
+      q<HTMLElement>("[data-year-w]").hidden = !isYear;
+      q<HTMLElement>("[data-date-w]").hidden = isYear;
+      q("[data-year-l]").textContent = t.yearLabel || "";
+      q("[data-date-l]").textContent = t.dateLabel || "";
+      q<HTMLElement>("[data-alt-w]").hidden = !t.alt;
+      q("[data-alt-l]").textContent = t.alt?.label || "";
+      q<HTMLElement>("[data-abroad-w]").hidden = !t.abroadLabel;
+      q("[data-abroad-l]").textContent = t.abroadLabel || "";
+      run();
+    }
+    function run() {
+      const t = cur();
+      const r = computeRefundDates(t, json, { year: yearIn.value, dateIso: dateIn.value, alt: alt.checked, abroad: abroad.checked, claimIso: claimIn.value, refusalIso: refIn.value }, { holidays });
+      for (const k of ["legal", "end", "two", "refusal"]) li(k).hidden = true;
+      q<HTMLElement>("[data-empty]").hidden = !!r;
+      if (!r) return;
+      const L = r.legal, E = r.claimEnd;
+      put("legal", fmt(L.iso, L.weekday), `${L.why}${moved(L)} · ${L.law}`);
+      const nb = [unknownYearNote(L), unknownYearNote(E)].find(Boolean) || "";
+      put("end", fmt(E.iso, E.weekday), `<em>법정신고기한이 지난 후 5년</em>${moved(E)}${left(E.dday)} · 국세기본법 제45조의2 제1항${nb ? `<br>${nb}` : ""}`);
+      if (r.claim) {
+        const c = r.claim;
+        put("two", fmt(c.twoMonths.iso, c.twoMonths.weekday), `청구를 받은 날(${md(c.iso, c.weekday)})부터 2개월 · 이날까지 아무 통지가 없으면 <em>${fmt(c.appealFrom.iso, c.appealFrom.weekday)}부터</em> 이의신청·심사청구·심판청구를 할 수 있습니다 · 국세기본법 제45조의2 제3항${c.late ? "<br>※ 청구한 날이 5년 마감 뒤입니다. 후발적 사유가 아니면 이 기간에 들지 않습니다." : ""}`);
+      }
+      if (r.refusal) {
+        const f = r.refusal, D = f.deadline;
+        put("refusal", fmt(D.iso, D.weekday), `${f.why}(${md(f.iso, f.weekday)} 받음)${moved(D)}${left(D.dday)} · ${f.law} · <a href="/deadline?e=notice&d=${f.iso}">기한 달력에서 보기</a>`);
+      }
+    }
+    root.addEventListener("change", (e) => ((e.target as HTMLInputElement).name === "rd-tax" ? setup() : run()));
+    root.addEventListener("input", run);
+    setup();
+  }
+</script>

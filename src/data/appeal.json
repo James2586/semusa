@@ -170,5 +170,61 @@
       "decide": "법원이 정함",
       "say": "행정소송은 법원에서 다툽니다. 결정까지의 기간은 법원이 정합니다."
     }
-  ]
+  ],
+  "refundCalc": {
+    "taxes": [
+      {
+        "id": "income",
+        "chip": "종합소득세",
+        "from": "yearly:income",
+        "input": "year",
+        "yearLabel": "소득이 생긴 해(귀속연도)",
+        "offset": 1,
+        "alt": {
+          "from": "yearly:income",
+          "md": "06-30",
+          "label": "성실신고확인 대상이에요",
+          "law": "소득세법 제70조의2 제2항"
+        }
+      },
+      {
+        "id": "corp",
+        "chip": "법인세",
+        "from": "yearly:corp",
+        "input": "year",
+        "yearLabel": "사업연도가 끝난 해(1월~12월 사업연도)",
+        "offset": 1
+      },
+      {
+        "id": "vat1",
+        "chip": "부가가치세 1기",
+        "from": "yearly:vat1",
+        "input": "year",
+        "yearLabel": "과세기간이 든 해(1월~6월분)",
+        "offset": 0
+      },
+      {
+        "id": "vat2",
+        "chip": "부가가치세 2기",
+        "from": "yearly:vat2",
+        "input": "year",
+        "yearLabel": "과세기간이 든 해(7월~12월분)",
+        "offset": 1
+      },
+      {
+        "id": "inherit",
+        "chip": "상속세",
+        "from": "event:inherit",
+        "input": "date"
+      },
+      {
+        "id": "gift",
+        "chip": "증여세",
+        "from": "event:gift",
+        "input": "date"
+      }
+    ],
+    "row": "경정청구",
+    "note": "법정신고기한까지 신고했거나 기한 후 신고를 한 경우의 날짜입니다. 실제 날짜는 신고서·통지서를 보고 상담 때 함께 확인합니다."
+  }
 }

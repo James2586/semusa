@@ -16,6 +16,7 @@ import home from "../../data/home.json";
 import site from "../../data/site.json";
 import DeadlineCalc from "../../components/DeadlineCalc.astro";
 import AppealTable from "../../components/AppealTable.astro";
+import RefundDates from "../../components/RefundDates.astro";
 import AppealFlow from "../../components/AppealFlow.astro";
 
 export function getStaticPaths() {
@@ -83,6 +84,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
         <h3 class="sub-h ap-h">내가 신고한 세금을 바로잡을 때 — 경정청구</h3>
         <p class="sec-sub">세무서의 처분에 맞서는 길과 달리, 먼저 신고한 세금이 많았을 때 바로잡아 달라고 청구하는 길입니다.</p>
         <div style="margin-top:14px"><AppealFlow which="refundFlow" /></div>
+        <RefundDates />
         <h3 class="sub-h ap-h">표로 비교하기</h3>
         <AppealTable />
       </div>
