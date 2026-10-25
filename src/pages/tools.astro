@@ -1,0 +1,92 @@
+---
+// 직접 만든 도구(2026-10-25 운영자 「실무용으로 소개해」): 손님이 쓰는 세금 계산기와, 실무에서 쓰는 세무 지식 통합검색 22.
+// 글은 src/data/tools.json(운영자 영상 글 줄 그대로 — validate-data checkTools)·calculators.json·site.json에서만. 주식 평가 웹은 나중에 더한다.
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import VideoCard from "../components/VideoCard.astro";
+import site from "../data/site.json";
+import tools from "../data/tools.json";
+import calcData from "../data/calculators.json";
+import videos from "../data/videos.json";
+
+const split = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? [t, ""] : [t.slice(0, i), t.slice(i + 3)]; };
+const principles = tools.principles.map((t) => split(t.replace(/^원칙 \d+ · /, "")));
+const features = tools.taxSearch.features.map(split);
+const tsVideo = videos.videos.find((v) => v.id === tools.taxSearch.video)!;
+const calcCount = calcData.calculators.length;
+---
+<Base title="직접 만든 도구" description={`손님이 쓰는 세금 계산기 ${calcCount}종과, 실무에서 근거를 찾고 계산을 확인하는 ${site.taxSearch.name}.`}>
+  <PageHead buki="calculated" tag="직접 만든 도구" title="책을 쓰고, 도구를 만듭니다" crumbs={[{ name: "직접 만든 도구" }]}
+    lead={`손님이 직접 써 보는 세금 계산기 ${calcCount}종과, 실무에서 근거를 찾을 때 쓰는 ${site.taxSearch.name}를 직접 만들었습니다.`} />
+
+  <section class="sec gut" aria-labelledby="h-tl-rule">
+    <div class="wrap">
+      <span class="tag">만드는 원칙</span>
+      <h2 class="sec-h" id="h-tl-rule">계산과 근거를 직접 검증할 수 있게</h2>
+      <ol class="tl-rules reveal">
+        {principles.map(([h, d]) => <li><b>{h}</b>{d && <span>{d}</span>}</li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-tl-calc">
+    <div class="wrap">
+      <span class="tag">누구나</span>
+      <h2 class="sec-h" id="h-tl-calc">세금 계산기 {calcCount}종</h2>
+      <p class="sec-sub">결과는 참고용입니다. 실제 세액은 사실관계에 따라 달라집니다.</p>
+      <ul class="tl-groups">
+        {calcData.groups.map((g) => <li><b>{g.name}</b><span>{calcData.calculators.filter((c) => c.group === g.id).map((c) => c.name).join(" · ")}</span></li>)}
+      </ul>
+      <p class="more"><a class="more-link" href="/calculators">계산기 모두 보기 ›</a></p>
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-tl-ts">
+    <div class="wrap tl-two">
+      <div>
+        <span class="tag">{site.taxSearch.note}</span>
+        <h2 class="sec-h" id="h-tl-ts">{site.taxSearch.name}</h2>
+        <p class="sec-sub">{tools.taxSearch.lead}</p>
+        <ul class="tl-feats">
+          {features.map(([h, d]) => <li><b>{h}</b>{d && <span>{d}</span>}</li>)}
+        </ul>
+        <p class="tl-note">{tsVideo.note}</p>
+        <p class="more"><a class="more-link" href={site.taxSearch.url} target="_blank" rel="noopener">{site.taxSearch.name} 열기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창 · {site.taxSearch.note})</span></a></p>
+      </div>
+      <VideoCard id={tools.taxSearch.video} />
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-tl-how">
+    <div class="wrap">
+      <span class="tag">이 사이트도</span>
+      <h2 class="sec-h" id="h-tl-how">같은 원칙으로 만들었습니다</h2>
+      <p class="sec-sub">법조문을 어디서 가져오고 기한을 어떻게 세는지 적었습니다.</p>
+      <p class="more"><a class="more-link" href="/how">이 사이트가 일하는 방식 ›</a></p>
+    </div>
+  </section>
+</Base>
+<style>
+  .tl-rules { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 12px; counter-reset: tr; }
+  .tl-rules li { counter-increment: tr; display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; row-gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .tl-rules li::before { content: counter(tr); grid-row: 1 / span 2; width: 28px; height: 28px; border-radius: 50%; background: var(--moss); color: var(--on-moss); display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+  .tl-rules b { font-size: 18px; }
+  .tl-rules span { color: var(--ink2); }
+  .tl-groups { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .tl-groups li { display: grid; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .tl-groups b { font-size: 17px; border-left: 3px solid var(--gold); padding-left: 9px; }
+  .tl-groups span { color: var(--ink2); font-size: 15.5px; }
+  .tl-two { display: grid; gap: 28px; }
+  .tl-two > * { min-width: 0; }
+  .tl-feats { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+  .tl-feats li { display: grid; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+  .tl-feats b { font-size: 16.5px; border-left: 3px solid var(--gold); padding-left: 9px; }
+  .tl-feats span { color: var(--ink2); font-size: 15.5px; }
+  .tl-note { margin: 14px 0 0; font-size: 15px; color: var(--muted); }
+  .more { margin-top: 22px; }
+  @media (min-width: 900px) {
+    .tl-rules { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tl-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
+    .tl-two { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 56px; align-items: start; }
+  }
+</style>

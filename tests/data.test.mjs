@@ -30,3 +30,17 @@ test('"세무사" 명칭을 막는다 (운영자 결정 2026-10-24)', () => {
   assert.equal(checkBannedWords("x", "세무전문가 성광호").length, 0);
   assert.equal(checkBannedWords("x", "전담 세무사").length, 1);
 });
+
+test("직접 만든 도구(tools.json): 글은 운영자 영상 글 줄 그대로만", async () => {
+  const { checkTools } = await import("../scripts/validate-data.mjs");
+  const { readFileSync } = await import("node:fs");
+  const videos = readFileSync(new URL("../src/data/videos.json", import.meta.url), "utf8");
+  const tools = JSON.parse(readFileSync(new URL("../src/data/tools.json", import.meta.url), "utf8"));
+  assert.deepEqual(checkTools(JSON.stringify(tools), videos), []);
+  const made = structuredClone(tools);
+  made.taxSearch.features.push("세금을 30% 줄여 준다");
+  assert.equal(checkTools(JSON.stringify(made), videos).length, 1);
+  const p = structuredClone(tools);
+  p.principles[0] = "원칙 1 · AI는 숫자를 만들지 않습니다";
+  assert.equal(checkTools(JSON.stringify(p), videos).length, 1);
+});

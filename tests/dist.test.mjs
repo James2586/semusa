@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 44개(색인 40 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 44);
+test("페이지 45개(색인 41 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 45);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 40);
+  assert.equal((sm.match(/<loc>/g) || []).length, 41);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
