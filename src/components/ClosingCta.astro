@@ -2,7 +2,7 @@
 // 마무리 띠(2026-10-24 2차 개편 — 첫 화면 "하나 더 물어보세요" 숲색 띠로 모든 쪽 통일). 불복 쪽(urgent)은 "기한이 있는 일입니다".
 import site from "../data/site.json";
 import KakaoIcon from "./KakaoIcon.astro";
-const mapQ = encodeURIComponent(site.address.full.replace(/^서울시/, "서울"));
+const mapQ = encodeURIComponent((site.address as any).map || site.address.full.replace(/^서울시/, "서울"));
 const tel = site.phone ? `tel:${site.phone.replace(/[^0-9+]/g, "")}` : null;
 // compact: 바로 아래 오시는 길이 있는 쪽(홈·오시는 길)은 주소·운영 시간을 빼고 버튼만
 interface Props { urgent?: boolean; compact?: boolean }

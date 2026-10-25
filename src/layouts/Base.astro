@@ -49,6 +49,7 @@ const org = {
   sameAs: site.channels.map((c) => c.url),
   founder: { "@type": "Person", name: site.rep, jobTitle: site.repTitle },
   ...(site.phone ? { telephone: site.phone } : {}),
+  ...((site as any).fax ? { faxNumber: (site as any).fax } : {}),
 };
 ---
 <!doctype html>

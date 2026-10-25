@@ -8,15 +8,17 @@
   "siteUrl": "https://semusatax.vercel.app",
   "email": "semusatax@kakao.com",
   "kakaoUrl": "https://open.kakao.com/me/semusa",
-  "phone": null,
+  "phone": "02-430-3251",
+  "fax": "02-6455-3271",
   "bizNo": null,
   "consultFee": null,
   "replyTime": null,
   "address": {
-    "full": "서울시 강남구 삼성로 151",
+    "full": "서울시 송파구 법원로 128, 3층 에이동 319호",
     "region": "서울특별시",
-    "locality": "강남구",
-    "street": "삼성로 151"
+    "locality": "송파구",
+    "street": "법원로 128, 3층 에이동 319호",
+    "map": "서울 송파구 법원로 128"
   },
   "transit": null,
   "parking": null,
