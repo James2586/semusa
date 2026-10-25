@@ -5,24 +5,28 @@ import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
 import gSrc from "../../docs/glossary-sources.json";
 import rSrc from "../../docs/rates-sources.json";
+import fSrc from "../../docs/faq-sources.json";
 import glossary from "../data/glossary.json";
 import rates from "../data/rates.json";
 import dl from "../data/deadlines.json";
 
 const ymd = (s: string | null) => (s ? `${Number(s.slice(0, 4))}. ${Number(s.slice(4, 6))}. ${Number(s.slice(6, 8))}.` : "");
 const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
-const useG: Record<string, string[]> = {}, useR: Record<string, string[]> = {};
+const useG: Record<string, string[]> = {}, useR: Record<string, string[]> = {}, useF: Record<string, string[]> = {};
+const faqMods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
+for (const m of faqMods) for (const part of String(m.frontmatter?.src || "").split(";")) { const id = part.trim().split(/\s+/)[0]; if (id) (useF[id] ||= []).push(String(m.frontmatter.order)); }
 for (const t of glossary.terms as any[]) for (const q of t.quotes) (useG[q.src] ||= []).includes(t.term) || useG[q.src].push(t.term);
 for (const s of rates.sections as any[]) for (const g of s.groups) for (const it of g.items) (useR[it.src] ||= []).includes(s.name) || useR[it.src].push(s.name);
 const rows = [
   ...Object.entries((gSrc as any).items).map(([id, a]: any) => ({ a, where: `용어 풀이 — ${useG[id]?.join(", ") || "-"}`, href: "/glossary" })),
   ...Object.entries((rSrc as any).items).map(([id, a]: any) => ({ a, where: `세율·공제 — ${useR[id]?.join(", ") || "-"}`, href: "/rates" })),
+  ...Object.entries((fSrc as any).items).map(([id, a]: any) => ({ a, where: `자주 묻는 질문 — ${useF[id]?.length || 0}개`, href: "/faq" })),
 ];
 const dlLaws = [...new Set([...dl.events.flatMap((e: any) => [e.law, e.fact?.law]), ...dl.yearly.map((y: any) => y.law)].filter(Boolean))];
 ---
 <Base title="원문 기준일" description="이 사이트가 옮겨 둔 법조문 원문의 법률 번호·공포일·받은 날과 쓰는 곳.">
   <PageHead tag="원문 기준일" title="법조문 원문, 언제 받은 것인지" crumbs={[{ name: "원문 기준일" }]}
-    lead="용어 풀이와 세율·공제 한눈에가 옮겨 둔 법조문 원문의 판과 받은 날입니다. 그 뒤에 법이 바뀌었을 수 있으니, 실제 일은 상담 때 함께 확인합니다." />
+    lead="용어 풀이·세율·공제 한눈에·자주 묻는 질문이 옮겨 둔 법조문 원문의 판과 받은 날입니다. 그 뒤에 법이 바뀌었을 수 있으니, 실제 일은 상담 때 함께 확인합니다." />
   <section class="gut sr-sec">
     <div class="wrap sr-in">
       <div class="sr-tw" tabindex="0" role="region" aria-label="옮겨 둔 법조문 원문">
@@ -30,7 +34,7 @@ const dlLaws = [...new Set([...dl.events.flatMap((e: any) => [e.law, e.fact?.law
           <thead><tr><th scope="col">조문</th><th scope="col">판</th><th scope="col">받은 날</th><th scope="col">쓰는 곳</th></tr></thead>
           <tbody>
             {rows.map(({ a, where, href }) => (
-              <tr><th scope="row">{a.law} {a.article}<small>{a.title}</small></th><td>법률 제{a.promulgationNo}호<small>{ymd(a.promulgationDate)} 공포</small></td><td>{dot(a.fetchedAt)}</td><td><a href={href}>{where}</a></td></tr>
+              <tr><th scope="row">{a.law} {a.article}<small>{a.title}</small></th><td>{/시행령/.test(a.law) ? "대통령령" : "법률"} 제{a.promulgationNo}호<small>{ymd(a.promulgationDate)} 공포</small></td><td>{dot(a.fetchedAt)}</td><td><a href={href}>{where}</a></td></tr>
             ))}
           </tbody>
         </table>

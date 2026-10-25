@@ -2,7 +2,7 @@
 // 쪽(HTML)·글꼴·그림은 늘 인터넷 먼저(새 배포가 바로 보이게 — 글꼴 파일은 빌드마다 같은 이름으로 다시 잘리고 그림도 이름이 안 바뀜), 끊겼을 때만 저장본.
 // 저장본 먼저는 이름에 내용이 박힌 /_astro/만. 미리 저장한 쪽과 그 쪽의 파일(CORE)은 지우지 않고, 다녀간 쪽·파일만 개수 상한으로 정리.
 // 다른 사이트(계산기 iframe·카카오)는 건드리지 않는다. 이 파일을 고치면 VERSION을 올린다(옛 저장소를 지움). 개인정보는 저장하지 않는다 — 같은 사이트 GET 응답만.
-const VERSION = "v5";
+const VERSION = "v6";
 const CORE = `core-${VERSION}`, PAGES = `pages-${VERSION}`, ASSETS = `assets-${VERSION}`;
 const PRECACHE = ["/deadline", "/tax-calendar", "/offline"];
 const PAGE_MAX = 40, ASSET_MAX = 120;
@@ -16,7 +16,10 @@ async function precache() {
     const html = await res.clone().text();
     await core.put(url, res);
     // 그 쪽이 쓰는 스크립트·스타일·글꼴도 같이(같은 사이트 경로만) — 스크립트가 불러오는 조각·CSS 속 글꼴까지 따라간다
-    await crawl(core, [...html.matchAll(/(?:href|src)="(\/(?:_astro|fonts|img\/buki)\/[^"]+)"/g)].map((m) => m[1]));
+    const refs = [...html.matchAll(/(?:href|src)="(\/(?:_astro|fonts|img\/buki)\/[^"]+)"/g)].map((m) => m[1]);
+    // srcset의 여러 크기(부기 200·300w)도 — 화면 밀도가 높은 휴대폰은 큰 쪽을 고른다
+    for (const m of html.matchAll(/srcset="([^"]+)"/g)) for (const part of m[1].split(",")) { const u = part.trim().split(/\s+/)[0]; if (/^\/img\/buki\//.test(u)) refs.push(u); }
+    await crawl(core, refs);
   }
 }
 async function crawl(cache, start) {

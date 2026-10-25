@@ -321,6 +321,7 @@ test("원문 기준일: 옮겨 둔 원문마다 법률 번호·받은 날 · 기
   const wf = readFileSync(".github/workflows/law-watch.yml", "utf8");
   assert.match(wf, /make-glossary-sources\.mjs tax-search\/tests\/fixtures --check/);
   assert.match(wf, /make-rates-sources\.mjs tax-search\/tests\/fixtures --check/);
+  assert.match(wf, /make-faq-sources\.mjs tax-search\/tests\/fixtures --check/);
   assert.match(wf, /TAX_SEARCH_TOKEN/);
 });
 
@@ -348,9 +349,10 @@ test("첫 화면 가벼움(6차 A): 그려 둔 요소 1,000개 이하 · 자릿�
 test("이 사이트가 일하는 방식(6차 B): 원칙·기한 계산 단계(근거 조문)·원문 수·측정값·둘러보기 · 바닥글·소개 쪽에서 잇기", { skip: !has }, () => {
   const h = readFileSync(join(DIST, "how.html"), "utf8");
   for (const s of ["법조문은 원문 그대로", "계산은 과정까지", "민법 제157조", "민법 제160조", "국세기본법 제5조 제1항", "상속세 및 증여세법 제68조", "Lighthouse", "3분 둘러보기", "/deadline?e=gift&amp;d=2026-11-10"]) assert.ok(h.includes(s), s);
-  const g = JSON.parse(readFileSync(new URL("../docs/glossary-sources.json", import.meta.url), "utf8"));
-  const r = JSON.parse(readFileSync(new URL("../docs/rates-sources.json", import.meta.url), "utf8"));
-  assert.ok(h.includes(`옮겨 둔 법조문 ${Object.keys(g.items).length + Object.keys(r.items).length}조문`));
+  // 용어 풀이·세율·질문이 옮겨 둔 원문 — 같은 조문(같은 판)은 한 번만
+  const all = ["glossary", "rates", "faq"].flatMap((k) => Object.values(JSON.parse(readFileSync(new URL(`../docs/${k}-sources.json`, import.meta.url), "utf8")).items));
+  const n = new Set(all.map((a) => `${a.law}|${a.article}|${a.promulgationNo}`)).size;
+  assert.ok(h.includes(`옮겨 둔 법조문 ${n}조문`), String(n));
   assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /href="\/how"/);
   assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /href="\/how"/);
 });

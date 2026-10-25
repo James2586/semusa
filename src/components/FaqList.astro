@@ -48,7 +48,10 @@ const faqs = mods.map(([path, m]) => ({ ...m.frontmatter, id: faqId(path), Conte
   .faq details[open] .pm { transform: rotate(45deg); }
   .a { padding: 0 0 20px 26px; font-size: 16.5px; }
   .fq-src { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
-  .fq-src > summary { cursor: pointer; padding: 10px 14px; font-size: 15px; font-weight: 600; color: var(--gold-text); min-height: 44px; display: flex; align-items: center; }
+  .fq-src > summary { cursor: pointer; padding: 10px 14px; font-size: 15px; font-weight: 600; color: var(--gold-text); min-height: 44px; display: flex; align-items: center; gap: 6px; }
+  .fq-src > summary::before { content: "▸"; transition: transform .2s; }
+  .fq-src[open] > summary::before { transform: rotate(90deg); }
+  @media (prefers-reduced-motion: reduce) { .fq-src > summary::before { transition: none; } }
   .fq-src > summary:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
   .fq-q { padding: 4px 14px 14px; display: grid; gap: 6px; }
   .fq-q + .fq-q { border-top: 1px solid var(--line); padding-top: 12px; }

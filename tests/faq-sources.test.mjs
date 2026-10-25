@@ -31,6 +31,7 @@ test("항 고르기는 그 항의 호까지, 호 고르기는 그 줄만", () =>
 test("원문에 없는 숫자는 잡는다 · 링크 주소 속 숫자는 세지 않음", () => {
   const q = faqQuotes("local20 ①", items);
   assert.deepEqual(faqNumberGaps("취득한 날부터 60일 안", q), []);
-  assert.deepEqual(faqNumberGaps("취득한 날부터 61일 안", q), ["61"]);
+  assert.deepEqual(faqNumberGaps("취득한 날부터 61일 안", q), ["61일"]);
+  assert.deepEqual(faqNumberGaps("취득한 날부터 60개월 안", q), ["60개월"]); // 단위까지 대조
   assert.deepEqual(faqNumberGaps("[기한 달력](/deadline?d=2026-01-01)", q), []);
 });
