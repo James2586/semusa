@@ -35,6 +35,10 @@ test('"세무사" 명칭이 어느 페이지에도 없다', { skip: !has }, () =
   for (const f of htmlFiles(DIST)) assert.ok(!readFileSync(f, "utf8").includes("세무사"), f);
 });
 
+test('"세무회계" 단어가 어느 페이지·매니페스트·검색 목록에도 없다(2026-10-25 운영자)', { skip: !has }, () => {
+  for (const f of [...htmlFiles(DIST), join(DIST, "manifest.webmanifest"), join(DIST, "search.json"), join(DIST, "rss.xml")]) assert.ok(!readFileSync(f, "utf8").includes("세무회계"), f);
+});
+
 test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !has }, () => {
   for (const p of ["notice.html", "privacy.html", "404.html"]) {
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
@@ -243,7 +247,8 @@ test("불복 절차: 흐름도(단계·기한 칩)·표·원문 접힘이 세무
   const A = JSON.parse(readFileSync("src/data/appeal.json", "utf8"));
   const h = readFileSync(join(DIST, "services/appeal.html"), "utf8");
   for (const r of A.rows) { assert.match(h, new RegExp(`<th scope="row"[^>]*>${r.stage}</th>`), r.stage); assert.ok(h.includes(r.law), r.law); }
-  for (const f of A.flow) if (f.edge) assert.ok(h.includes(f.edge), f.edge);
+  for (const f of [...A.flow, ...A.refundFlow]) if (f.edge) assert.ok(h.includes(f.edge), f.edge);
+  assert.equal((h.match(/<button[^>]*data-af-play/g) || []).length, 2, "불복 길·경정청구 길 흐름도 두 개");
   assert.match(h, /data-af-play/);
   assert.match(h, /법조문 원문 보기/);
   assert.doesNotMatch(readFileSync(join(DIST, "services/inheritance-gift.html"), "utf8"), /data-af-play|class="ap-t/);

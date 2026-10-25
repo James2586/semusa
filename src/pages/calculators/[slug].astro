@@ -130,7 +130,7 @@ const desc = calc.intro ? `${calc.short}. ${calc.intro}`.slice(0, 150) : `${calc
   document.querySelectorAll<HTMLButtonElement>("[data-share]").forEach((btn) => {
     const ok = document.querySelector("[data-share-ok]")!;
     btn.addEventListener("click", async () => {
-      const data = { title: btn.dataset.share, text: `${btn.dataset.share} — 하나 더 세무회계`, url: location.href };
+      const data = { title: btn.dataset.share, text: `${btn.dataset.share} — 하나 더 · 세무법인 성수 송파 WM센터`, url: location.href };
       try {
         if (navigator.share) { await navigator.share(data); return; }
         await navigator.clipboard.writeText(location.href);

@@ -4,6 +4,7 @@
 // 해석·요약·계산을 붙이지 않는다. 계산식 그림처럼 풀 수 없는 것은 법제처 원문 링크로.
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
+import site from "../data/site.json";
 import rates from "../data/rates.json";
 import sources from "../../docs/rates-sources.json";
 import calcData from "../data/calculators.json";
@@ -35,7 +36,7 @@ const groupLabel = (s: any, g: any) => {
   return `법률 제${a.promulgationNo}호(${ymd(a.promulgationDate)} 공포) 판${a.promulgationDate === latest ? " — 지금 판" : ""}`;
 };
 const dataset = { "@context": "https://schema.org", "@type": "Dataset", name: "세율·공제 한눈에", description: "상속세·증여세·양도소득세·취득세·종합부동산세·종합소득세·법인세의 세율과 주요 공제 — 법조문 원문 그대로",
-  isBasedOn: Object.values(S).map((a: any) => ({ "@type": "Legislation", name: /^부칙/.test(a.article) ? `${a.law} ${a.article}` : `${a.law} ${a.article}(법률 제${a.promulgationNo}호)` })), creator: { "@type": "Organization", name: "하나 더 세무회계" } };
+  isBasedOn: Object.values(S).map((a: any) => ({ "@type": "Legislation", name: /^부칙/.test(a.article) ? `${a.law} ${a.article}` : `${a.law} ${a.article}(법률 제${a.promulgationNo}호)` })), creator: { "@type": "Organization", name: site.name } };
 ---
 <Base title="세율·공제 한눈에" description="상속세·증여세·양도소득세·취득세·종합부동산세·종합소득세·법인세의 세율과 주요 공제를 법조문 원문 그대로 모았습니다." jsonLd={[dataset]}>
   <PageHead buki="warning" tag="세율·공제 한눈에" title="세율과 공제, 원문 그대로" crumbs={[{ name: "세율·공제 한눈에" }]}

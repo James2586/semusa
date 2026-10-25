@@ -317,8 +317,8 @@ export function checkAppeal(text, srcItems) {
   if (data.note) one("note", data.note, ["text"]);
   // 흐름도: 화살표·결정·설명 글의 숫자도 그 단계 표 줄(row)의 원문에 — 사건 칸(row 없음)은 숫자를 쓰지 않는다
   const byStage = Object.fromEntries((data.rows || []).map((r) => [r.stage, r]));
-  (data.flow || []).forEach((f, i) => {
-    const at = `flow ${i + 1}번째(${[].concat(f.node || f.edge).join("·")})`;
+  [["flow", data.flow], ["refundFlow", data.refundFlow]].forEach(([fk, list]) => (list || []).forEach((f, i) => {
+    const at = `${fk} ${i + 1}번째(${[].concat(f.node || f.edge).join("·")})`;
     if (!f.say) errors.push(`appeal.json ${at}: say(따라가기 설명)가 비었습니다.`);
     const txt = [f.edge, f.decide, f.say].filter(Boolean).join(" ");
     if (!f.row) { if (/\d/.test(txt)) errors.push(`appeal.json ${at}: row 없는 칸에 숫자가 있습니다.`); return; }
@@ -326,7 +326,7 @@ export function checkAppeal(text, srcItems) {
     if (!row) { errors.push(`appeal.json ${at}: row "${f.row}"가 rows에 없습니다.`); return; }
     const quotes = faqQuotes(row.src, srcItems);
     for (const n of faqNumberGaps(txt, quotes)) errors.push(`appeal.json ${at}: 숫자 "${n}"이(가) ${f.row} 원문에 없습니다.`);
-  });
+  }));
   return errors;
 }
 
