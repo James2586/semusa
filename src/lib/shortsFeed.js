@@ -15,13 +15,16 @@ export function parseShorts(xml, { include = [], count = 6 } = {}) {
 }
 
 export async function fetchShorts({ channelId, include, count }) {
-  try {
-    // 이 환경처럼 바깥에 못 나가는 곳에서 화면을 확인할 때만: 받아 둔 피드 파일(운영 빌드엔 없음)
-    if (process.env.SHORTS_FEED_FILE) return parseShorts((await import("node:fs")).readFileSync(process.env.SHORTS_FEED_FILE, "utf8"), { include, count });
-    const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) return [];
-    return parseShorts(await res.text(), { include, count });
-  } catch {
-    return [];
+  // 이 환경처럼 바깥에 못 나가는 곳에서 화면을 확인할 때만: 받아 둔 피드 파일(운영 빌드엔 없음)
+  if (process.env.SHORTS_FEED_FILE) return parseShorts((await import("node:fs")).readFileSync(process.env.SHORTS_FEED_FILE, "utf8"), { include, count });
+  // 유튜브 피드는 같은 주소도 절반쯤 404·500을 돌려준다(2026-10-25 실측 — 첫 배포에서 구역이 빠짐) — 몇 번 더 묻는다
+  const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`;
+  for (let i = 0; i < 8; i++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      if (res.ok) return parseShorts(await res.text(), { include, count });
+    } catch {}
+    await new Promise((r) => setTimeout(r, 300));
   }
+  return [];
 }
