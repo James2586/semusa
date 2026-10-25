@@ -1,0 +1,82 @@
+{
+  "_note": "「부기와 1분 세금」 저장본 — 빌드 때 유튜브 피드를 못 읽으면 이것을 쓴다. scripts/update-shorts-snapshot.mjs로만 만든다(손으로 고치지 말 것). entries는 피드의 Shorts 전부(「세무사」 든 제목 제외) — 세금 주제 고르기는 빌드 때 shorts.json include로.",
+  "savedAt": "2026-10-25",
+  "latest": "2026-10-24",
+  "entries": [
+    {
+      "title": "가업상속공제 경영기간 10년→30년으로 늘어난다",
+      "link": "https://www.youtube.com/shorts/zia8yyRwjc4",
+      "date": "2026-10-24"
+    },
+    {
+      "title": "클로드에게 물어 본 주택정책 수단 세 가지, 무엇부터 봐야 할까?",
+      "link": "https://www.youtube.com/shorts/T7dRjQJbfLQ",
+      "date": "2026-10-24"
+    },
+    {
+      "title": "자녀에게 미리 증여하려는 분이 꼭 봐야 할 함정",
+      "link": "https://www.youtube.com/shorts/cSsUe9b72pg",
+      "date": "2026-10-24"
+    },
+    {
+      "title": "정년 60세 후 국민연금 전까지 생활비는?",
+      "link": "https://www.youtube.com/shorts/Y83nw-aj2g8",
+      "date": "2026-10-23"
+    },
+    {
+      "title": "부모 집을 시세보다 싸게 사도 될까? 증여세 기준 30%·3억",
+      "link": "https://www.youtube.com/shorts/s729deElro8",
+      "date": "2026-10-22"
+    },
+    {
+      "title": "부모님 아파트 증여 vs 상속, 세금 비교 전 확인할 것",
+      "link": "https://www.youtube.com/shorts/6ad2NjXDJyE",
+      "date": "2026-10-22"
+    },
+    {
+      "title": "연금저축 중도해지, 세금폭탄 16.5% 조심",
+      "link": "https://www.youtube.com/shorts/kWG80SUBJ6g",
+      "date": "2026-10-21"
+    },
+    {
+      "title": "은퇴하면 건강보험료는 왜 갑자기 오를까?",
+      "link": "https://www.youtube.com/shorts/o_4ZyQdX6m0",
+      "date": "2026-10-20"
+    },
+    {
+      "title": "2026년 10월 19일",
+      "link": "https://www.youtube.com/shorts/hXyOatQKJl4",
+      "date": "2026-10-19"
+    },
+    {
+      "title": "8억원대 종소세 불복 소송…축구선수 김영권 최종 패소",
+      "link": "https://www.youtube.com/shorts/wFqhU2BrgZU",
+      "date": "2026-10-18"
+    },
+    {
+      "title": "상속재산 10억 이하, 상속세 0원일까?",
+      "link": "https://www.youtube.com/shorts/3_4XK7JS3Qw",
+      "date": "2026-10-18"
+    },
+    {
+      "title": "부모 공동소유 주택 일부 상속·증여받았다면 비과세될까",
+      "link": "https://www.youtube.com/shorts/2ruIDYaKb4Y",
+      "date": "2026-10-18"
+    },
+    {
+      "title": "재산세, 2030년 평균 53.5% 늘어날까",
+      "link": "https://www.youtube.com/shorts/7J12-cdNF58",
+      "date": "2026-10-17"
+    },
+    {
+      "title": "프리랜서도 야근수당을 받을 수 있을까요?",
+      "link": "https://www.youtube.com/shorts/nf7lEoIWibg",
+      "date": "2026-10-17"
+    },
+    {
+      "title": "신혼집 증여세, 5억 지원받을 때 확인 안하면 증여세 폭탄",
+      "link": "https://www.youtube.com/shorts/Rsh2Zdw7fY4",
+      "date": "2026-10-17"
+    }
+  ]
+}
