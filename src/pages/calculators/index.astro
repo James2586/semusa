@@ -47,6 +47,8 @@ const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]))
   .cards li[hidden] { display: none; }
   .cards a { display: flex; flex-direction: column; gap: 4px; height: 100%; min-height: 132px; padding: 14px 14px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; text-decoration: none; transition: border-color .2s, transform .25s, box-shadow .25s; }
   .cards a:hover, .cards a:focus-visible { border-color: var(--moss); transform: translateY(-3px); box-shadow: 0 10px 22px -14px rgba(21, 25, 21, .45); }
+  /* 휴대폰은 올려 둘 마우스가 없어 누르는 동안 올라온다(2026-10-25 운영자) */
+  .cards a:active { border-color: var(--moss); transform: translateY(-4px); box-shadow: 0 12px 24px -14px rgba(21, 25, 21, .5); transition-duration: .1s; }
   .cards small { font-size: 14px; color: var(--muted); }
   .cards b { font-size: 16.5px; line-height: 1.45; }
   .cards span:not(.go) { font-size: 14.5px; color: var(--muted); line-height: 1.5; }

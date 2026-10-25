@@ -64,7 +64,8 @@ const org = {
     {/* 페이지 넘김 전환 켜기: 바깥 CSS 파일에 두면 첫 화면(기한 계산 스크립트가 있는 쪽)으로 넘어갈 때 Chromium이 켜짐을 놓쳐 전환을 끊는다(2026-10-24 실측) — 머리의 작은 style로 */}
     <style is:inline>@view-transition{navigation:auto}</style>
     {/* 글자 크게(3차 D2): 그리기 전에 붙여 깜빡임 없이 — 저장소를 막은 브라우저는 그냥 지나감 */}
-    <script is:inline>try{if(localStorage.getItem("fs")==="lg")document.documentElement.dataset.fs="lg"}catch(e){}</script>
+    {/* 끝의 빈 touchstart: 아이폰 사파리는 이것이 없으면 누르는 동안의 모양(:active — 카드 올라옴·버튼 눌림)을 그리지 않는다 */}
+    <script is:inline>try{if(localStorage.getItem("fs")==="lg")document.documentElement.dataset.fs="lg"}catch(e){}addEventListener("touchstart",function(){},{passive:true})</script>
     {/* 오프라인(3차 D1): 기한 달력·세금 달력을 인터넷 없이도 — public/sw.js */}
     <script is:inline>if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})</script>
     <link rel="preload" href="/fonts/serif-ko-700.woff2" as="font" type="font/woff2" crossorigin />
