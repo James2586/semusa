@@ -29,7 +29,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 </style>
 <div class="og" style="--fs:${p.title.length > 14 ? 70 : 86}px"><p class="k">${esc(p.kicker)}</p>
 <div class="m"><p class="t">${esc(p.title)}</p>${p.sub ? `<p class="s">${esc(p.sub)}</p>` : ""}</div>
-<div class="f"><span class="w">하나 더<span class="p">+</span></span><span class="n">세무회계 · 세무전문가 성광호</span></div></div>`;
+<div class="f"><span class="w">하나 더<span class="p">+</span></span><span class="n">세무전문가 성광호</span></div></div>`;
 
 const OUT = join(ROOT, "public/og");
 mkdirSync(OUT, { recursive: true });

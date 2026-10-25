@@ -43,7 +43,7 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
     </div>
   </section>
 
-  <section class="gut stats-sec" aria-label="숫자로 보는 하나 더 세무회계">
+  <section class="gut stats-sec" aria-label="숫자로 보는 하나 더">
     <dl class="wrap stats">
       {stats.map((x) => <div><dt>{x.label}</dt><dd><Odometer n={x.n} cls="stat-n" /><span class="u">{x.unit}</span></dd></div>)}
     </dl>
@@ -58,10 +58,10 @@ const shelf = spines.map((s) => (s.featured ? { ...s, book: home.books[k], i: k+
       <div class="prose hello">
         <p><strong>단순한 세무 대리를 넘어, 고객님의 든든한 파트너가 되겠습니다.</strong></p>
         <p>세금은 단순히 납부해야 할 의무가 아닙니다. 올바른 전략 하나가 사업의 미래를 바꾸고, 소중하게 일군 자산을 온전히 지키는 힘이 됩니다. 저는 수많은 고객과 함께하며 그 사실을 누구보다 깊이 체감해 왔습니다.</p>
-        <p>하나 더 세무회계는 단순 신고 대행에 머물지 않습니다. 사업 초기 법인 설립부터 기장, 절세 설계, 상속·증여 컨설팅, 세무조사 대응까지—고객님의 세금 이야기에 처음부터 끝까지 함께합니다. 매번 달라지는 담당자 걱정 없이, 언제나 같은 얼굴의 전담 세무전문가가 곁에 있습니다.</p>
+        <p>하나 더는 단순 신고 대행에 머물지 않습니다. 사업 초기 법인 설립부터 기장, 절세 설계, 상속·증여 컨설팅, 세무조사 대응까지—고객님의 세금 이야기에 처음부터 끝까지 함께합니다. 매번 달라지는 담당자 걱정 없이, 언제나 같은 얼굴의 전담 세무전문가가 곁에 있습니다.</p>
         <p>특히 이코노미조선 칼럼리스트로서 쌓아온 세무 지식과 33권의 저서를 통해 검증된 노하우를, 한 분 한 분의 상황에 맞춰 실질적인 해법으로 제안드립니다. 이론이 아닌 현장에서 통하는 절세 전략을 경험하실 수 있습니다.</p>
         <p>세금 문제로 고민하고 계신다면 혼자 짊어지지 마세요. 편안한 상담 한 번으로 최선의 방향을 함께 찾아드리겠습니다. 고객님의 성공이 곧 저의 성공입니다.</p>
-        <blockquote><span class="q-t">"고객의 세금 걱정을 덜어드리는 것이 저의 사명입니다."</span><cite>— {site.name} {site.rep}</cite></blockquote>
+        <blockquote><span class="q-t">"고객의 세금 걱정을 덜어드리는 것이 저의 사명입니다."</span><cite>— {site.repTitle} {site.rep}</cite></blockquote>
       </div>
     </div>
   </section>

@@ -35,6 +35,10 @@ test('"세무사" 명칭이 어느 페이지에도 없다', { skip: !has }, () =
   for (const f of htmlFiles(DIST)) assert.ok(!readFileSync(f, "utf8").includes("세무사"), f);
 });
 
+test('"세무회계" 단어가 어느 페이지·매니페스트·검색 목록에도 없다(2026-10-25 운영자)', { skip: !has }, () => {
+  for (const f of [...htmlFiles(DIST), join(DIST, "manifest.webmanifest"), join(DIST, "search.json"), join(DIST, "rss.xml")]) assert.ok(!readFileSync(f, "utf8").includes("세무회계"), f);
+});
+
 test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !has }, () => {
   for (const p of ["notice.html", "privacy.html", "404.html"]) {
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);

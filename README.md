@@ -1,6 +1,6 @@
 # semusa homepage
 
-하나 더 세무회계 홈페이지 (https://semusatax.vercel.app). Astro 정적 사이트.
+하나 더 홈페이지 (https://semusatax.vercel.app). Astro 정적 사이트.
 
 ## 운영자가 고치는 곳
 
