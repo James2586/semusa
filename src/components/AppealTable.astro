@@ -1,0 +1,78 @@
+---
+// 불복 절차 한눈에(2026-10-25, 미추홀세무법인 사이트 참고): src/data/appeal.json — 칸 글의 숫자는 고른 원문 줄에 있다(validate-data checkAppeal).
+// 넓은 화면은 표, 좁은 화면은 단계마다 카드. 아래 「법조문 원문 보기」는 고른 원문 줄 그대로(해석·요약 없음). 어느 절차를 고를지·결과는 적지 않는다.
+import appeal from "../data/appeal.json";
+import faqSrc from "../../docs/faq-sources.json";
+import { faqQuotes } from "../lib/faqSources.js";
+const ymd = (s: string | null) => (s ? `${Number(s.slice(0, 4))}. ${Number(s.slice(4, 6))}. ${Number(s.slice(6, 8))}.` : "");
+const items = (faqSrc as any).items;
+const rows = appeal.rows.map((r) => ({ ...r, quotes: faqQuotes(r.src, items).filter((q: any) => q.src) }));
+const noteQuotes = faqQuotes(appeal.note.src, items).filter((q: any) => q.src);
+const COLS = [["when", "언제"], ["file", "청구 기한"], ["decide", "결정까지"], ["law", "근거"]] as const;
+---
+<div class="ap">
+  <table class="ap-t">
+    <caption class="sr-only">불복 절차별 청구 시점·청구 기한·결정 기간·근거 조문</caption>
+    <colgroup><col class="c-st" /><col class="c-when" /><col class="c-file" /><col class="c-dec" /><col class="c-law" /></colgroup>
+    <thead><tr><th scope="col">절차</th>{COLS.map(([, h]) => <th scope="col">{h}</th>)}</tr></thead>
+    <tbody>
+      {rows.map((r: any) => (
+        <tr><th scope="row">{r.stage}</th>{COLS.map(([k, h]) => <td data-label={h} class={`ap-${k}`}>{r[k]}</td>)}</tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="ap-note">{appeal.note.text} <span class="ap-law">{appeal.note.law}</span></p>
+  <details class="ap-src">
+    <summary>법조문 원문 보기</summary>
+    {[...rows.map((r: any) => [r.stage, r.quotes]), ["기한의 특례", noteQuotes]].map(([stage, quotes]: any) => (
+      <div class="ap-q">
+        <p class="ap-qs">{stage}</p>
+        {quotes.map((q: any) => (
+          <div class="ap-qa">
+            <p class="ap-qh">{q.src.law} {q.src.article}({q.src.title}) <small>법률 제{q.src.promulgationNo}호({ymd(q.src.promulgationDate)} 공포) · 법제처 원문 {q.src.fetchedAt.split("-").map(Number).join(". ")}. 받음</small></p>
+            {q.lines.map((l: any) => <p class={`ap-l d${l.d}`}>{l.t}</p>)}
+          </div>
+        ))}
+      </div>
+    ))}
+  </details>
+</div>
+<style>
+  .ap { display: grid; gap: 12px; }
+  .ap-t { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; font-size: 15.5px; line-height: 1.6; }
+  .ap-t thead th { text-align: left; font-size: 14px; color: var(--ink2); background: var(--paper); padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .ap-t tbody th { text-align: left; font-size: 16.5px; padding: 14px; vertical-align: top; white-space: nowrap; border-left: 3px solid var(--gold); }
+  .ap-t td { padding: 14px; vertical-align: top; color: var(--ink2); }
+  .ap-t tbody tr + tr > * { border-top: 1px solid var(--line); }
+  .ap-t td.ap-file, .ap-t td.ap-decide { color: var(--ink); }
+  .ap-t td.ap-law { font-size: 14px; color: var(--muted); }
+  .c-st { width: 14%; } .c-when { width: 21%; } .c-file { width: 27%; } .c-dec { width: 21%; } .c-law { width: 17%; }
+  .ap-note { margin: 0; font-size: 15px; color: var(--ink2); }
+  .ap-law { font-size: 14px; color: var(--muted); white-space: nowrap; }
+  .ap-src { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  .ap-src > summary { cursor: pointer; padding: 10px 14px; font-size: 15px; font-weight: 600; color: var(--gold-text); min-height: 44px; display: flex; align-items: center; gap: 6px; }
+  .ap-src > summary::before { content: "▸"; transition: transform .2s; }
+  .ap-src[open] > summary::before { transform: rotate(90deg); }
+  .ap-src > summary:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .ap-q { padding: 4px 14px 14px; display: grid; gap: 8px; }
+  .ap-q + .ap-q { border-top: 1px solid var(--line); padding-top: 12px; }
+  .ap-qs { margin: 0; font-size: 16px; font-weight: 700; }
+  .ap-qa { display: grid; gap: 4px; }
+  .ap-qh { margin: 0; font-size: 15px; font-weight: 700; }
+  .ap-qh small { display: block; font-size: 14px; font-weight: 400; color: var(--muted); }
+  .ap-l { margin: 0; font-size: 15px; line-height: 1.7; color: var(--ink2); }
+  .ap-l.d2 { padding-left: 1em; } .ap-l.d3 { padding-left: 2em; }
+  @media (prefers-reduced-motion: reduce) { .ap-src > summary::before { transition: none; } }
+  /* 좁은 화면: 단계마다 카드(칸 이름을 앞에) */
+  @media (max-width: 899px) {
+    .ap-t, .ap-t tbody, .ap-t tr, .ap-t th, .ap-t td { display: block; }
+    .ap-t { border: 0; background: none; }
+    .ap-t thead { display: none; }
+    .ap-t tbody { display: grid; gap: 10px; }
+    .ap-t tr { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 4px 0 8px; }
+    .ap-t tbody tr + tr > * { border-top: 0; }
+    .ap-t tbody th { border-left: 3px solid var(--gold); margin: 12px 14px 4px; padding: 0 0 0 9px; white-space: normal; }
+    .ap-t td { padding: 6px 14px; }
+    .ap-t td::before { content: attr(data-label); display: block; font-size: 14px; font-weight: 700; color: var(--muted); }
+  }
+</style>

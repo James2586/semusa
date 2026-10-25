@@ -35,6 +35,11 @@
     { "name": "국세청", "url": "https://www.nts.go.kr/" },
     { "name": "홈택스", "url": "https://hometax.go.kr/" },
     { "name": "국세법령정보시스템", "url": "https://taxlaw.nts.go.kr/index.do" },
-    { "name": "이택스코리아", "url": "https://www.etaxkorea.net/" }
+    { "name": "이택스코리아", "url": "https://www.etaxkorea.net/" },
+    { "name": "위택스(지방세)", "url": "https://www.wetax.go.kr/" },
+    { "name": "부동산 공시가격 알리미", "url": "https://www.realtyprice.kr/" },
+    { "name": "인터넷등기소", "url": "https://www.iros.go.kr/" },
+    { "name": "정부24", "url": "https://www.gov.kr/" },
+    { "name": "4대사회보험 정보연계센터", "url": "https://www.4insure.or.kr/" }
   ]
 }

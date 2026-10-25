@@ -233,9 +233,22 @@ test("상담 요청 글: 길잡이·기한 달력에 붙고, 이 기기 안에�
   for (const f of ["guide.html", "deadline.html"]) {
     const h = readFileSync(join(DIST, f), "utf8");
     assert.match(h, /data-cn-text/, f);
-    assert.match(h, /이 글은 이 기기 안에서만 만들고 어디로도 보내지 않습니다/, f);
+    assert.match(h, /이 글은 이 기기 안에서만 만들고, 사이트는 받거나 저장하지 않습니다/, f);
+    assert.match(h, /href="mailto:[^"]+"[^>]*data-cn-mail/, `${f}: 이메일로 보내기`);
   }
   assert.doesNotMatch(readFileSync("src/components/ConsultNote.astro", "utf8"), /localStorage|sessionStorage|fetch\(/);
+});
+
+test("불복 절차: 흐름도(단계·기한 칩)·표·원문 접힘이 세무조사·불복 쪽에만, 자동 재생 없음", { skip: !has }, () => {
+  const A = JSON.parse(readFileSync("src/data/appeal.json", "utf8"));
+  const h = readFileSync(join(DIST, "services/appeal.html"), "utf8");
+  for (const r of A.rows) { assert.match(h, new RegExp(`<th scope="row"[^>]*>${r.stage}</th>`), r.stage); assert.ok(h.includes(r.law), r.law); }
+  for (const f of A.flow) if (f.edge) assert.ok(h.includes(f.edge), f.edge);
+  assert.match(h, /data-af-play/);
+  assert.match(h, /법조문 원문 보기/);
+  assert.doesNotMatch(readFileSync(join(DIST, "services/inheritance-gift.html"), "utf8"), /data-af-play|class="ap-t/);
+  // 따라가기는 누를 때만 — 쪽을 열자마자 타이머를 걸지 않는다
+  assert.doesNotMatch(readFileSync("src/components/AppealFlow.astro", "utf8").split("<script>")[1], /^\s*(setInterval|setTimeout)/m);
 });
 
 test("세금 생애 지도: 정거장마다 펼침 단추·내용(기한 근거·계산기·용어) · 첫 화면 맛보기 링크", { skip: !has }, () => {

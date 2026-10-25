@@ -9,15 +9,16 @@ const { open = false } = Astro.props;
 <details class="cn" data-cn open={open}>
   <summary>상담 요청 글 만들기</summary>
   <div class="cn-body">
-    <p class="cn-lead">고른 내용으로 첫 메시지를 만들었습니다. 「궁금한 점」을 채운 뒤 복사해 카카오톡에 붙여 보내세요.</p>
+    <p class="cn-lead">고른 내용으로 첫 메시지를 만들었습니다. 「궁금한 점」을 채운 뒤 복사해 카카오톡에 붙여 보내거나, 「이메일로 보내기」를 누르세요(메일 앱에 이 글이 채워져 열립니다).</p>
     <label for="cn-text" class="sr-only">상담 요청 글</label>
     <textarea id="cn-text" class="cn-text" rows="9" spellcheck="false" data-cn-text></textarea>
     <div class="cn-acts">
       <button type="button" class="btn btn-moss" data-cn-copy>글 복사</button>
       <a class="btn btn-kakao" href={site.kakaoUrl} target="_blank" rel="noopener"><KakaoIcon />카카오톡 열기</a>
+      {site.email && <a class="btn btn-moss" href={`mailto:${site.email}`} data-cn-mail data-to={site.email}>이메일로 보내기</a>}
       <button type="button" class="cn-reset" data-cn-reset hidden>고른 내용으로 다시 만들기</button>
     </div>
-    <p class="cn-st" role="status" data-cn-st>이 글은 이 기기 안에서만 만들고 어디로도 보내지 않습니다. 이름·연락처·금액은 넣지 않았습니다.</p>
+    <p class="cn-st" role="status" data-cn-st>이 글은 이 기기 안에서만 만들고, 사이트는 받거나 저장하지 않습니다. 이름·연락처·금액은 넣지 않았습니다.</p>
   </div>
 </details>
 <script type="application/json" data-cn-site set:html={JSON.stringify({ siteName: site.name }).replace(/</g, "\\u003c")} />
@@ -47,10 +48,13 @@ const { open = false } = Astro.props;
     const reset = box.querySelector<HTMLButtonElement>("[data-cn-reset]")!;
     const { siteName } = JSON.parse(document.querySelector("[data-cn-site]")?.textContent || "{}");
     let auto = "", dirty = false;
-    const set = (t: string) => { auto = t; if (!dirty) ta.value = t; reset.hidden = !dirty || ta.value === auto; };
+    // 이메일로 보내기(2026-10-25): 메일 앱이 이 글을 채워 연다 — 사이트는 글을 받지도 저장하지도 않는다(mailto 주소만 바꿈)
+    const mail = box.querySelector<HTMLAnchorElement>("[data-cn-mail]");
+    const syncMail = () => { if (mail) mail.href = `mailto:${mail.dataset.to}?subject=${encodeURIComponent(`상담 요청 — ${siteName || ""} 홈페이지`)}&body=${encodeURIComponent(ta.value)}`; };
+    const set = (t: string) => { auto = t; if (!dirty) ta.value = t; reset.hidden = !dirty || ta.value === auto; syncMail(); };
     addEventListener("consult:update", (e) => set(buildConsultMessage({ siteName, url: location.href, ...(e as CustomEvent).detail })));
-    ta.addEventListener("input", () => { dirty = ta.value !== auto; reset.hidden = !dirty; });
-    reset.addEventListener("click", () => { dirty = false; ta.value = auto; reset.hidden = true; ta.focus(); });
+    ta.addEventListener("input", () => { dirty = ta.value !== auto; reset.hidden = !dirty; syncMail(); });
+    reset.addEventListener("click", () => { dirty = false; ta.value = auto; reset.hidden = true; syncMail(); ta.focus(); });
     box.querySelector("[data-cn-copy]")!.addEventListener("click", async () => {
       try { await navigator.clipboard.writeText(ta.value); st.textContent = "복사했습니다. 카카오톡을 열어 대화창에 붙여 넣으세요."; }
       catch { ta.focus(); ta.select(); st.textContent = "복사하지 못했습니다. 글이 선택되어 있으니 길게 눌러 복사해 주세요."; }
