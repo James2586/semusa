@@ -12,6 +12,7 @@ import UpcomingDeadlines from "../components/UpcomingDeadlines.astro";
 import { shelfSpines, inkFor } from "../lib/shelf.js";
 import Pager from "../components/Pager.astro";
 import ClosingCta from "../components/ClosingCta.astro";
+import ShortsStrip from "../components/ShortsStrip.astro";
 import life from "../data/lifemap.json";
 
 const groupName = Object.fromEntries(calcData.groups.map((g) => [g.id, g.name]));
@@ -112,6 +113,9 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
     </div>
   </section>
 
+  <!-- 4-1 부기와 1분 세금(6차 C — 유튜브 @성셈 Shorts, 못 읽으면 숨김) -->
+  <ShortsStrip />
+
   <!-- 5 상담은 이렇게 -->
   <section class="sec gut ruled" aria-labelledby="h-how">
     <div class="wrap">
@@ -153,7 +157,7 @@ const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h1
     <div class="wrap narrow">
       <span class="tag">자주 묻는 질문</span>
       <h2 class="sec-h" id="h-faq">많이 물어보시는 것</h2>
-      <div style="margin-top:18px"><FaqList limit={5} /></div>
+      <div style="margin-top:18px"><FaqList perCategory /></div>
       <p class="more"><a class="more-link" href="/faq">자주 묻는 질문 더 보기 ›</a></p>
     </div>
   </section>

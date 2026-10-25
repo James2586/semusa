@@ -89,6 +89,7 @@
     {
       "slug": "real-estate",
       "photo": "mood-pen",
+      "faq": ["양도", "취득·보유"],
       "name": "부동산 세금",
       "short": "집이나 땅을 사고팔고 보유할 때 내는 세금을 미리 계산하고 신고합니다.",
       "calculators": [
@@ -320,6 +321,7 @@
     {
       "slug": "appeal",
       "photo": "mood-book",
+      "faq": ["불복"],
       "name": "세무조사·불복",
       "short": "부당한 과세에 대한 권리 구제 및 세무 조사 시 납세자를 보호합니다.",
       "calculators": [],

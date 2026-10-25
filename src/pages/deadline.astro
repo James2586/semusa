@@ -13,7 +13,7 @@ const holidays = await fetchHolidayRows();
 const evs = data.events;
 ---
 <Base title="기한 달력" description="무슨 일이 있었는지 고르고 날짜를 넣으면, 신고 기한까지 센 날과 건너뛴 쉬는 날을 달력으로 보여 드립니다.">
-  <PageHead tag="기한 달력" title="기한을 달력으로 봅니다" crumbs={[{ name: "기한 달력" }]}
+  <PageHead buki="deadline" tag="기한 달력" title="기한을 달력으로 봅니다" crumbs={[{ name: "기한 달력" }]}
     lead="센 날이 칸을 따라 채워지고, 마감일이 쉬는 날이면 그 칸을 건너 진짜 마감일에 멈춥니다." />
 
   <section class="gut dc-sec" data-dc>

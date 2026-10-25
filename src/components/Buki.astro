@@ -1,0 +1,9 @@
+---
+// 부기(2026-10-25 6차 C): 유튜브 @성셈 Shorts의 3D 부엉이. 그림은 통합검색 22(택스 서치) public/mascot/3d에서 옮겨 줄인 것(public/img/buki/).
+// 장식이라 화면 읽기는 건너뛴다(alt=""). 한 쪽에 한 마리, 안내 문구가 원래 있는 자리에만 — 계산 결과·세율 표 위에는 두지 않는다.
+// 숫자·결과·약속을 말하지 않는다(말풍선 없음). 자세: hello 인사 · deadline 기한 · calculated 계산 · found 찾음 · warning 확인할 것 · default 기본.
+interface Props { pose: "hello" | "deadline" | "calculated" | "found" | "warning" | "default"; cls?: string; sizes?: string; eager?: boolean }
+const { pose, cls, sizes = "120px", eager = false } = Astro.props;
+---
+<img class:list={["buki", cls]} src={`/img/buki/buki-${pose}-200.webp`} srcset={`/img/buki/buki-${pose}-200.webp 200w, /img/buki/buki-${pose}-300.webp 300w`}
+  sizes={sizes} width="200" height="240" alt="" loading={eager ? "eager" : "lazy"} decoding="async" />

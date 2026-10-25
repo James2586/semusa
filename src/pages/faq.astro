@@ -15,8 +15,8 @@ const faqLd = {
   mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: strip(f.text) } })),
 };
 ---
-<Base title="자주 묻는 질문" description="상속세 신고 기한, 증여재산공제, 법인 기장 등 자주 묻는 질문." jsonLd={[faqLd]}>
-  <PageHead tag="자주 묻는 질문" title="많이 물어보시는 것" crumbs={[{ name: "자주 묻는 질문" }]} lead="답 아래에 근거 조문을 함께 적었습니다." />
+<Base title="자주 묻는 질문" description="상속·증여, 양도, 취득·보유, 법인, 불복 — 자주 묻는 질문을 근거 조문·법조문 원문과 함께." jsonLd={[faqLd]}>
+  <PageHead tag="자주 묻는 질문" title="많이 물어보시는 것" crumbs={[{ name: "자주 묻는 질문" }]} lead="답 아래에 근거 조문을 적고, 법조문 원문도 펼쳐 볼 수 있게 했습니다. 결과는 사실관계에 따라 달라질 수 있으니 상담 때 함께 확인합니다." />
   <section class="gut faq-sec">
     <div class="wrap narrow">
       {faqs.length >= 8 && <div class="chips" role="group" aria-label="분야로 거르기">
@@ -34,7 +34,7 @@ const faqLd = {
 </style>
 <script>
   const chips = [...document.querySelectorAll<HTMLButtonElement>(".fchip[data-cat]")];
-  const qs = [...document.querySelectorAll<HTMLDetailsElement>(".faq details")];
+  const qs = [...document.querySelectorAll<HTMLDetailsElement>(".faq > details")];
   const st = document.getElementById("faq-status")!; // 질문이 8개 이상일 때만 칩이 있다
   for (const c of chips) c.addEventListener("click", () => {
     const k = c.dataset.cat!;

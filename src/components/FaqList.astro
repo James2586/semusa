@@ -1,16 +1,39 @@
 ---
-// categories: 서비스 쪽에서 그 분야 질문만(services.json faq — faq 파일의 category)
-interface Props { limit?: number; categories?: string[] }
-const { limit, categories } = Astro.props;
+// categories: 서비스 쪽에서 그 분야 질문만(services.json faq — faq 파일의 category). perCategory: 분야마다 첫 질문 하나씩(첫 화면)
+interface Props { limit?: number; categories?: string[]; perCategory?: boolean }
+const { limit, categories, perCategory } = Astro.props;
 import { faqId } from "../lib/searchIndex.js";
+import { faqQuotes } from "../lib/faqSources.js";
+import { splitLawLine } from "../lib/lawTable.js";
+import faqSrc from "../../docs/faq-sources.json";
+// 근거 원문(6차 D): 머리말 src가 있는 질문은 답 아래 「법조문 원문」 접힘에 고른 원문 줄을 그대로(표는 칸으로) — 해석·요약 없음
+const ymd = (s: string | null) => (s ? `${Number(s.slice(0, 4))}. ${Number(s.slice(4, 6))}. ${Number(s.slice(6, 8))}.` : "");
+// 법제처 주소는 그 판으로(세율 쪽과 같음)
+const lawUrl = (a: any) => `https://www.law.go.kr/법령/${a.law.replace(/\s/g, "")}/(${a.promulgationNo},${a.promulgationDate})/${a.article}`;
+const quotesOf = (f: any) => f.src ? faqQuotes(f.src, (faqSrc as any).items).filter((q) => q.src) : [];
 const mods = Object.entries(import.meta.glob("../content/faq/*.md", { eager: true })) as [string, any][];
-const faqs = mods.map(([path, m]) => ({ ...m.frontmatter, id: faqId(path), Content: m.Content })).filter((f) => !categories || categories.includes(f.category)).sort((a, b) => Number(a.order) - Number(b.order)).slice(0, limit);
+const faqs = mods.map(([path, m]) => ({ ...m.frontmatter, id: faqId(path), Content: m.Content })).filter((f) => !categories || categories.includes(f.category)).sort((a, b) => Number(a.order) - Number(b.order))
+  .filter((f, i, all) => !perCategory || all.findIndex((x) => x.category === f.category) === i).slice(0, limit);
 ---
 <div class="faq">
   {faqs.map((f) => (
     <details data-cat={f.category} id={f.id}>
       <summary><span class="q" aria-hidden="true">Q</span><span>{f.q}</span><span class="pm" aria-hidden="true">+</span></summary>
-      <div class="a prose"><f.Content />{f.law && <p class="law">{f.law}</p>}</div>
+      <div class="a prose"><f.Content />{f.law && <p class="law">{f.law}</p>}
+        {quotesOf(f).length > 0 && (
+          <details class="fq-src">
+            <summary>법조문 원문 보기</summary>
+            {quotesOf(f).map((q: any, qi: number) => (
+              <div class="fq-q">
+                <p class="fq-h">{q.src.law} {q.src.article}({q.src.title}) <small>{q.src.promulgationNo && `${/시행령/.test(q.src.law) ? "대통령령" : "법률"} 제${q.src.promulgationNo}호(${ymd(q.src.promulgationDate)} 공포) · `}법제처 원문 {q.src.fetchedAt.split("-").map(Number).join(". ")}. 받음</small></p>
+                {q.lines.map((l: any) => <div class={`fq-l d${l.d}`}>{splitLawLine(l.t).map((seg: any, si: number) => seg.type === "text" ? <p>{seg.text}</p>
+                  : seg.type === "table" ? <div class="fq-tw" tabindex="0" role="region" aria-label={`${f.id} ${q.src.article} 표 ${qi + 1}-${si}`}><table><thead><tr>{seg.head.map((h: string) => <th scope="col">{h}</th>)}</tr></thead><tbody>{seg.rows.map((r: string[]) => <tr>{r.map((c) => <td>{c}</td>)}</tr>)}</tbody></table></div>
+                  : <p class="fq-raw">[칸이 합쳐진 표나 계산식 — <a href={lawUrl(q.src)} target="_blank" rel="noopener">법제처 원문에서 확인 ↗<span class="sr-only">(새 창)</span></a>]</p>)}</div>)}
+              </div>
+            ))}
+          </details>
+        )}
+      </div>
     </details>
   ))}
 </div>
@@ -24,6 +47,22 @@ const faqs = mods.map(([path, m]) => ({ ...m.frontmatter, id: faqId(path), Conte
   .pm { margin-left: auto; color: var(--gold-text); font-size: 22px; line-height: 1.2; transition: transform .2s; flex: none; }
   .faq details[open] .pm { transform: rotate(45deg); }
   .a { padding: 0 0 20px 26px; font-size: 16.5px; }
+  .fq-src { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  .fq-src > summary { cursor: pointer; padding: 10px 14px; font-size: 15px; font-weight: 600; color: var(--gold-text); min-height: 44px; display: flex; align-items: center; gap: 6px; }
+  .fq-src > summary::before { content: "▸"; transition: transform .2s; }
+  .fq-src[open] > summary::before { transform: rotate(90deg); }
+  @media (prefers-reduced-motion: reduce) { .fq-src > summary::before { transition: none; } }
+  .fq-src > summary:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .fq-q { padding: 4px 14px 14px; display: grid; gap: 6px; }
+  .fq-q + .fq-q { border-top: 1px solid var(--line); padding-top: 12px; }
+  .fq-h { font-size: 15px; font-weight: 700; margin: 0; }
+  .fq-h small { display: block; font-size: 14px; font-weight: 400; color: var(--muted); }
+  .fq-l p { margin: 0; font-size: 15px; line-height: 1.7; color: var(--ink2); }
+  .fq-l.d2 { padding-left: 1em; } .fq-l.d3 { padding-left: 2em; }
+  .fq-tw { overflow-x: auto; margin: 6px 0; }
+  .fq-tw:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .fq-tw table { border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .fq-tw th, .fq-tw td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; white-space: nowrap; }
 </style>
 <script>
   // 찾기에서 /faq#q-… 로 오면 그 질문을 펼친다

@@ -15,8 +15,8 @@ function htmlFiles(dir) {
   });
 }
 
-test("페이지 43개(색인 39 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
-  assert.equal(htmlFiles(DIST).length, 43);
+test("페이지 44개(색인 40 + 공지·개인정보·오프라인 + 404)", { skip: !has }, () => {
+  assert.equal(htmlFiles(DIST).length, 44);
 });
 
 test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 건너뛰기", { skip: !has }, () => {
@@ -40,7 +40,7 @@ test("공지·개인정보·404는 noindex이고 sitemap에 없다", { skip: !ha
     assert.match(readFileSync(join(DIST, p), "utf8"), /<meta name="robots" content="noindex"/, p);
   }
   const sm = readFileSync(join(DIST, "sitemap-0.xml"), "utf8");
-  assert.equal((sm.match(/<loc>/g) || []).length, 39);
+  assert.equal((sm.match(/<loc>/g) || []).length, 40);
   assert.ok(!/notice|privacy|404/.test(sm));
 });
 
@@ -321,6 +321,7 @@ test("원문 기준일: 옮겨 둔 원문마다 법률 번호·받은 날 · 기
   const wf = readFileSync(".github/workflows/law-watch.yml", "utf8");
   assert.match(wf, /make-glossary-sources\.mjs tax-search\/tests\/fixtures --check/);
   assert.match(wf, /make-rates-sources\.mjs tax-search\/tests\/fixtures --check/);
+  assert.match(wf, /make-faq-sources\.mjs tax-search\/tests\/fixtures --check/);
   assert.match(wf, /TAX_SEARCH_TOKEN/);
 });
 
@@ -333,4 +334,52 @@ test("세율 쪽: 법제처 링크는 그 판으로 · 판 이름표는 원문 �
   assert.doesNotMatch(h, /20613/); // 바로 앞 판엔 그 판 세율의 적용례가 아닌 부칙을 붙이지 않음
   assert.match(h, /같은 조 ②은\(는\) 이 쪽에 옮기지 않았습니다/); // 상증법 §22②
   assert.doesNotMatch(h, /부칙\(법률 제\d+호, \d{8}\)/); // 날짜는 읽는 꼴로
+});
+
+test("첫 화면 가벼움(6차 A): 그려 둔 요소 1,000개 이하 · 자릿수 바퀴 칸은 쉬는 상태에 그리지 않음", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "index.html"), "utf8").replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, "");
+  const n = (h.match(/<[a-zA-Z][^>]*>/g) || []).length;
+  assert.ok(n <= 1000, `첫 화면 요소 ${n}개`);
+  // 「매년 돌아오는 날」은 쉬는 상태에서 숫자 글자만 — 바퀴(20칸)는 화면에 들어올 때 잠깐만 만든다
+  const up = readFileSync(new URL("../src/components/UpcomingDeadlines.astro", import.meta.url), "utf8");
+  assert.match(up, /dd\.textContent = label/);
+  assert.match(up, /function spin\(\)/);
+});
+
+test("이 사이트가 일하는 방식(6차 B): 원칙·기한 계산 단계(근거 조문)·원문 수·측정값·둘러보기 · 바닥글·소개 쪽에서 잇기", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "how.html"), "utf8");
+  for (const s of ["법조문은 원문 그대로", "계산은 과정까지", "민법 제157조", "민법 제160조", "국세기본법 제5조 제1항", "상속세 및 증여세법 제68조", "Lighthouse", "3분 둘러보기", "/deadline?e=gift&amp;d=2026-11-10"]) assert.ok(h.includes(s), s);
+  // 용어 풀이·세율·질문이 옮겨 둔 원문 — 같은 조문(같은 판)은 한 번만
+  const all = ["glossary", "rates", "faq"].flatMap((k) => Object.values(JSON.parse(readFileSync(new URL(`../docs/${k}-sources.json`, import.meta.url), "utf8")).items));
+  const n = new Set(all.map((a) => `${a.law}|${a.article}|${a.promulgationNo}`)).size;
+  assert.ok(h.includes(`옮겨 둔 법조문 ${n}조문`), String(n));
+  assert.match(readFileSync(join(DIST, "index.html"), "utf8"), /href="\/how"/);
+  assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /href="\/how"/);
+});
+
+test("부기(6차 C): 한 쪽에 한 마리 이하 · 장식(alt 빈칸) · 기한 달력·계산기·길잡이·세율·404에 · 오프라인은 「연결 안 됨」 그림을 쪽 안에", { skip: !has }, () => {
+  for (const f of htmlFiles(DIST)) {
+    const h = readFileSync(f, "utf8");
+    const n = (h.match(/class="buki[ "]/g) || []).length;
+    assert.ok(n <= 1, `${f}: 부기 ${n}마리`);
+    for (const m of h.matchAll(/<img class="buki[^>]*>/g)) assert.match(m[0], /alt=""/, f);
+  }
+  for (const [p, pose] of [["deadline.html", "deadline"], ["calculators/index.html", "calculated"], ["guide.html", "found"], ["rates.html", "warning"], ["404.html", "default"]]) {
+    const file = existsSync(join(DIST, p)) ? join(DIST, p) : join(DIST, p.replace("/index.html", ".html"));
+    assert.match(readFileSync(file, "utf8"), new RegExp(`/img/buki/buki-${pose}-200\\.webp`), p);
+  }
+  const off = readFileSync(join(DIST, "offline.html"), "utf8");
+  assert.match(off, /class="off-buki"[^>]*>\s*<svg/);
+  assert.doesNotMatch(off, /\/img\/buki\/buki-offline\.svg/);
+});
+
+test("자주 묻는 질문 20개(6차 D): 근거 조문·원문 접힘 · 분야 칩 · 첫 화면은 분야마다 하나 · 질문 구조화 데이터 20개", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "faq.html"), "utf8");
+  assert.equal((h.match(/<details data-cat=/g) || []).length, 20);
+  assert.ok((h.match(/법조문 원문 보기/g) || []).length >= 17);
+  for (const c of ["상속", "증여", "양도", "취득·보유", "법인·기장", "불복"]) assert.match(h, new RegExp(`data-cat="${c}"`), c);
+  const ld = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap((m) => [JSON.parse(m[1])].flat()).find((j) => j["@type"] === "FAQPage");
+  assert.equal(ld.mainEntity.length, 20);
+  const home = readFileSync(join(DIST, "index.html"), "utf8").split('id="h-faq"')[1].split("</section>")[0];
+  assert.equal((home.match(/<details data-cat=/g) || []).length, 6);
 });
