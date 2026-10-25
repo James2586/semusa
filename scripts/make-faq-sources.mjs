@@ -33,6 +33,11 @@ const SPEC = [
   ["basic66", "procedure-law-excerpts.json", ["basic", "66"], "국세기본법", "제66조", ["basicMeta"]],
   ["basic68", "procedure-law-excerpts.json", ["basic", "68"], "국세기본법", "제68조", ["basicMeta"]],
   ["basic81_15", "procedure-law-excerpts.json", ["basic", "81의15"], "국세기본법", "제81조의15", ["basicMeta"]],
+  // 불복 절차 한눈에 표(2026-10-25, src/data/appeal.json) — 결정 기간·행정소송·기한 특례
+  ["basic5", "decision-period-law.json", ["basic", "5"], "국세기본법", "제5조", ["meta", "basic"]],
+  ["basic56", "decision-period-law.json", ["basic", "56"], "국세기본법", "제56조", ["meta", "basic"]],
+  ["basic65", "decision-period-law.json", ["basic", "65"], "국세기본법", "제65조", ["meta", "basic"]],
+  ["basic80_2", "decision-period-law.json", ["basic", "80의2"], "국세기본법", "제80조의2", ["meta", "basic"]],
 ];
 
 const items = {};

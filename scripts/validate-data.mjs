@@ -296,6 +296,40 @@ export function checkFaq(name, text, srcItems = null) {
 
 // 운영자 결정(2026-10-24): 운영자가 말하기 전까지 "세무사" 명칭을 쓰지 않는다.
 export const BANNED_WORDS = ["세무사"];
+// 불복 절차 한눈에 표(2026-10-25): 칸 글의 숫자는 고른 원문 줄에, law에는 원문 법 이름이 있어야 한다(자주 묻는 질문과 같은 대조)
+export function checkAppeal(text, srcItems) {
+  const errors = [];
+  const { data, error } = parseJsonFile("appeal.json", text);
+  if (error) return [error];
+  if (!(data.rows || []).length) errors.push("appeal.json: rows가 비었습니다.");
+  const one = (at, row, fields) => {
+    for (const k of ["law", "src", ...fields]) if (!row[k]) errors.push(`appeal.json ${at}: ${k}가 비었습니다.`);
+    if (!row.src) return;
+    const quotes = faqQuotes(row.src, srcItems);
+    for (const q of quotes) {
+      if (!q.src) errors.push(`appeal.json ${at}: src "${q.id}"가 docs/faq-sources.json에 없습니다.`);
+      else if (!q.lines.length) errors.push(`appeal.json ${at}: src "${q.id}"에서 고른 줄이 없습니다.`);
+      else if (!String(row.law).includes(q.src.law)) errors.push(`appeal.json ${at}: law에 원문 법 이름(${q.src.law})이 없습니다.`);
+    }
+    for (const n of faqNumberGaps(fields.map((k) => row[k]).join(" "), quotes)) errors.push(`appeal.json ${at}: 숫자 "${n}"이(가) 고른 원문에 없습니다.`);
+  };
+  (data.rows || []).forEach((r, i) => one(`${i + 1}번째 줄(${r.stage || "?"})`, r, ["stage", "when", "file", "decide"]));
+  if (data.note) one("note", data.note, ["text"]);
+  // 흐름도: 화살표·결정·설명 글의 숫자도 그 단계 표 줄(row)의 원문에 — 사건 칸(row 없음)은 숫자를 쓰지 않는다
+  const byStage = Object.fromEntries((data.rows || []).map((r) => [r.stage, r]));
+  (data.flow || []).forEach((f, i) => {
+    const at = `flow ${i + 1}번째(${[].concat(f.node || f.edge).join("·")})`;
+    if (!f.say) errors.push(`appeal.json ${at}: say(따라가기 설명)가 비었습니다.`);
+    const txt = [f.edge, f.decide, f.say].filter(Boolean).join(" ");
+    if (!f.row) { if (/\d/.test(txt)) errors.push(`appeal.json ${at}: row 없는 칸에 숫자가 있습니다.`); return; }
+    const row = byStage[f.row];
+    if (!row) { errors.push(`appeal.json ${at}: row "${f.row}"가 rows에 없습니다.`); return; }
+    const quotes = faqQuotes(row.src, srcItems);
+    for (const n of faqNumberGaps(txt, quotes)) errors.push(`appeal.json ${at}: 숫자 "${n}"이(가) ${f.row} 원문에 없습니다.`);
+  });
+  return errors;
+}
+
 export function checkTools(text, videosText) {
   const errors = [];
   const { data, error } = parseJsonFile("tools.json", text);
@@ -366,6 +400,7 @@ export function validateAll(root = ROOT) {
     const t = readFileSync(join(faqDir, f), "utf8");
     errors.push(...checkFaq(f, t, faqSrc), ...checkBannedWords(`faq/${f}`, t));
   }
+  errors.push(...checkAppeal(read("src/data/appeal.json"), faqSrc), ...checkBannedWords("src/data/appeal.json", read("src/data/appeal.json")));
   return errors;
 }
 

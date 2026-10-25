@@ -9,18 +9,23 @@ import fSrc from "../../docs/faq-sources.json";
 import glossary from "../data/glossary.json";
 import rates from "../data/rates.json";
 import dl from "../data/deadlines.json";
+import appeal from "../data/appeal.json";
 
 const ymd = (s: string | null) => (s ? `${Number(s.slice(0, 4))}. ${Number(s.slice(4, 6))}. ${Number(s.slice(6, 8))}.` : "");
 const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
 const useG: Record<string, string[]> = {}, useR: Record<string, string[]> = {}, useF: Record<string, string[]> = {};
 const faqMods = Object.values(import.meta.glob("../content/faq/*.md", { eager: true })) as any[];
 for (const m of faqMods) for (const part of String(m.frontmatter?.src || "").split(";")) { const id = part.trim().split(/\s+/)[0]; if (id) (useF[id] ||= []).push(String(m.frontmatter.order)); }
+const useA = new Set([...appeal.rows.map((r) => r.src), appeal.note.src].flatMap((s) => s.split(";").map((p) => p.trim().split(/\s+/)[0]).filter(Boolean)));
 for (const t of glossary.terms as any[]) for (const q of t.quotes) (useG[q.src] ||= []).includes(t.term) || useG[q.src].push(t.term);
 for (const s of rates.sections as any[]) for (const g of s.groups) for (const it of g.items) (useR[it.src] ||= []).includes(s.name) || useR[it.src].push(s.name);
 const rows = [
   ...Object.entries((gSrc as any).items).map(([id, a]: any) => ({ a, where: `용어 풀이 — ${useG[id]?.join(", ") || "-"}`, href: "/glossary" })),
   ...Object.entries((rSrc as any).items).map(([id, a]: any) => ({ a, where: `세율·공제 — ${useR[id]?.join(", ") || "-"}`, href: "/rates" })),
-  ...Object.entries((fSrc as any).items).map(([id, a]: any) => ({ a, where: `자주 묻는 질문 — ${useF[id]?.length || 0}개`, href: "/faq" })),
+  // 같은 원문을 불복 절차 표(appeal.json)도 쓴다 — 쓰는 곳을 둘 다
+  ...Object.entries((fSrc as any).items).map(([id, a]: any) => useF[id]?.length || !useA.has(id)
+    ? { a, where: `자주 묻는 질문 — ${useF[id]?.length || 0}개${useA.has(id) ? " · 불복 절차 표" : ""}`, href: "/faq" }
+    : { a, where: "불복 절차 표", href: "/services/appeal#h-ap" }),
 ];
 const dlLaws = [...new Set([...dl.events.flatMap((e: any) => [e.law, e.fact?.law]), ...dl.yearly.map((y: any) => y.law)].filter(Boolean))];
 ---

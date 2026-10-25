@@ -1,0 +1,112 @@
+---
+// 불복 절차 흐름도(2026-10-25 운영자 「모션 그래픽으로 전체를 쉽게」): src/data/appeal.json flow — 단계·화살표·설명 글의 숫자는 원문과 대조됨(validate-data checkAppeal).
+// 그림은 HTML·CSS(SVG·바깥 그림 없음). 「따라가 보기」를 눌렀을 때만 한 단계씩 켜진다(자동 재생·반복 없음), 이전·다음으로 직접 넘길 수 있고,
+// 움직임 줄이기면 선이 미끄러지지 않고 바로 바뀐다. 자바스크립트가 없으면 설명이 모두 펼쳐진 흐름도만 보인다.
+import appeal from "../data/appeal.json";
+const flow = appeal.flow as any[];
+---
+<div class="af" data-af>
+  <div class="af-ctl">
+    <button type="button" class="btn btn-moss" data-af-play>▶ 순서대로 따라가 보기</button>
+    <div class="af-step" data-af-steps hidden>
+      <button type="button" class="btn btn-moss af-sm" data-af-prev aria-label="이전 단계">‹ 이전</button>
+      <button type="button" class="btn btn-moss af-sm" data-af-next aria-label="다음 단계">다음 ›</button>
+      <button type="button" class="btn btn-moss af-sm" data-af-stop>전체 보기</button>
+    </div>
+  </div>
+  <p class="af-st" role="status" data-af-st></p>
+  <ol class="af-list">
+    <span class="af-rail" aria-hidden="true"><span class="af-fill" data-af-fill></span></span>
+    {flow.map((f, i) => f.edge ? (
+      <li class="af-edge" data-af-i={i}>
+        <span class="af-dl">{f.edge}</span>
+        <span class="af-say">{f.say}</span>
+      </li>
+    ) : (
+      <li class:list={["af-node", f.kind === "event" && "af-ev", f.optional && "af-opt"]} data-af-i={i}>
+        <span class="af-dot" aria-hidden="true"></span>
+        <span class="af-card">
+          <span class="af-name">{[].concat(f.node).map((n: string, k: number) => <>{k > 0 && <span class="af-or">·</span>}<b>{n}</b></>)}{f.optional && <span class="af-tag">거치지 않아도 됨</span>}</span>
+          {f.decide && <span class="af-dec">결정: {f.decide}</span>}
+          <span class="af-say">{f.say}</span>
+        </span>
+      </li>
+    ))}
+  </ol>
+</div>
+<style>
+  .af { display: grid; gap: 14px; }
+  .af-ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .af-step { display: flex; flex-wrap: wrap; gap: 8px; }
+  .af-step[hidden] { display: none; }
+  .af-sm { min-height: 44px; padding: 0 16px; font-size: 15.5px; }
+  .af-st { margin: 0; font-size: 15px; color: var(--ink2); min-height: 0; }
+  .af-st:empty { display: none; }
+  .af-list { position: relative; list-style: none; margin: 0; padding: 0 0 0 34px; display: grid; gap: 0; }
+  /* 세로 선: 회색 바탕 위에 숲색이 지금 단계까지 차오른다 */
+  .af-rail { position: absolute; left: 11px; top: 14px; bottom: 14px; width: 4px; border-radius: 2px; background: var(--line2); }
+  .af-fill { position: absolute; left: 0; top: 0; width: 100%; height: 0; border-radius: 2px; background: var(--moss); transition: height .55s cubic-bezier(.2, .7, .2, 1); }
+  .af-node { position: relative; padding: 8px 0; }
+  .af-dot { position: absolute; left: -32px; top: 22px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); border: 3px solid var(--moss); box-sizing: border-box; transition: transform .3s, background .3s; }
+  .af-card { display: grid; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; transition: border-color .3s, box-shadow .3s, opacity .3s; }
+  .af-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .af-name b { font-size: 17.5px; }
+  .af-or { color: var(--muted); }
+  .af-tag { font-size: 14px; font-weight: 700; color: var(--gold-text); border: 1px solid var(--gold); border-radius: 999px; padding: 1px 10px; }
+  .af-dec { font-size: 15.5px; font-weight: 600; color: var(--moss); }
+  .af-say { font-size: 15px; color: var(--ink2); line-height: 1.65; }
+  .af-ev .af-card { background: var(--paper); border-style: solid; }
+  .af-ev .af-dot { background: var(--moss); }
+  .af-opt .af-card { border-style: dashed; border-color: var(--line2); }
+  /* 화살표 칸: 기한 칩 + 아래로 화살표 */
+  .af-edge { position: relative; padding: 6px 0 6px 2px; display: grid; gap: 4px; transition: opacity .3s; }
+  .af-dl { justify-self: start; font-size: 15px; font-weight: 700; color: var(--gold-text); background: var(--soft, #F5EDD4); border-radius: 999px; padding: 4px 12px; }
+  .af-dl::before { content: "↓ "; }
+  .af-edge .af-say { padding-left: 2px; }
+  /* 따라가기 중: 지난 단계는 그대로, 지금 단계는 강조, 아직 안 온 단계는 흐리게 */
+  .af.is-walk .af-say { display: none; }
+  .af.is-walk [data-af-i].is-now .af-say { display: block; }
+  .af.is-walk [data-af-i].is-later { opacity: .35; }
+  .af.is-walk .af-node.is-now .af-card { border-color: var(--moss); border-style: solid; box-shadow: 0 10px 22px -14px rgba(21, 25, 21, .5); }
+  .af.is-walk .af-node.is-now .af-dot { transform: scale(1.25); background: var(--gold); border-color: var(--moss); }
+  .af.is-walk .af-edge.is-now .af-dl { background: var(--moss); color: var(--on-moss); }
+  @media (prefers-reduced-motion: reduce) { .af-fill, .af-dot, .af-card, .af-edge { transition: none; } }
+  @media (min-width: 900px) {
+    .af-list { max-width: 760px; }
+  }
+</style>
+<script>
+  // 따라가기: 누를 때만. 한 단계씩 2.4초(움직임 줄이기면 같은 간격으로 바로 바뀜), 이전·다음·전체 보기로 언제든 멈춘다.
+  document.querySelectorAll<HTMLElement>("[data-af]").forEach((af) => {
+    const items = [...af.querySelectorAll<HTMLElement>("[data-af-i]")];
+    const fill = af.querySelector<HTMLElement>("[data-af-fill]")!, st = af.querySelector<HTMLElement>("[data-af-st]")!;
+    const play = af.querySelector<HTMLButtonElement>("[data-af-play]")!, steps = af.querySelector<HTMLElement>("[data-af-steps]")!;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let cur = -1, timer = 0;
+    const list = af.querySelector<HTMLElement>(".af-list")!;
+    const show = (i: number) => {
+      cur = Math.max(0, Math.min(items.length - 1, i));
+      af.classList.add("is-walk");
+      items.forEach((el, k) => { el.classList.toggle("is-now", k === cur); el.classList.toggle("is-later", k > cur); });
+      const el = items[cur], top = list.getBoundingClientRect().top;
+      const r = el.getBoundingClientRect();
+      fill.style.height = `${Math.max(0, r.top - top + Math.min(r.height, 40) - 14)}px`;
+      const name = el.querySelector(".af-name")?.textContent?.replace("거치지 않아도 됨", "").trim() || el.querySelector(".af-dl")?.textContent || "";
+      st.textContent = `${cur + 1} / ${items.length} — ${name}`;
+      const vr = el.getBoundingClientRect();
+      if (vr.top < 80 || vr.bottom > innerHeight - 80) el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+    };
+    const stopAuto = () => { clearInterval(timer); timer = 0; play.textContent = "▶ 순서대로 따라가 보기"; };
+    const reset = () => { stopAuto(); af.classList.remove("is-walk"); items.forEach((el) => el.classList.remove("is-now", "is-later")); fill.style.height = "0"; st.textContent = ""; steps.hidden = true; cur = -1; };
+    play.addEventListener("click", () => {
+      if (timer) { stopAuto(); return; }
+      steps.hidden = false;
+      show(cur < 0 || cur >= items.length - 1 ? 0 : cur + 1);
+      play.textContent = "■ 멈춤";
+      timer = window.setInterval(() => { if (cur >= items.length - 1) { stopAuto(); st.textContent += " (끝)"; return; } show(cur + 1); }, 2400);
+    });
+    af.querySelector("[data-af-prev]")!.addEventListener("click", () => { stopAuto(); show(cur - 1); });
+    af.querySelector("[data-af-next]")!.addEventListener("click", () => { stopAuto(); show(cur + 1); });
+    af.querySelector("[data-af-stop]")!.addEventListener("click", () => { reset(); play.focus(); });
+  });
+</script>

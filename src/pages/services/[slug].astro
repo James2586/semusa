@@ -15,6 +15,8 @@ import calcData from "../../data/calculators.json";
 import home from "../../data/home.json";
 import site from "../../data/site.json";
 import DeadlineCalc from "../../components/DeadlineCalc.astro";
+import AppealTable from "../../components/AppealTable.astro";
+import AppealFlow from "../../components/AppealFlow.astro";
 
 export function getStaticPaths() {
   return svcData.services.map((s) => ({ params: { slug: s.slug }, props: { svc: s } }));
@@ -70,6 +72,19 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
       </div>
     </div>
   </section>
+
+  {svc.slug === "appeal" && (
+    <section class="sec gut ruled" aria-labelledby="h-ap">
+      <div class="wrap">
+        <span class="tag">불복 절차 한눈에</span>
+        <h2 class="sec-h" id="h-ap">통지부터 행정소송까지, 한 길로</h2>
+        <p class="sec-sub">절차마다 청구 기한과 결정 기간이 다릅니다. 어느 절차가 맞는지는 사정마다 달라 상담 때 함께 정합니다.</p>
+        <div style="margin-top:20px"><AppealFlow /></div>
+        <h3 class="sub-h ap-h">표로 비교하기</h3>
+        <AppealTable />
+      </div>
+    </section>
+  )}
 
   <section class="sec gut ruled" aria-labelledby="h-who">
     <div class="wrap two two-head">
@@ -152,6 +167,7 @@ const photo = svc.photo ? { name: svc.photo, w: [800, 1200], ratio: "4 / 5" } : 
   .dl-two > * { min-width: 0; }
   .yr .up-list { margin-top: 14px; }
   .sub-h { font-size: 18px; margin-bottom: 4px; }
+  .ap-h { margin: 36px 0 12px; }
   .dls { list-style: none; margin: 14px 0 0; padding: 0; border-top: 1px solid var(--ink); }
   .dls li { display: grid; gap: 4px; padding: 16px 0; border-bottom: 1px solid var(--line); }
   .dls b { font-size: 17.5px; }
