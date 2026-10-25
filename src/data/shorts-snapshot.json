@@ -1,8 +1,18 @@
 {
   "_note": "「부기와 1분 세금」 저장본 — 빌드 때 유튜브 피드를 못 읽으면 이것을 쓴다. scripts/update-shorts-snapshot.mjs로만 만든다(손으로 고치지 말 것). entries는 피드의 Shorts 전부(「세무사」 든 제목 제외) — 세금 주제 고르기는 빌드 때 shorts.json include로.",
   "savedAt": "2026-10-25",
-  "latest": "2026-10-24",
+  "latest": "2026-10-25",
   "entries": [
+    {
+      "title": "같은 2억 원도 누구에게 받느냐에 따라 세금이 다릅니다",
+      "link": "https://www.youtube.com/shorts/nxBuR52toFA",
+      "date": "2026-10-25"
+    },
+    {
+      "title": "대법원 폭탄 판결! 집주인이 실거주하면 세입자를 정말 내보낼 수 있을까?",
+      "link": "https://www.youtube.com/shorts/XZ4MxEfSpUg",
+      "date": "2026-10-25"
+    },
     {
       "title": "가업상속공제 경영기간 10년→30년으로 늘어난다",
       "link": "https://www.youtube.com/shorts/zia8yyRwjc4",
@@ -66,16 +76,6 @@
     {
       "title": "재산세, 2030년 평균 53.5% 늘어날까",
       "link": "https://www.youtube.com/shorts/7J12-cdNF58",
-      "date": "2026-10-17"
-    },
-    {
-      "title": "프리랜서도 야근수당을 받을 수 있을까요?",
-      "link": "https://www.youtube.com/shorts/nf7lEoIWibg",
-      "date": "2026-10-17"
-    },
-    {
-      "title": "신혼집 증여세, 5억 지원받을 때 확인 안하면 증여세 폭탄",
-      "link": "https://www.youtube.com/shorts/Rsh2Zdw7fY4",
       "date": "2026-10-17"
     }
   ]

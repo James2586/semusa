@@ -40,14 +40,16 @@ const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
   .sh-head :global(.sh-buki) { width: 96px; height: auto; display: block; }
   .sh-head .more-link { margin-top: 14px; }
   .sh-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .sh-card { display: grid; grid-template-rows: auto 1fr auto; gap: 10px; min-height: 172px; height: 100%; padding: 14px; border-radius: 10px; background: var(--moss); color: var(--on-moss); text-decoration: none;
-    box-shadow: inset 0 0 0 1px rgba(243, 240, 231, .08); transition: transform .2s cubic-bezier(.2, .7, .2, 1); }
-  .sh-card:hover, .sh-card:focus-visible { transform: translateY(-3px); }
-  .sh-card:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-  .sh-kind { display: inline-flex; align-items: center; gap: 4px; justify-self: start; font-size: 14px; font-weight: 700; color: var(--gold-hi); }
+  /* 흰 카드 + 제목 왼쪽 금색 줄 — 계산기·서비스 카드와 같은 모양(2026-10-25 운영자: 진한 녹색은 「누르세요」 버튼 색이라 목록 카드엔 쓰지 않음) */
+  .sh-card { display: grid; grid-template-rows: auto 1fr auto; gap: 10px; min-height: 172px; height: 100%; padding: 14px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none;
+    transition: border-color .2s, transform .25s, box-shadow .25s; }
+  .sh-card:hover, .sh-card:focus-visible { border-color: var(--moss); transform: translateY(-3px); box-shadow: 0 10px 22px -14px rgba(21, 25, 21, .45); }
+  .sh-card:active { border-color: var(--moss); transform: translateY(-4px); box-shadow: 0 12px 24px -14px rgba(21, 25, 21, .5); transition-duration: .1s; }
+  .sh-card:focus-visible { outline: 3px solid var(--moss); outline-offset: 2px; }
+  .sh-kind { display: inline-flex; align-items: center; gap: 4px; justify-self: start; font-size: 14px; font-weight: 700; color: var(--gold-text); }
   .sh-kind svg { width: 14px; height: 14px; }
-  .sh-card b { font-size: 16px; line-height: 1.5; font-weight: 700; word-break: keep-all; overflow-wrap: anywhere; }
-  .sh-card small { font-size: 14px; color: var(--on-moss2); font-variant-numeric: tabular-nums; }
+  .sh-card b { align-self: start; font-size: 16px; line-height: 1.5; font-weight: 700; word-break: keep-all; overflow-wrap: anywhere; border-left: 3px solid var(--gold); padding-left: 9px; }
+  .sh-card small { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
   /* 휴대폰은 4개만(세로로 길어지지 않게) — 나머지는 「Shorts 모두 보기」로 */
   @media (max-width: 899px) { .sh-list li:nth-child(n + 5) { display: none; } }
   @media (prefers-reduced-motion: reduce) { .sh-card { transition: none; } }
