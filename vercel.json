@@ -2,6 +2,7 @@
   "framework": "astro",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "git": { "deploymentEnabled": { "claude/**": false, "ccr-*": false } },
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [

@@ -1,6 +1,7 @@
 # semusa — 하나 더 · 세무법인 성수 송파 WM센터 홈페이지
 
 - 배포: https://semusatax.vercel.app (main 병합 → Vercel). 작업 가지에서 만든 것은 단계가 끝나 운영자가 확인하기 전에는 main에 병합하지 않는다.
+  작업 가지(`claude/**`·`ccr-*`)는 미리보기 배포를 만들지 않는다(`vercel.json` `git.deploymentEnabled` — 2026-10-25 Hobby 하루 배포 한도에 걸려 PR #26이 운영에 안 올라감). 병합 뒤 「운영에 올라갔다」고 말하기 전에 그 커밋의 Vercel 상태(`/repos/James2586/semusa/commits/<sha>/status`)를 확인할 것. 병합은 잘게 쪼개지 말고 묶어서.
 - Astro 7 정적 사이트. `npm run build && npm test`(자료 검사·빌드·제목 글꼴 자르기·검사 33개).
 
 ## 운영자 결정 (바꾸려면 운영자에게 먼저 묻는다)
