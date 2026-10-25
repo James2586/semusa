@@ -18,6 +18,7 @@
 - 글자는 14px 이상, 본문 17px. 한글 기울임 금지.
 - 본문은 기기 글꼴(내려받기 0). 제목 글꼴은 빌드 뒤 `scripts/subset-fonts.mjs`가 쓰인 글자만 잘라 `dist/fonts/`에 만든다 — 제목 글꼴(`--f-display`)을 쓰는 새 클래스는 `SERIF_CLASSES`에 더한다(`tests/fonts.test.mjs`).
 - 세법 숫자·기한은 법조문 원문과 대조한 것만, 근거 조문을 같이 적는다(FAQ `law:` 칸).
+- 자주 묻는 질문(6차 D, 20개): 순서 4부터는 머리말 `src:`(근거 이름 + 고를 항 ①… 또는 호 1. — `docs/faq-sources.json`, `scripts/make-faq-sources.mjs`로만 옮김) 필수 — 답의 숫자는 고른 원문 줄(과 그 판의 번호·시행일)에 있어야 한다(`checkFaq`·`src/lib/faqSources.js`). 답 아래 「법조문 원문 보기」는 고른 줄 그대로(칸이 합쳐진 표는 법제처 링크로), 고른 줄에 「세무사」 금지(법인세법 제60조 ⑨에 있음 — ①③만 고름). 분야(category)를 더하면 topics.json·services.json `faq`도. 첫 화면은 분야마다 첫 질문(`perCategory`). 원문 감시(law-watch)에 faq-sources는 아직 넣지 않았다.
 - 결과를 약속하는 말("세금 ○% 절감" 등) 금지. 계산기 결과는 참고용 문구를 붙인다.
 - 하위 컴포넌트(`KakaoIcon` 등)에 스타일을 줄 땐 `:global()` — Astro 범위 스타일은 자식 컴포넌트에 닿지 않는다.
 - 서비스 페이지의 기한(`services.json` deadlines)·계산기 안내 글(`calculators.json`)은 법조문 원문과 대조한 것만, `law`(근거 조문) 필수 — 근거 인용은 `docs/calculator-content-sources.json`. 글을 고치면 근거도 같이 고친다.

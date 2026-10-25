@@ -370,3 +370,14 @@ test("부기(6차 C): 한 쪽에 한 마리 이하 · 장식(alt 빈칸) · 기�
   assert.match(off, /class="off-buki"[^>]*>\s*<svg/);
   assert.doesNotMatch(off, /\/img\/buki\/buki-offline\.svg/);
 });
+
+test("자주 묻는 질문 20개(6차 D): 근거 조문·원문 접힘 · 분야 칩 · 첫 화면은 분야마다 하나 · 질문 구조화 데이터 20개", { skip: !has }, () => {
+  const h = readFileSync(join(DIST, "faq.html"), "utf8");
+  assert.equal((h.match(/<details data-cat=/g) || []).length, 20);
+  assert.ok((h.match(/법조문 원문 보기/g) || []).length >= 17);
+  for (const c of ["상속", "증여", "양도", "취득·보유", "법인·기장", "불복"]) assert.match(h, new RegExp(`data-cat="${c}"`), c);
+  const ld = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap((m) => [JSON.parse(m[1])].flat()).find((j) => j["@type"] === "FAQPage");
+  assert.equal(ld.mainEntity.length, 20);
+  const home = readFileSync(join(DIST, "index.html"), "utf8").split('id="h-faq"')[1].split("</section>")[0];
+  assert.equal((home.match(/<details data-cat=/g) || []).length, 6);
+});

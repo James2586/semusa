@@ -1,6 +1,7 @@
 // 빌드 전에 운영자가 고치는 파일(src/data/*.json, src/content/faq/*.md)을 검사한다.
 // 틀린 곳이 있으면 파일 이름과 줄 번호를 한국어로 알려 주고 빌드를 멈춘다.
 import { splitLawLine, pickParagraphs } from "../src/lib/lawTable.js";
+import { faqQuotes, faqNumberGaps } from "../src/lib/faqSources.js";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -268,7 +269,7 @@ export function parseFrontmatter(text) {
   return { fm, body: m[2].trim() };
 }
 
-export function checkFaq(name, text) {
+export function checkFaq(name, text, srcItems = null) {
   const errors = [];
   const p = parseFrontmatter(text);
   if (!p) return [`faq/${name}: 맨 위 --- 사이 머리말이 없습니다.`];
@@ -276,6 +277,20 @@ export function checkFaq(name, text) {
   if (!p.fm.category) errors.push(`faq/${name}: category가 비었습니다.`);
   if (!p.fm.order || !/^\d+$/.test(p.fm.order)) errors.push(`faq/${name}: order는 숫자여야 합니다.`);
   if (!p.body) errors.push(`faq/${name}: 답 본문이 비었습니다.`);
+  // 근거 원문(6차 D): src가 있으면 고른 줄이 있어야 하고, 답의 숫자는 그 원문에 있어야 한다. 순서 4 이후(6차에 더한 질문)는 src 필수.
+  if (srcItems) {
+    if (!p.fm.src && Number(p.fm.order) >= 4) errors.push(`faq/${name}: src(근거 원문)가 비었습니다 — docs/faq-sources.json 이름과 고를 항.`);
+    if (p.fm.src) {
+      if (!p.fm.law) errors.push(`faq/${name}: law(근거 조문)가 비었습니다.`);
+      const quotes = faqQuotes(p.fm.src, srcItems);
+      for (const q of quotes) {
+        if (!q.src) errors.push(`faq/${name}: src "${q.id}"가 docs/faq-sources.json에 없습니다.`);
+        else if (!q.lines.length) errors.push(`faq/${name}: src "${q.id}"에서 고른 줄이 없습니다.`);
+        else if (!String(p.fm.law).includes(q.src.law)) errors.push(`faq/${name}: law에 원문 법 이름(${q.src.law})이 없습니다.`);
+      }
+      for (const n of faqNumberGaps(p.body, quotes)) errors.push(`faq/${name}: 답의 숫자 "${n}"이(가) 고른 원문에 없습니다.`);
+    }
+  }
   return errors;
 }
 
@@ -326,9 +341,11 @@ export function validateAll(root = ROOT) {
     errors.push(...checkBannedWords(f, read(f)));
   }
   const faqDir = join(root, "src/content/faq");
+  let faqSrc = {};
+  try { faqSrc = JSON.parse(read("docs/faq-sources.json")).items || {}; } catch { errors.push("docs/faq-sources.json을 읽지 못했습니다(node scripts/make-faq-sources.mjs)."); }
   for (const f of readdirSync(faqDir).filter((f) => f.endsWith(".md"))) {
     const t = readFileSync(join(faqDir, f), "utf8");
-    errors.push(...checkFaq(f, t), ...checkBannedWords(`faq/${f}`, t));
+    errors.push(...checkFaq(f, t, faqSrc), ...checkBannedWords(`faq/${f}`, t));
   }
   return errors;
 }
