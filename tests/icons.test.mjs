@@ -45,7 +45,7 @@ test("아이콘 PNG: 크기가 맞고 숲색 바탕에 크림색 \"더\"와 금�
 
 test("manifest: 192·512·maskable 아이콘이 실제 파일을 가리킨다", () => {
   const m = JSON.parse(readFileSync(new URL("manifest.webmanifest", PUB), "utf8"));
-  assert.equal(m.name, "하나 더");
+  assert.equal(m.name, "하나 더 · 세무법인 성수 송파 WM센터");
   for (const i of m.icons) readPng(i.src.slice(1));
   assert.ok(m.icons.some((i) => i.purpose === "maskable"));
   assert.ok(["standalone", "minimal-ui"].includes(m.display), "설치하려면 standalone·minimal-ui");

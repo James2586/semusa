@@ -355,7 +355,7 @@ const evs = data.events;
     if (!cur) return;
     const url = shareUrl(), title = `${cur.ev.name} 기한 — ${dot(cur.r.deadlineIso)}(${cur.r.weekday})`;
     try {
-      if (navigator.share) { await navigator.share({ title, text: `${title} · 하나 더 기한 달력`, url }); return; }
+      if (navigator.share) { await navigator.share({ title, text: `${title} · 하나 더 기한 달력 · 세무법인 성수 송파 WM센터`, url }); return; }
       await navigator.clipboard.writeText(url);
       status.textContent = "주소를 복사했어요. 카카오톡 대화창에 붙여 넣어 보내세요.";
     } catch (err) { if ((err as Error)?.name !== "AbortError") status.textContent = `주소: ${url}`; }

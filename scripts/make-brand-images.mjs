@@ -34,7 +34,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .s{font-weight:400;font-size:28px;color:${MOSS2};padding-left:22px;border-left:2px solid rgba(243,240,231,.24);line-height:1.15}
 </style>
 <div class="og"><p class="t">세금은 날짜부터<br><em>하나 더</em> 봅니다.</p>
-<div class="f"><span class="w">하나 더<span class="p">+</span></span><span class="s">세무전문가 성광호</span></div></div>`;
+<div class="f"><span class="w">하나 더<span class="p">+</span></span><span class="s">세무법인 성수 송파 WM센터 · 세무전문가 성광호</span></div></div>`;
 
 const ICONS = [
   ["favicon-32.png", 32, { round: 7, scale: 0.5, drawPlus: 2 }], // 32px에선 가는 +가 번져 금색이 사라져 2px로 그림
