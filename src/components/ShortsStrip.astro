@@ -1,11 +1,12 @@
 ---
 // 첫 화면 「부기와 1분 세금」(2026-10-25 6차 C): 유튜브 @성셈 Shorts 중 세금 주제 최신 몇 개 — 제목은 유튜브 제목 그대로, 누르면 유튜브로.
-// 썸네일·재생기는 싣지 않는다(바깥 그림·구글로 가는 요청 없음, 첫 화면 가볍게). 목록을 못 읽으면 구역째 숨긴다(빌드는 멈추지 않음).
+// 썸네일·재생기는 싣지 않는다(바깥 그림·구글로 가는 요청 없음, 첫 화면 가볍게). 목록을 못 읽으면 저장본(shorts-snapshot.json)으로, 저장본도 비면 구역째 숨긴다(빌드는 멈추지 않음).
 import site from "../data/site.json";
 import cfg from "../data/shorts.json";
 import Buki from "./Buki.astro";
+import saved from "../data/shorts-snapshot.json";
 import { fetchShorts } from "../lib/shortsFeed.js";
-const shorts = await fetchShorts(cfg);
+const shorts = await fetchShorts(cfg, { saved });
 const yt = site.channels.find((c: any) => c.url.includes("youtube.com")) as any;
 const dot = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
 ---
