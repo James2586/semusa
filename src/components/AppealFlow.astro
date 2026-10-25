@@ -3,7 +3,10 @@
 // 그림은 HTML·CSS(SVG·바깥 그림 없음). 「따라가 보기」를 눌렀을 때만 한 단계씩 켜진다(자동 재생·반복 없음), 이전·다음으로 직접 넘길 수 있고,
 // 움직임 줄이기면 선이 미끄러지지 않고 바로 바뀐다. 자바스크립트가 없으면 설명이 모두 펼쳐진 흐름도만 보인다.
 import appeal from "../data/appeal.json";
-const flow = appeal.flow as any[];
+// which: "flow"(처분에 맞서는 불복 길) | "refundFlow"(내가 신고한 세금을 바로잡는 경정청구 길)
+interface Props { which?: "flow" | "refundFlow" }
+const { which = "flow" } = Astro.props;
+const flow = (appeal as any)[which] as any[];
 ---
 <div class="af" data-af>
   <div class="af-ctl">

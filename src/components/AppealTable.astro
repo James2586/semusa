@@ -68,7 +68,9 @@ const COLS = [["when", "언제"], ["file", "청구 기한"], ["decide", "결정�
     .ap-t, .ap-t tbody, .ap-t tr, .ap-t th, .ap-t td { display: block; }
     .ap-t { border: 0; background: none; }
     .ap-t thead { display: none; }
-    .ap-t tbody { display: grid; gap: 10px; }
+    .ap-t colgroup { display: none; }
+    .ap-t tbody { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .ap-t tr { min-width: 0; }
     .ap-t tr { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 4px 0 8px; }
     .ap-t tbody tr + tr > * { border-top: 0; }
     .ap-t tbody th { border-left: 3px solid var(--gold); margin: 12px 14px 4px; padding: 0 0 0 9px; white-space: normal; }
