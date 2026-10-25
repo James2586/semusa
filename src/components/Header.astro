@@ -179,7 +179,7 @@ const on = (p: string) => (path === p || path.startsWith(p + "/") ? "page" : und
   }
   /* 1024~1199: 로고 옆 사무소 이름(세무법인 성수 송파 WM센터, 2026-10-25)까지 한 줄에 들어가게 메뉴 간격을 좁힌다 */
   @media (min-width: 1024px) and (max-width: 1199px) { .gnb-btn, .gnb-a { padding-inline: 6px; } .gnb-cta { padding: 0 12px; } }
-  @media (min-width: 1200px) { .tool-l { display: inline; } }
+  @media (min-width: 1200px) { .tool-l { display: inline; white-space: nowrap; } .tool { flex-shrink: 0; } }
 </style>
 
 <script>

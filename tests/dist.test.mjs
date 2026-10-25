@@ -401,3 +401,17 @@ test("자주 묻는 질문 20개(6차 D): 근거 조문·원문 접힘 · 분야
   const home = readFileSync(join(DIST, "index.html"), "utf8").split('id="h-faq"')[1].split("</section>")[0];
   assert.equal((home.match(/<details data-cat=/g) || []).length, 6);
 });
+
+test("오시는 길 카카오 지도: 숨긴 칸만 그려 두고 SDK는 보일 때 스크립트가 · 끌기·휠 잡지 않음 · 처리방침 안내", { skip: !has }, () => {
+  for (const f of ["location.html", "index.html"]) {
+    const h = readFileSync(join(DIST, f), "utf8");
+    assert.match(h, /<div[^>]*data-kmap[^>]*hidden/, f);
+    assert.doesNotMatch(h, /<script[^>]*src="https:\/\/dapi\.kakao\.com/, f); // 처음부터 받지 않음
+    assert.match(h, /href="https:\/\/map\.kakao\.com\/[^"]*"/, f); // 지도 못 그려도 버튼은 남음
+  }
+  const src = readFileSync(new URL("../src/components/LocationBlock.astro", import.meta.url), "utf8");
+  assert.match(src, /draggable: false/);
+  assert.match(src, /scrollwheel: false/);
+  assert.match(src, /IntersectionObserver/);
+  assert.match(readFileSync(join(DIST, "privacy.html"), "utf8"), /카카오 지도/);
+});
