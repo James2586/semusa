@@ -3,7 +3,9 @@ import site from "../data/site.json";
 import KakaoIcon from "./KakaoIcon.astro";
 interface Props { headingLevel?: "h2" | "none" }
 const { headingLevel = "none" } = Astro.props;
-const q = encodeURIComponent(site.address.full.replace(/^서울시/, "서울"));
+// 지도 찾기는 건물 주소까지만(층·호수를 붙이면 지도 검색이 못 찾는다) — site.json address.map
+const q = encodeURIComponent((site.address as any).map || site.address.full.replace(/^서울시/, "서울"));
+const tel = site.phone ? `tel:${site.phone.replace(/[^0-9+]/g, "")}` : null;
 ---
 <div class="loc">
   <div>
@@ -12,6 +14,8 @@ const q = encodeURIComponent(site.address.full.replace(/^서울시/, "서울"));
       <dt>주소</dt><dd data-addr>{site.address.full}</dd>
       {site.transit && <><dt>교통</dt><dd>{site.transit}</dd></>}
       {site.parking && <><dt>주차</dt><dd>{site.parking}</dd></>}
+      {tel && <><dt>전화</dt><dd><a href={tel}>{site.phone}</a></dd></>}
+      {(site as any).fax && <><dt>팩스</dt><dd>{(site as any).fax}</dd></>}
       <dt>운영</dt><dd>{site.hours}</dd>
       <dt>메일</dt><dd>{site.email}</dd>
     </dl>
