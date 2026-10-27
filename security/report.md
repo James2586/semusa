@@ -1,6 +1,6 @@
 # semusa(홈페이지) 보안 점검 보고서
 
-만든 때: 2026-10-28 07:47 (한국 시각)
+만든 때: 2026-10-28 08:31 (한국 시각)
 
 ## 요약
 
@@ -30,39 +30,6 @@
 ## 화면 스크립트의 innerHTML
 
 .astro 화면 스크립트·src/lib·public의 innerHTML·insertAdjacentHTML·document.write 7곳을 봤다 — 주소(?e=·#…)·localStorage·sessionStorage에서 온 값이 정화 없이 들어가는 곳만 xss/dom-source로 나온다(빌드 때 자료 파일로 만든 글은 대상 아님).
-
-## 의존성 취약점(npm audit)
-
-- 알려진 취약점 없음
-
-## 운영 사이트 확인(https://semusatax.vercel.app, GET만)
-
-공개되면 안 되는 파일 없음
-
-### 보안 헤더(실제 응답)
-
-| 주소 | 판정 |
-|---|---|
-| / | ❌ CSP 없음 |
-| /deadline | ❌ CSP 없음 |
-
-### 실수로 공개되기 쉬운 파일
-
-| 주소 | 판정 |
-|---|---|
-| /.env | ✅ 안 열림(404) |
-| /.git/config | ✅ 안 열림(404) |
-| /.git/HEAD | ✅ 안 열림(404) |
-| /package.json | ✅ 안 열림(404) |
-| /.vercel/project.json | ✅ 안 열림(404) |
-| /vercel.json | ✅ 안 열림(404) |
-
-### 소스맵
-
-| 파일 | 판정 |
-|---|---|
-| /_astro/DeadlineCalc.astro_astro_type_script_index_0_lang.CjqJludX.js.map | ✅ 없음(404) |
-| /_astro/UpcomingDeadlines.astro_astro_type_script_index_0_lang.CzG7andD.js.map | ✅ 없음(404) |
 
 ## 이 도구가 못 보는 것
 

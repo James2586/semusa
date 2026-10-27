@@ -7,12 +7,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { finalizeFindings, loadBaseline, compareBaseline, baselineWithNew, renderReport, npmAudit, auditSection, nowKstText, SEVERITY_LABEL } from "./security/core.mjs";
+import { finalizeFindings, loadBaseline, compareBaseline, baselineWithNew, renderReport, npmAudit, auditSection, nowKstText, scanSnapshot, SEVERITY_LABEL } from "./security/core.mjs";
 import * as rules from "./security/rules.mjs";
 
 export const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const BASELINE_FILE = path.join(ROOT, "security", "baseline.json");
 export const REPORT_FILE = path.join(ROOT, "security", "report.md");
+export const SNAPSHOT_FILE = path.join(ROOT, "security", "scan.json"); // 관리자 화면·서버 점검용 요약(규칙 파일에 probePlan이 있으면 점검 계획도)
+
+// security/scan.json 내용(생성 시각 제외) — 시험이 지금 코드로 만든 값과 대조한다
+export function snapshotOf(scan) {
+  return scanSnapshot(scan, typeof rules.probePlan === "function" ? { probePlan: rules.probePlan(scan.routes || []) } : {});
+}
 
 export function runScan(root = ROOT) {
   const { findings, sections = [], ...extra } = rules.runRules(root);
@@ -38,6 +44,7 @@ async function main() {
   const md = renderReport({ title: rules.TITLE || "보안 점검 보고서", generatedAt: nowKstText(), findings: scan.findings, comparison: scan.comparison, sections, notes });
   fs.mkdirSync(path.dirname(REPORT_FILE), { recursive: true });
   fs.writeFileSync(REPORT_FILE, md + "\n");
+  fs.writeFileSync(SNAPSHOT_FILE, JSON.stringify({ generatedAt: new Date().toISOString(), ...snapshotOf(scan) }, null, 1) + "\n");
 
   const { fresh, known, stale } = scan.comparison;
   console.log(`보안 점검: 찾은 것 ${scan.findings.length}건(기준선에 있음 ${known.length}, 새로 찾음 ${fresh.length}, 지울 기준선 ${stale.length}) → ${path.relative(ROOT, REPORT_FILE)}`);
