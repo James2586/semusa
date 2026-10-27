@@ -1,0 +1,33 @@
+{
+  "about": "보안 점검 기준선(scripts/security-scan.mjs). open = 알고 있지만 아직 고치지 않음(보고서에 계속 보임), accepted = 검토해 괜찮다고 정함(reason 필수). 새 경보는 시험(npm test)이 막는다 — 고치거나, 의도한 것이면 --update-baseline 뒤 status·reason을 적는다.",
+  "entries": [
+    {
+      "key": "headers/csp|vercel.json|missing",
+      "status": "open",
+      "reason": "CSP 없음 — 정적 사이트라 위험은 작지만, 보고 전용(Report-Only)부터 걸어 볼지 검토(카카오 지도 SDK·계산기 iframe 출처를 허용 목록에)",
+      "since": "2026-10-27",
+      "severity": "medium"
+    },
+    {
+      "key": "headers/missing|vercel.json|strict-transport-security",
+      "status": "open",
+      "reason": "semusatax.vercel.app은 Vercel이 HSTS를 붙여 줌 — 직접 도메인을 연결하면 vercel.json에 더할 것",
+      "since": "2026-10-27",
+      "severity": "low"
+    },
+    {
+      "key": "xss/json-in-script|src/components/CrumbLd.astro|JSON.stringify(ld)",
+      "status": "open",
+      "reason": "JSON-LD 글은 자료 파일(사이트 글)에서 와 지금은 위험하지 않지만, 다른 자료 칸처럼 .replace(/</g, \"\\\\u003c\")로 맞출지 검토",
+      "since": "2026-10-27",
+      "severity": "low"
+    },
+    {
+      "key": "xss/json-in-script|src/layouts/Base.astro|JSON.stringify([org, ...jsonLd])",
+      "status": "open",
+      "reason": "JSON-LD 글은 자료 파일(사이트 글)에서 와 지금은 위험하지 않지만, 다른 자료 칸처럼 .replace(/</g, \"\\\\u003c\")로 맞출지 검토",
+      "since": "2026-10-27",
+      "severity": "low"
+    }
+  ]
+}
