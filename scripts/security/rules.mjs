@@ -3,8 +3,9 @@
 //   ② JSON-LD·자료 칸을 <script>에 넣을 때 </script> 끊김 막기 ③ 자료 파일의 비밀 키 ④ 보안 헤더 ⑤ 의존성.
 import {
   walkFiles, readText, parseCode, traverse, calleeName, isCall, memberPath, isFunctionNode, lineOf, nodeText, makeFinding,
-  scanSecrets, checkVercelHeaders, probeGet, judgeLiveHeaders, EXPOSED_FILE_CHECKS,
+  scanSecrets, checkVercelHeaders, 
 } from "./core.mjs";
+import { runSitePlan, siteProbeSection } from "./probe.mjs";
 
 export const TITLE = "semusa(홈페이지) 보안 점검 보고서";
 export const AUDIT_NOTES = {};
@@ -217,37 +218,14 @@ export const LIMITS = [
 
 // ── 운영 사이트 확인(GET만) ──
 export const SITE = "https://semusatax.vercel.app";
+// 운영 확인 계획(GET만) — tax-search api/_securityProbe.js SEMUSA_PLAN(관리자 탭·밤 9시 점검)과 같게 둔다(한쪽을 고치면 같이).
+export const PROBE_PLAN = {
+  site: SITE, name: "semusa",
+  headers: ["/", "/deadline"],
+  acceptHeaders: { csp: "아직 안 고침 — 정적 홈페이지(로그인·입력 저장 없음), semusa 기준선 vercel.json 항목" },
+  files: true, sourceMaps: true,
+};
+
 export async function runProbes() {
-  const hdrRows = ["| 주소 | 판정 |", "|---|---|"];
-  for (const u of ["/", "/deadline"]) {
-    const res = await probeGet(SITE + u);
-    if (!res.ok) { hdrRows.push(`| ${u} | ${res.error} |`); continue; }
-    const issues = judgeLiveHeaders(SITE + u, res.headers);
-    hdrRows.push(`| ${u} | ${issues.length ? issues.map((i) => "❌ " + i.what).join("<br>") : "✅ 보안 헤더 있음"} |`);
-  }
-  const bad = [];
-  const fileRows = ["| 주소 | 판정 |", "|---|---|"];
-  for (const c of EXPOSED_FILE_CHECKS) {
-    const res = await probeGet(SITE + c.path, { look: c.look });
-    fileRows.push(`| ${c.path} | ${!res.ok ? res.error : res.looked ? "❌ 열림" : `✅ 안 열림(${res.status}${res.status === 200 ? " — 그 파일이 아니라 첫 화면이 옴" : ""})`} |`);
-    if (res.looked) bad.push(c.path);
-  }
-  const mapRows = [];
-  try {
-    const html = await (await fetch(SITE + "/")).text();
-    const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)].map((m) => m[1]).slice(0, 3);
-    for (const s of scripts) {
-      const res = await probeGet(new URL(s + ".map", SITE).href, { look: (t, st) => st === 200 && /"sources"\s*:/.test(t) });
-      mapRows.push(`| ${s}.map | ${!res.ok ? res.error : res.looked ? "❌ 소스맵 열림" : `✅ 없음(${res.status})`} |`);
-    }
-  } catch { mapRows.push("| / | 첫 화면을 받지 못함 |"); }
-  return [{
-    title: `운영 사이트 확인(${SITE}, GET만)`,
-    lines: [
-      bad.length ? `**확인 필요 ${bad.length}건**: ${bad.join(", ")}` : "공개되면 안 되는 파일 없음",
-      "", "### 보안 헤더(실제 응답)", "", ...hdrRows,
-      "", "### 실수로 공개되기 쉬운 파일", "", ...fileRows,
-      ...(mapRows.length ? ["", "### 소스맵", "", "| 파일 | 판정 |", "|---|---|", ...mapRows] : []),
-    ],
-  }];
+  return [siteProbeSection(await runSitePlan(PROBE_PLAN), { footer: [] })];
 }

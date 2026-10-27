@@ -208,6 +208,29 @@ export function compareBaseline(findings, baseline) {
   return { fresh, known, stale };
 }
 
+// 관리자 화면·서버 점검이 읽는 요약(security/scan.json) — 줄 번호·생성 시각 밖의 값은 코드가 그대로면 같다(시험이 대조).
+//   응답 본문·비밀 값은 없다(scanSecrets 메시지는 이미 가린 값).
+export function scanSnapshot(scan, extra = {}) {
+  const status = new Map(scan.comparison.known.map((f) => [f.key, f.baseline]));
+  const items = scan.findings.map((f) => {
+    const b = status.get(f.key);
+    const noLine = (t) => String(t || "").replace(/(\.(?:[cm]?jsx?|astro|json)):\d+/g, "$1"); // 다른 파일을 고칠 때마다 줄 번호로 바뀌지 않게
+    return { key: f.key, rule: f.rule, severity: f.severity, file: f.file, message: noLine(f.message), fix: noLine(f.fix), status: b ? b.status : "new", reason: b?.reason || "" };
+  });
+  const count = (fn) => items.filter(fn).length;
+  return {
+    about: "npm run security:scan이 만든 코드 검사 요약 — 손으로 고치지 말 것",
+    counts: {
+      total: items.length, open: count((i) => i.status === "open"), accepted: count((i) => i.status === "accepted"), fresh: count((i) => i.status === "new"), stale: scan.comparison.stale.length,
+      bySeverity: Object.fromEntries(SEVERITY_ORDER.map((s) => [s, count((i) => i.severity === s && i.status !== "accepted")])),
+    },
+    items,
+    stale: scan.comparison.stale.map((e) => e.key),
+    routes: (scan.routes || []).length,
+    ...extra,
+  };
+}
+
 export function baselineWithNew(baseline, fresh, since) {
   const entries = [...baseline.entries];
   for (const f of fresh) entries.push({ key: f.key, status: "open", reason: "", since, severity: f.severity });
@@ -392,50 +415,8 @@ export function auditSection(audit, accepted = {}) {
   return { title: "의존성 취약점(npm audit)", lines };
 }
 
-// ── 운영 사이트 확인(GET만) ──
-// 응답 본문은 저장하지 않는다 — 상태 코드·형식·길이와, 넘겨받은 판정 함수(look)의 참/거짓만 남긴다.
-export async function probeGet(url, { timeoutMs = 20_000, headers = {}, look = null, redirect = "manual" } = {}) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const r = await fetch(url, { method: "GET", headers: { "user-agent": "security-probe (GET only)", ...headers }, redirect, signal: ctrl.signal });
-    const text = await r.text();
-    const hdr = {};
-    r.headers.forEach((v, k) => { hdr[k] = v; });
-    return { ok: true, status: r.status, type: hdr["content-type"] || "", bytes: text.length, headers: hdr, looked: look ? !!look(text, r.status, hdr) : null };
-  } catch (e) {
-    return { ok: false, status: 0, error: e.name === "AbortError" ? "시간 초과" : "연결 실패" };
-  } finally {
-    clearTimeout(t);
-  }
-}
-
-// 운영 응답 헤더 판정(probeGet 결과의 headers)
-export function judgeLiveHeaders(url, hdr) {
-  const out = [];
-  const lower = Object.fromEntries(Object.entries(hdr || {}).map(([k, v]) => [k.toLowerCase(), v]));
-  const want = [
-    ["strict-transport-security", "늘 https로만(HSTS)"],
-    ["x-content-type-options", "파일 형식 추측 막기"],
-    ["referrer-policy", "주소 전체 안 보내기"],
-  ];
-  for (const [k, why] of want) if (!lower[k]) out.push({ ok: false, what: `${k} 없음 — ${why}` });
-  if (!lower["x-frame-options"] && !/frame-ancestors/.test(lower["content-security-policy"] || "")) out.push({ ok: false, what: "X-Frame-Options·frame-ancestors 없음 — 다른 사이트 틀(iframe)에 넣기 허용" });
-  if (!lower["content-security-policy"]) out.push({ ok: false, what: lower["content-security-policy-report-only"] ? "CSP 보고 전용(차단 안 함)" : "CSP 없음" });
-  if (lower["x-powered-by"]) out.push({ ok: false, what: `x-powered-by 머리 노출(${lower["x-powered-by"]})` });
-  void url;
-  return out;
-}
-
-// 흔히 실수로 공개되는 파일 — 열리면(200 + 그 파일다운 내용) 문제
-export const EXPOSED_FILE_CHECKS = [
-  { path: "/.env", look: (t, s) => s === 200 && /^[A-Z_][A-Z0-9_]*=/m.test(t) && !/<html/i.test(t) },
-  { path: "/.git/config", look: (t, s) => s === 200 && /\[core\]/.test(t) },
-  { path: "/.git/HEAD", look: (t, s) => s === 200 && /^ref: refs\//.test(t) },
-  { path: "/package.json", look: (t, s) => s === 200 && /"dependencies"\s*:/.test(t) && !/<html/i.test(t) },
-  { path: "/.vercel/project.json", look: (t, s) => s === 200 && /projectId/.test(t) },
-  { path: "/vercel.json", look: (t, s) => s === 200 && /"headers"|"rewrites"/.test(t) && !/<html/i.test(t) },
-];
+// ── 운영 사이트 확인(GET만) — ./probe.mjs(코드 읽기 없이 서버 함수도 쓰는 가벼운 파일)로 옮김 ──
+export { probeGet, judgeLiveHeaders, EXPOSED_FILE_CHECKS } from "./probe.mjs";
 
 export function nowKstText() {
   const d = new Date(Date.now() + 9 * 3600_000);

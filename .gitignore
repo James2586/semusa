@@ -2,3 +2,6 @@ node_modules/
 dist/
 .astro/
 .vercel/
+
+# 보안 점검 요약(npm run security:scan이 만듦 — tax-search만 배포에 싣는다)
+security/scan.json
