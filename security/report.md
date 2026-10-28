@@ -1,6 +1,6 @@
 # semusa(홈페이지) 보안 점검 보고서
 
-만든 때: 2026-10-28 08:31 (한국 시각)
+만든 때: 2026-10-28 09:28 (한국 시각)
 
 ## 요약
 
@@ -30,6 +30,10 @@
 ## 화면 스크립트의 innerHTML
 
 .astro 화면 스크립트·src/lib·public의 innerHTML·insertAdjacentHTML·document.write 7곳을 봤다 — 주소(?e=·#…)·localStorage·sessionStorage에서 온 값이 정화 없이 들어가는 곳만 xss/dom-source로 나온다(빌드 때 자료 파일로 만든 글은 대상 아님).
+
+## 의존성 취약점(npm audit)
+
+- 알려진 취약점 없음
 
 ## 이 도구가 못 보는 것
 

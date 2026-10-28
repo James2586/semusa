@@ -7,13 +7,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { finalizeFindings, loadBaseline, compareBaseline, baselineWithNew, renderReport, npmAudit, auditSection, nowKstText, scanSnapshot, SEVERITY_LABEL } from "./security/core.mjs";
+import { finalizeFindings, loadBaseline, compareBaseline, baselineWithNew, renderReport, npmAudit, auditSection, nowKstText, scanSnapshot, auditSnapshot, SEVERITY_LABEL } from "./security/core.mjs";
 import * as rules from "./security/rules.mjs";
 
 export const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const BASELINE_FILE = path.join(ROOT, "security", "baseline.json");
 export const REPORT_FILE = path.join(ROOT, "security", "report.md");
 export const SNAPSHOT_FILE = path.join(ROOT, "security", "scan.json"); // 관리자 화면·서버 점검용 요약(규칙 파일에 probePlan이 있으면 점검 계획도)
+export const AUDIT_FILE = path.join(ROOT, "security", "audit.json"); // --audit·--probe 때만 다시 만듦(인터넷 필요 — 시험과 대조하지 않음)
 
 // security/scan.json 내용(생성 시각 제외) — 시험이 지금 코드로 만든 값과 대조한다
 export function snapshotOf(scan) {
@@ -35,6 +36,9 @@ async function main() {
   if (args.has("--audit") || args.has("--probe")) {
     const audit = await npmAudit(ROOT);
     sections.push(auditSection(audit, rules.AUDIT_NOTES || {}));
+    // 못 읽었으면 예전 파일을 덮지 않는다(인터넷이 끊긴 세션에서 돌려도 패널이 비지 않게)
+    if (audit.ok) fs.writeFileSync(AUDIT_FILE, JSON.stringify({ generatedAt: new Date().toISOString(), ...auditSnapshot(audit, rules.AUDIT_NOTES || {}) }, null, 1) + "\n");
+    else notes.push(`npm audit 실패 — ${path.relative(ROOT, AUDIT_FILE)}는 그대로 둠`);
   }
   if (args.has("--probe")) {
     if (typeof rules.runProbes !== "function") notes.push("이 저장소엔 운영 확인 규칙이 없음");
