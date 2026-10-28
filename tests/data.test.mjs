@@ -43,6 +43,12 @@ test("직접 만든 도구(tools.json): 글은 운영자 영상 글 줄 그대�
   const p = structuredClone(tools);
   p.principles[0] = "원칙 1 · AI는 숫자를 만들지 않습니다";
   assert.equal(checkTools(JSON.stringify(p), videos).length, 1);
+  const sv = structuredClone(tools);
+  sv.stockVal.features.push("평가 시간이 90% 줄어든다");
+  assert.equal(checkTools(JSON.stringify(sv), videos).length, 1);
+  const sv2 = structuredClone(tools);
+  sv2.stockVal.video = "없는영상";
+  assert.ok(checkTools(JSON.stringify(sv2), videos).length >= 1);
 });
 
 test("불복 절차 표(appeal.json): 숫자는 고른 원문에만 — 지어 쓴 숫자는 막힌다", async () => {

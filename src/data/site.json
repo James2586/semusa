@@ -35,6 +35,7 @@
   ],
   "booksUrl": "https://search.kyobobook.co.kr/search?keyword=%EC%84%B1%EA%B4%91%ED%98%B8",
   "taxSearch": { "name": "세무 지식 통합검색 22", "url": "https://tax-search-rho.vercel.app/", "note": "세무 실무자용" },
+  "stockVal": { "name": "비상장주식 가치평가", "url": "https://stock-valuation-ypou.vercel.app/", "note": "세무 실무자용" },
   "faqSiteUrl": "https://semusafaq.vercel.app/",
   "usefulSites": [
     { "name": "국세청", "url": "https://www.nts.go.kr/" },

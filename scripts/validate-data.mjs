@@ -345,6 +345,14 @@ export function checkTools(text, videosText) {
   const tl = lines(ts.video);
   if (!(ts.features || []).length) errors.push("tools.json taxSearch.features가 비었습니다.");
   (ts.features || []).forEach((t) => { if (!tl.has(t)) errors.push(`tools.json taxSearch.features: "${t}" — ${ts.video} 영상 글(videos.json)에 같은 줄이 없습니다.`); });
+  // 비상장주식 가치평가(2026-10-28 운영자) — 기능은 stockval 영상 줄 그대로
+  if (data.stockVal) {
+    const sv = data.stockVal;
+    if (!videos.some((v) => v.id === sv.video)) errors.push(`tools.json stockVal.video: "${sv.video}" 영상이 videos.json에 없습니다.`);
+    const sl = lines(sv.video);
+    if (!(sv.features || []).length) errors.push("tools.json stockVal.features가 비었습니다.");
+    (sv.features || []).forEach((t) => { if (!sl.has(t)) errors.push(`tools.json stockVal.features: "${t}" — ${sv.video} 영상 글(videos.json)에 같은 줄이 없습니다.`); });
+  }
   return errors;
 }
 

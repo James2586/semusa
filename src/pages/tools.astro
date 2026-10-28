@@ -1,6 +1,6 @@
 ---
 // 직접 만든 도구(2026-10-25 운영자 「실무용으로 소개해」): 손님이 쓰는 세금 계산기와, 실무에서 쓰는 세무 지식 통합검색 22.
-// 글은 src/data/tools.json(운영자 영상 글 줄 그대로 — validate-data checkTools)·calculators.json·site.json에서만. 주식 평가 웹은 나중에 더한다.
+// 글은 src/data/tools.json(운영자 영상 글 줄 그대로 — validate-data checkTools)·calculators.json·site.json에서만. 비상장주식 가치평가는 2026-10-28 운영자.
 import Base from "../layouts/Base.astro";
 import PageHead from "../components/PageHead.astro";
 import VideoCard from "../components/VideoCard.astro";
@@ -13,11 +13,13 @@ const split = (t: string) => { const i = t.indexOf(" — "); return i < 0 ? [t, 
 const principles = tools.principles.map((t) => split(t.replace(/^원칙 \d+ · /, "")));
 const features = tools.taxSearch.features.map(split);
 const tsVideo = videos.videos.find((v) => v.id === tools.taxSearch.video)!;
+const svFeatures = tools.stockVal.features.map(split);
+const svVideo = videos.videos.find((v) => v.id === tools.stockVal.video)!;
 const calcCount = calcData.calculators.length;
 ---
-<Base title="직접 만든 도구" description={`손님이 쓰는 세금 계산기 ${calcCount}종과, 실무에서 근거를 찾고 계산을 확인하는 ${site.taxSearch.name}.`}>
+<Base title="직접 만든 도구" description={`손님이 쓰는 세금 계산기 ${calcCount}종과, 실무에서 쓰는 ${site.taxSearch.name}·${site.stockVal.name}.`}>
   <PageHead buki="calculated" tag="직접 만든 도구" title="책을 쓰고, 도구를 만듭니다" crumbs={[{ name: "직접 만든 도구" }]}
-    lead={`손님이 직접 써 보는 세금 계산기 ${calcCount}종과, 실무에서 근거를 찾을 때 쓰는 ${site.taxSearch.name}를 직접 만들었습니다.`} />
+    lead={`손님이 직접 써 보는 세금 계산기 ${calcCount}종과, 실무에서 근거를 찾는 ${site.taxSearch.name}, 비상장주식을 평가하는 ${site.stockVal.name}를 직접 만들었습니다.`} />
 
   <section class="sec gut" aria-labelledby="h-tl-rule">
     <div class="wrap">
@@ -54,6 +56,22 @@ const calcCount = calcData.calculators.length;
         <p class="more"><a class="more-link" href={site.taxSearch.url} target="_blank" rel="noopener">{site.taxSearch.name} 열기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창 · {site.taxSearch.note})</span></a></p>
       </div>
       <VideoCard id={tools.taxSearch.video} />
+    </div>
+  </section>
+
+  <section class="sec gut ruled" aria-labelledby="h-tl-sv">
+    <div class="wrap tl-two">
+      <div>
+        <span class="tag">{site.stockVal.note}</span>
+        <h2 class="sec-h" id="h-tl-sv">{site.stockVal.name}</h2>
+        <p class="sec-sub">{tools.stockVal.lead}</p>
+        <ul class="tl-feats">
+          {svFeatures.map(([h, d]) => <li><b>{h}</b>{d && <span>{d}</span>}</li>)}
+        </ul>
+        <p class="tl-note">{svVideo.note}</p>
+        <p class="more"><a class="more-link" href={site.stockVal.url} target="_blank" rel="noopener">{site.stockVal.name} 열기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창 · {site.stockVal.note})</span></a></p>
+      </div>
+      <VideoCard id={tools.stockVal.video} />
     </div>
   </section>
 
