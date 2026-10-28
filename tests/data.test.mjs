@@ -26,9 +26,12 @@ test("계산기 칸이 비거나 slug가 겹치면 알려 준다", () => {
   assert.match(errs, /https:\/\/로 시작/);
 });
 
-test('"세무사" 명칭을 막는다 (운영자 결정 2026-10-24)', () => {
+test('대표 이름 앞·뒤의 "세무사"를 막는다 (운영자 결정 2026-10-24, 범위 2026-10-28)', () => {
   assert.equal(checkBannedWords("x", "세무전문가 성광호").length, 0);
-  assert.equal(checkBannedWords("x", "전담 세무사").length, 1);
+  assert.equal(checkBannedWords("x", "세무사 · 회계사를 위한 상증세법 평가 프로그램").length, 0);
+  assert.equal(checkBannedWords("x", "성광호 세무사").length, 1);
+  assert.equal(checkBannedWords("x", "세무사 성광호").length, 1);
+  assert.equal(checkBannedWords("x", "<b>성광호</b> 세무사").length, 1);
 });
 
 test("직접 만든 도구(tools.json): 글은 운영자 영상 글 줄 그대로만", async () => {

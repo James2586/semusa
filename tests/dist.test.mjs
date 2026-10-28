@@ -3,6 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { NAME_TITLE_RE } from "../scripts/validate-data.mjs";
 
 const DIST = new URL("../dist/", import.meta.url).pathname;
 const has = existsSync(DIST);
@@ -31,8 +32,8 @@ test("모든 페이지: lang=ko, 제목, 설명, canonical, h1 하나, 본문 �
   }
 });
 
-test('"세무사" 명칭이 어느 페이지에도 없다', { skip: !has }, () => {
-  for (const f of htmlFiles(DIST)) assert.ok(!readFileSync(f, "utf8").includes("세무사"), f);
+test('대표 이름 앞·뒤에 "세무사"가 붙은 곳이 어느 페이지에도 없다(2026-10-28 운영자 — 이름과 떨어진 「세무사」는 괜찮음)', { skip: !has }, () => {
+  for (const f of htmlFiles(DIST)) assert.doesNotMatch(readFileSync(f, "utf8"), NAME_TITLE_RE, f);
 });
 
 test('"세무회계" 단어가 어느 페이지·매니페스트·검색 목록에도 없다(2026-10-25 운영자)', { skip: !has }, () => {
