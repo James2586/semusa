@@ -294,8 +294,11 @@ export function checkFaq(name, text, srcItems = null) {
   return errors;
 }
 
-// 운영자 결정(2026-10-24): 운영자가 말하기 전까지 "세무사" 명칭을 쓰지 않는다.
-export const BANNED_WORDS = ["세무사"];
+// 운영자 결정(2026-10-24 → 2026-10-28 범위 정함): 대표 이름(성광호) 바로 앞·뒤에 "세무사"를 붙이지 않는다.
+// 「세무사·회계사를 위한 프로그램」처럼 이름과 떨어진 「세무사」는 괜찮다(2026-10-28 운영자 「내 이름 앞과 뒤에만 안 쓰면 돼」).
+export const REP_NAME = "성광호";
+// 이름과 「세무사」 사이에 띄어쓰기·가운뎃점·HTML 태그만 있으면 붙인 것으로 본다
+export const NAME_TITLE_RE = new RegExp(`${REP_NAME}(?:[\\s·,]|<[^>]*>)*세무사|세무사(?:[\\s·,]|<[^>]*>)*${REP_NAME}`);
 // 불복 절차 한눈에 표(2026-10-25): 칸 글의 숫자는 고른 원문 줄에, law에는 원문 법 이름이 있어야 한다(자주 묻는 질문과 같은 대조)
 export function checkAppeal(text, srcItems) {
   const errors = [];
@@ -345,11 +348,20 @@ export function checkTools(text, videosText) {
   const tl = lines(ts.video);
   if (!(ts.features || []).length) errors.push("tools.json taxSearch.features가 비었습니다.");
   (ts.features || []).forEach((t) => { if (!tl.has(t)) errors.push(`tools.json taxSearch.features: "${t}" — ${ts.video} 영상 글(videos.json)에 같은 줄이 없습니다.`); });
+  // 비상장주식 가치평가(2026-10-28 운영자) — 기능은 stockval 영상 줄 그대로
+  if (data.stockVal) {
+    const sv = data.stockVal;
+    if (!videos.some((v) => v.id === sv.video)) errors.push(`tools.json stockVal.video: "${sv.video}" 영상이 videos.json에 없습니다.`);
+    const sl = lines(sv.video);
+    if (!(sv.features || []).length) errors.push("tools.json stockVal.features가 비었습니다.");
+    (sv.features || []).forEach((t) => { if (!sl.has(t)) errors.push(`tools.json stockVal.features: "${t}" — ${sv.video} 영상 글(videos.json)에 같은 줄이 없습니다.`); });
+  }
   return errors;
 }
 
 export function checkBannedWords(name, text) {
-  return BANNED_WORDS.filter((w) => text.includes(w)).map((w) => `${name}: "${w}" 명칭은 쓰지 않습니다(운영자 결정). "세무전문가"로 바꾸세요.`);
+  const m = text.match(NAME_TITLE_RE);
+  return m ? [`${name}: "${m[0]}" — 대표 이름 앞·뒤에 「세무사」를 붙이지 않습니다(운영자 결정). "세무전문가 성광호"로 바꾸세요.`] : [];
 }
 
 export function validateAll(root = ROOT) {
