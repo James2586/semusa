@@ -384,35 +384,54 @@ export function checkVercelHeaders(root, { file = "vercel.json", wantCsp = true,
 }
 
 // ── 의존성 취약점(npm audit — 보고서 전용, 시험엔 넣지 않음: 새 취약점 공개만으로 코드 변경 없이 실패하므로) ──
+// npm audit 두 번 — 전체와 운영 의존성만(--omit=dev). prod = 운영(배포된 서버·화면)에 실리는 패키지인지.
 export async function npmAudit(root) {
   const { execFileSync } = await import("node:child_process");
-  let raw;
-  try {
-    raw = execFileSync("npm", ["audit", "--json"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: 120_000 });
-  } catch (e) {
-    raw = e.stdout || "";
-  }
-  try {
-    const data = JSON.parse(raw);
-    const vulns = Object.values(data.vulnerabilities || {}).map((v) => ({
-      name: v.name, severity: v.severity, direct: !!v.isDirect, range: v.range,
-      fix: v.fixAvailable === true ? "npm audit fix" : v.fixAvailable ? `${v.fixAvailable.name}@${v.fixAvailable.version}${v.fixAvailable.isSemVerMajor ? "(메이저)" : ""}` : "수정판 없음",
-      via: (v.via || []).map((x) => (typeof x === "string" ? x : x.title)).filter(Boolean).slice(0, 3),
-    }));
-    return { ok: true, vulns };
-  } catch {
-    return { ok: false, vulns: [], error: "npm audit 결과를 읽지 못함(인터넷 연결·레지스트리 확인)" };
-  }
+  const run = (extra) => {
+    let raw;
+    try {
+      raw = execFileSync("npm", ["audit", "--json", ...extra], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: 120_000 });
+    } catch (e) {
+      raw = e.stdout || "";
+    }
+    try { return JSON.parse(raw); } catch { return null; }
+  };
+  const all = run([]);
+  if (!all || !all.vulnerabilities) return { ok: false, vulns: [], error: "npm audit 결과를 읽지 못함(인터넷 연결·레지스트리 확인)" };
+  const prod = run(["--omit=dev"]);
+  const prodNames = prod?.vulnerabilities ? new Set(Object.keys(prod.vulnerabilities)) : null;
+  const vulns = Object.values(all.vulnerabilities).map((v) => ({
+    name: v.name, severity: v.severity, direct: !!v.isDirect, range: v.range,
+    prod: prodNames ? prodNames.has(v.name) : null,
+    fix: v.fixAvailable === true ? "npm audit fix" : v.fixAvailable ? `${v.fixAvailable.name}@${v.fixAvailable.version}${v.fixAvailable.isSemVerMajor ? "(메이저)" : ""}` : "수정판 없음",
+    via: (v.via || []).map((x) => (typeof x === "string" ? x : x.title)).filter(Boolean).slice(0, 3),
+    advisories: (v.via || []).filter((x) => typeof x === "object" && x.url).map((x) => ({ severity: x.severity, title: x.title, url: x.url })).slice(0, 8),
+  }));
+  return { ok: true, vulns };
 }
 
+const AUDIT_ORDER = { critical: 0, high: 1, moderate: 2, low: 3, info: 4 };
 export function auditSection(audit, accepted = {}) {
   if (!audit.ok) return { title: "의존성 취약점(npm audit)", lines: [`- ${audit.error}`] };
-  const order = { critical: 0, high: 1, moderate: 2, low: 3, info: 4 };
-  const list = [...audit.vulns].sort((a, b) => order[a.severity] - order[b.severity] || a.name.localeCompare(b.name));
+  const list = [...audit.vulns].sort((a, b) => (b.prod === true) - (a.prod === true) || AUDIT_ORDER[a.severity] - AUDIT_ORDER[b.severity] || a.name.localeCompare(b.name));
   if (!list.length) return { title: "의존성 취약점(npm audit)", lines: ["- 알려진 취약점 없음"] };
-  const lines = ["| 위험도 | 패키지 | 직접 의존 | 내용 | 고칠 판 | 메모 |", "|---|---|---|---|---|---|"];
-  for (const v of list) lines.push(`| ${v.severity} | ${v.name} | ${v.direct ? "예" : "아니오"} | ${esc(v.via.join(" / "))} | ${esc(v.fix)} | ${esc(accepted[v.name] || "")} |`);
+  const lines = ["운영 = 배포된 서버·화면에 실리는 패키지(npm audit --omit=dev), 개발 = 빌드·시험 도구에만.", "", "| 위험도 | 패키지 | 운영/개발 | 직접 의존 | 내용 | 고칠 판 | 메모 |", "|---|---|---|---|---|---|---|"];
+  for (const v of list) lines.push(`| ${v.severity} | ${v.name} | ${v.prod === null ? "?" : v.prod ? "운영" : "개발"} | ${v.direct ? "예" : "아니오"} | ${esc(v.via.join(" / "))} | ${esc(v.fix)} | ${esc(accepted[v.name] || "")} |`);
   return { title: "의존성 취약점(npm audit)", lines };
+}
+
+// 관리자 화면용 요약(security/audit.json) — 인터넷이 필요해 시험(npm test)과 대조하지 않는다, 만든 때를 같이 싣는다.
+export function auditSnapshot(audit, accepted = {}) {
+  if (!audit.ok) return { ok: false, error: audit.error, vulns: [] };
+  const vulns = [...audit.vulns]
+    .sort((a, b) => (b.prod === true) - (a.prod === true) || AUDIT_ORDER[a.severity] - AUDIT_ORDER[b.severity] || a.name.localeCompare(b.name))
+    .map((v) => ({ ...v, note: accepted[v.name] || "" }));
+  const count = (fn) => vulns.filter(fn).length;
+  return {
+    ok: true,
+    counts: Object.fromEntries(["critical", "high", "moderate", "low"].map((s) => [s, { prod: count((v) => v.severity === s && v.prod), dev: count((v) => v.severity === s && !v.prod) }])),
+    vulns,
+  };
 }
 
 // ── 운영 사이트 확인(GET만) — ./probe.mjs(코드 읽기 없이 서버 함수도 쓰는 가벼운 파일)로 옮김 ──
@@ -719,22 +738,25 @@ export function routeMapSection(routes, sinkInfo, intro) {
 
 // ════════════════════════════════════════════════════════════════════════════
 // 함수 안 요청 값 추적(가벼운 것)
-//   req.query/req.body/req.headers/req.cookies에서 나온 이름(같은 함수 안 선언·구조 분해만). 다른 함수로 넘긴 값은 따라가지 않는다.
+//   req.query/req.body/req.headers/req.cookies에서 나온 이름(같은 함수 안 선언·구조 분해). 다른 함수로 넘긴 값은
+//   taintedFunctions가 같은 파일 안 함수의 매개변수까지(2단계) 따라간다 — 다른 파일로 넘긴 값은 따라가지 않는다.
 //   값은 글자 다루기(trim·slice·String…)로만 이어진다고 본다 — 그 밖의 함수 호출(sanitize…·Number…)을 거치면 검사했다고 보고 끊는다
 //   (거짓 경보를 줄이는 쪽 — 검사 함수가 실제로 거르는지는 보지 않는다).
 // ════════════════════════════════════════════════════════════════════════════
 const TAINT_ROOTS = /^req\.(query|body|headers|cookies)(\.|$)/;
 const STRING_METHODS = new Set(["trim", "trimStart", "trimEnd", "toLowerCase", "toUpperCase", "slice", "substring", "substr", "replace", "replaceAll", "split", "join", "toString", "concat", "padStart", "padEnd", "at", "normalize"]);
-export function taintedNames(fn) {
-  const names = new Set();
+// params = 처음부터 요청 값으로 보는 이름(부른 쪽이 요청 값을 넘긴 매개변수), reqAliases = req를 통째로 받은 다른 이름의 매개변수
+export function taintedNames(fn, { params = [], reqAliases = [] } = {}) {
+  const names = new Set(params);
+  const roots = ["req", ...reqAliases];
+  const isRootPath = (p) => roots.some((r) => p === `${r}.query` || p === `${r}.body` || p.startsWith(`${r}.`) && TAINT_ROOTS.test("req" + p.slice(r.length)));
   const isTainted = (expr) => {
     if (!expr) return false;
     switch (expr.type) {
       case "Identifier": return names.has(expr.name);
       case "MemberExpression": case "OptionalMemberExpression": {
         const p = memberPath(expr);
-        if (p && TAINT_ROOTS.test(p)) return true;
-        if (p === "req.query" || p === "req.body") return true;
+        if (p && isRootPath(p)) return true;
         return isTainted(expr.object);
       }
       case "TemplateLiteral": return expr.expressions.some(isTainted);
@@ -770,6 +792,72 @@ export function exprUnsafe(expr, isTainted, safeWrappers = SAFE_WRAPPERS) {
   if (isCall(expr) && safeWrappers.has(calleeName(expr))) return false;
   return isTainted(expr);
 }
+// 매개변수 하나 → 그 안의 이름들(구조 분해·기본값 포함)
+function paramNames(p) {
+  const out = [];
+  if (!p) return out;
+  if (p.type === "Identifier") out.push(p.name);
+  else if (p.type === "AssignmentPattern") out.push(...paramNames(p.left));
+  else if (p.type === "RestElement") out.push(...paramNames(p.argument));
+  else if (p.type === "ObjectPattern") for (const pr of p.properties) out.push(...paramNames(pr.type === "RestElement" ? pr.argument : pr.value));
+  else if (p.type === "ArrayPattern") for (const el of p.elements) out.push(...paramNames(el));
+  return out;
+}
+
+/**
+ * 요청 값이 닿는 함수들: req를 받는 함수 + 같은 파일 맨 위 함수 중 요청 값(또는 req 통째)을 인자로 넘겨받는 함수(maxDepth 단계까지).
+ * → [{ fn, isTainted, names, via }] — via는 넘겨받은 경로 글("handleX → buildQuery(id)"), req를 직접 받는 함수면 "".
+ * 부른 곳이 여럿이면 매개변수를 합친다(어느 한 곳에서라도 요청 값이 오면 그 매개변수는 요청 값).
+ */
+export function taintedFunctions(ast, { maxDepth = 2 } = {}) {
+  if (!ast) return [];
+  const top = collectFunctions(ast);
+  const nameOf = new Map([...top].map(([k, v]) => [v, k]));
+  const ctx = new Map(); // fn → { params:Set, aliases:Set, via:[] }
+  const get = (fn) => { if (!ctx.has(fn)) ctx.set(fn, { params: new Set(), aliases: new Set(), via: [] }); return ctx.get(fn); };
+  eachFunction(ast, (fn) => { if (usesReq(fn)) get(fn); });
+  let frontier = [...ctx.keys()];
+  for (let depth = 0; depth < maxDepth && frontier.length; depth++) {
+    const next = new Set();
+    for (const fn of frontier) {
+      const c = ctx.get(fn);
+      const { isTainted } = taintedNames(fn, { params: [...c.params], reqAliases: [...c.aliases] });
+      const reqNames = new Set(["req", ...c.aliases]);
+      traverse(fn.body, (n) => {
+        if (isFunctionNode(n) && n !== fn) return false;
+        if (!isCall(n) || n.callee.type !== "Identifier") return;
+        const target = top.get(n.callee.name);
+        if (!target || target === fn || !target.body || target.body.type !== "BlockStatement") return;
+        n.arguments.forEach((arg, i) => {
+          const param = target.params[i];
+          if (!param) return;
+          const tc = get(target);
+          const before = tc.params.size + tc.aliases.size;
+          if (arg.type === "Identifier" && reqNames.has(arg.name)) {
+            if (param.type === "Identifier" && param.name !== "req") tc.aliases.add(param.name);
+          } else if (isTainted(arg)) {
+            for (const nm of paramNames(param)) tc.params.add(nm);
+          } else return;
+          if (tc.params.size + tc.aliases.size > before) {
+            tc.via.push(`${nameOf.get(fn) || fn.id?.name || "(이름 없는 함수)"} → ${n.callee.name}(${paramNames(param).join(", ")})`);
+            next.add(target);
+          }
+        });
+      });
+    }
+    frontier = [...next];
+  }
+  const out = [];
+  for (const [fn, c] of ctx) {
+    if (!usesReq(fn) && !c.params.size && !c.aliases.size) continue;
+    const { isTainted, names } = taintedNames(fn, { params: [...c.params], reqAliases: [...c.aliases] });
+    out.push({ fn, isTainted, names, via: usesReq(fn) ? "" : c.via.slice(0, 2).join(" · ") });
+  }
+  return out;
+}
+// 이어받은 경로가 있으면 경보 글 끝에 붙인다
+export const viaNote = (via) => (via ? ` (요청 값이 ${via}로 넘어옴)` : "");
+
 export function eachFunction(ast, cb) {
   traverse(ast, (n) => { if (isFunctionNode(n) && n.body?.type === "BlockStatement") cb(n); });
 }
@@ -823,21 +911,19 @@ export function ruleSsrf(root, { dirs = ["api"], exts = [".js"], safeWrappers = 
       }
     });
     const declBefore = (name, pos) => (decls.get(name) || []).filter((d) => d.start < pos).sort((a, b) => b.start - a.start)[0]?.init || null;
-    eachFunction(ast, (fn) => {
-      if (!usesReq(fn)) return;
-      const { isTainted } = taintedNames(fn);
+    for (const { fn, isTainted, via } of taintedFunctions(ast)) {
       const ctx = { isTainted, safeWrappers, declBefore };
       traverse(fn.body, (n) => {
         if (!(isCall(n) && n.callee.type === "Identifier" && n.callee.name === "fetch" && n.arguments[0])) return;
         if (hostOf(n.arguments[0], ctx) !== "tainted") return;
         out.push(makeFinding({
           rule: "inject/ssrf", severity: "high", file: rel, line: lineOf(n),
-          message: `서버가 요청 값으로 정해지는 주소를 부름: fetch(${nodeText(code, n.arguments[0], 60)})`,
+          message: `서버가 요청 값으로 정해지는 주소를 부름: fetch(${nodeText(code, n.arguments[0], 60)})${viaNote(via)}`,
           anchor: nodeText(code, n.arguments[0], 120),
           fix: "허용 호스트 목록과 대조한 뒤에만 부르기",
         }));
       });
-    });
+    }
   }
   return out;
 }
