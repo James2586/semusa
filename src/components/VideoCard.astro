@@ -18,7 +18,7 @@ const v = data.videos.find((x) => x.id === id)!;
   </figcaption>
 </figure>
 <style>
-  .vcard { margin: 0; display: grid; gap: 12px; max-width: 300px; }
+  .vcard { margin: 0; display: grid; gap: 12px; max-width: 300px; scroll-margin-top: calc(var(--header-h) + 16px); }
   video { width: 100%; height: auto; aspect-ratio: 9 / 16; border-radius: 6px; background: #0E1622; box-shadow: 0 16px 30px -18px rgba(0, 0, 0, .6); }
   figcaption { font-size: 15.5px; color: var(--ink2); }
   figcaption b { font-size: 16.5px; color: var(--ink); }

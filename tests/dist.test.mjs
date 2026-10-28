@@ -134,6 +134,14 @@ test("칼럼·책: 대표 글 + 카드(종류 칩·새 창 표시) + 거르기 �
   assert.ok((h.match(/class="card-a"/g) || []).length >= 6);
   assert.match(h, /aria-pressed="true"[^>]*data-kind="전체"/);
   assert.match(h, /href="\/about#video-portfolio"/);
+  // 칼럼·책의 「영상 보기」는 그 영상이 실제로 있는 쪽으로 간다(2026-10-28 stockval이 /about에 없어 눌러도 안 나왔음)
+  const vids = JSON.parse(readFileSync(new URL("../src/data/videos.json", import.meta.url), "utf8")).videos;
+  for (const v of vids) {
+    const href = `${v.page ?? "/about"}#video-${v.id}`;
+    assert.ok(h.includes(`href="${href}"`), `칼럼·책 영상 카드 링크 ${href} 없음`);
+    const page = readFileSync(join(DIST, `${(v.page ?? "/about").slice(1)}.html`), "utf8");
+    assert.ok(page.includes(`id="video-${v.id}"`), `${v.page ?? "/about"}에 영상 ${v.id} 없음 — 칼럼·책에서 눌러도 영상이 안 나옴`);
+  }
   assert.match(readFileSync(join(DIST, "about.html"), "utf8"), /id="video-portfolio"/);
 });
 

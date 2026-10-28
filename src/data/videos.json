@@ -43,6 +43,7 @@
     },
     {
       "id": "stockval",
+      "page": "/tools",
       "title": "직접 만든 도구 — 비상장주식 가치평가",
       "src": "/media/stockval.mp4",
       "poster": "/media/stockval-poster.webp",
