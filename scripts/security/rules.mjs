@@ -222,7 +222,7 @@ export const SITE = "https://semusatax.vercel.app";
 export const PROBE_PLAN = {
   site: SITE, name: "semusa",
   headers: ["/", "/deadline"],
-  acceptHeaders: { csp: "아직 안 고침 — 정적 홈페이지(로그인·입력 저장 없음), semusa 기준선 vercel.json 항목" },
+  acceptHeaders: { "csp-report-only": "CSP 보고 단계(2026-10-29 — 보고는 택스 서치 관리자 탭 ④ semusa 칸, 차단 전환은 운영자 결정 뒤)" },
   files: true, sourceMaps: true,
 };
 

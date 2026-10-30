@@ -2,11 +2,11 @@
   "about": "보안 점검 기준선(scripts/security-scan.mjs). open = 알고 있지만 아직 고치지 않음(보고서에 계속 보임), accepted = 검토해 괜찮다고 정함(reason 필수). 새 경보는 시험(npm test)이 막는다 — 고치거나, 의도한 것이면 --update-baseline 뒤 status·reason을 적는다.",
   "entries": [
     {
-      "key": "headers/csp|vercel.json|missing",
+      "key": "headers/csp|vercel.json|report-only",
       "status": "open",
-      "reason": "CSP 없음 — 정적 사이트라 위험은 작지만, 보고 전용(Report-Only)부터 걸어 볼지 검토(카카오 지도 SDK·계산기 iframe 출처를 허용 목록에)",
-      "since": "2026-10-27",
-      "severity": "medium"
+      "reason": "2026-10-29 보고 단계(Report-Only)로 켬 — 보고는 택스 서치 관리자 탭 ④(semusa 칸)에서 1~2주 본 뒤 차단 전환은 운영자 결정(scripts/csp.mjs)",
+      "since": "2026-10-30",
+      "severity": "low"
     },
     {
       "key": "headers/missing|vercel.json|strict-transport-security",
