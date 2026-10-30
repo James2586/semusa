@@ -11,7 +11,8 @@
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Content-Security-Policy-Report-Only", "value": "default-src 'self'; script-src 'self' 'sha256-4DCBpHS0xCs58DoD3z2WfYdkkovSZGXQVI2V5YiCXeI=' 'sha256-8pmJ+LKOimfmY11bNdMdX6UYDdssvFISbeigEe4XIjo=' 'sha256-APzg5xhHojDXGJ11iOBXvOG82uQIv9gVGKd8M5h42x0=' 'sha256-jPssZNg3MaVslxLPi3u4K32zVrWm2tzqhMaXos/a9L4=' 'sha256-p7kx4hv/xa6lg3nn+sMUYdiIriE2MONZ4ej1rPQMBfk=' https://dapi.kakao.com https://t1.daumcdn.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://dapi.kakao.com; media-src 'self'; frame-src https://budambu.vercel.app https://buytax.vercel.app https://ceo-retirment-tax.vercel.app https://ceo-salary-tax.vercel.app https://chokwa-baedang.vercel.app https://gasugeum.vercel.app https://gift-tax-2.vercel.app https://inheritance-tax-1.vercel.app https://inheritance-tax8.vercel.app https://james2586.github.io https://retirement-tax.vercel.app https://special-corporate-gift-299j.vercel.app https://yangdo-tax-13.vercel.app; worker-src 'self'; manifest-src 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; report-uri https://tax-search-rho.vercel.app/api/admin?resource=csp&site=semusa" }
       ]
     },
     {
