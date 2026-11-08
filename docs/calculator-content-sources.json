@@ -26,7 +26,8 @@
       "confidence": "high",
       "sources": {
         "deadline": "tests/fixtures/gift-tax-law.json §68① \"증여받은 날이 속하는 달의 말일부터 3개월 이내에\" · transfer-tax-law.json 소득세법 §105①3 \"부담부증여의 채무액에 해당하는 부분으로서 양도로 보는 경우에는 그 양도일이 속하는 달의 말일부터 3개월\" · acq-tax-law.json 지방세법 §20① \"증여자의 채무를 인수하는 부담부 증여로 인한 취득의 경우는 취득일이 속하는 달의 말일부터 3개월\"",
-        "scope": "/home/user/budambu/README.md \"증여세 + 양도소득세 + 취득세를 한 화면에서 계산해요(2026.1.1 이후 증여\"; shared/burdenGiftCalc.js BURDEN_NOT_COVERED(2025.12.31 이전 증여·지분 일부·가산세·상가 부가가치세·부동산 밖 재산·감면); CLAUDE.md 5번 \"비교표 다섯 개는 숫자·차이만\". 양도로 보는 부분: transfer-tax-law.json 소득세법 §88 \"부담부증여 시 수증자가 부담하는 채무액에 해당하는 부분은 양도로 보며\". 계산 파일 29개 cmp 동일."
+        "scope": "/home/user/budambu/README.md \"증여세 + 양도소득세 + 취득세를 한 화면에서 계산해요(2026.1.1 이후 증여\"; shared/burdenGiftCalc.js BURDEN_NOT_COVERED(2025.12.31 이전 증여·지분 일부·가산세·상가 부가가치세·부동산 밖 재산·감면); CLAUDE.md 5번 \"비교표 다섯 개는 숫자·차이만\". 양도로 보는 부분: transfer-tax-law.json 소득세법 §88 \"부담부증여 시 수증자가 부담하는 채무액에 해당하는 부분은 양도로 보며\". 계산 파일 29개 cmp 동일.",
+        "covers": "「지분 일부를 주는 경우(한 사람 명의·부부 공동명의 모두), 조합원입주권을 주는 경우(기존 주택이 헐렸으면 토지, 안 헐렸으면 주택의 취득세로)」(2026-11-08): tax-search tests/fixtures/burden-gift-corpus-quotes.json 22권 [9742] \"조합원입주권을 취득한 경우에는 주택이 아닌 토지를 취득한 것으로 본다\" · [9741] \"원조합원입주권 / 취득시기=관리처분계획인가 후 주택이 멸실된 때\"; 엔진 shared/burdenGiftCalc.js 규칙 B19(입주권 — 헐렸는지 기본값 없이 묻고 토지/주택, 원조합원·승계조합원)·B20(지분 일부 — 부부 공동명의는 지분 × 증여자 몫), 해석 칸 rightAcq·rightAcqBase, /home/user/budambu/README.md 2026-11-08 줄. lib/ 계산 파일 cmp 동일."
       }
     },
     "transfer": {
