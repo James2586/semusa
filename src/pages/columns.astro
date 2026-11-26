@@ -77,8 +77,8 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
               </a>
               <div class="press-meta">
                 <small>{p.outlet} · {pressDate(p.date)} · {p.pages} · 「{p.series} &lt;{p.no}&gt;」</small>
-                <a class="press-t" href={p.url} target="_blank" rel="noopener">{p.title}<span class="sr-only">(이코노미조선, 새 창)</span></a>
-                <a class="go" href={p.url} target="_blank" rel="noopener">이코노미조선에서 읽기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a>
+                {p.url ? <a class="press-t" href={p.url} target="_blank" rel="noopener">{p.title}<span class="sr-only">(이코노미조선, 새 창)</span></a> : <span class="press-t">{p.title}</span>}
+                {p.url ? <a class="go" href={p.url} target="_blank" rel="noopener">이코노미조선에서 읽기 <span aria-hidden="true">↗</span><span class="sr-only">(새 창)</span></a> : <span class="press-wait">온라인 기사는 아직 올라오지 않았습니다 — 지면 그림을 눌러 크게 보세요</span>}
               </div>
             </article>
           ))}
@@ -149,7 +149,7 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
   .press-zoom { justify-self: end; font-size: 14px; font-weight: 600; color: var(--gold-text); }
   .press-img:hover .press-zoom { text-decoration: underline; text-underline-offset: 4px; }
   .press-t { color: var(--ink); text-decoration: none; }
-  .press-t:hover { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
+  a.press-t:hover { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
   .press .go { justify-self: start; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
   .press-h { margin-top: 36px; font-size: 18px; }
   .press-chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -157,6 +157,7 @@ const pressDate = (iso: string) => iso.split("-").map(Number).join(". ") + ".";
   .press img { width: 100%; height: auto; display: block; border-radius: 4px; box-shadow: 0 10px 24px -18px rgba(21, 25, 21, .5); }
   .press-meta { display: grid; gap: 6px; align-content: center; padding: 0 4px 4px; }
   .press-meta small { font-size: 14px; color: var(--muted); }
+  .press-wait { font-size: 15px; color: var(--muted); }
   .press-t { font-family: var(--f-display); font-size: 22px; line-height: 1.4; }
   .press .go:hover { text-decoration: underline; text-underline-offset: 4px; }
   .feat { display: grid; gap: 12px; align-content: start; background: var(--moss); color: var(--on-moss); border-radius: 6px; padding: 28px 22px; text-decoration: none; }

@@ -1,0 +1,46 @@
+# 이코노미조선 연재 자동 반영(2026-11-26 운영자 「연재 칼럼이 자동으로 추가 안되니」): 매일 아침 이코노미조선 검색에서
+# 「성광호의 세무 ABC」 새 글을 찾아 src/data/press.json(articles — 제목·날짜·주소 그대로, 주제는 제목 낱말로)에 더하고,
+# 주소가 빈 지면(items)에 같은 회 온라인 기사 주소를 잇는다(scripts/update-press.mjs · src/lib/pressFeed.js).
+# 바뀐 것이 있을 때만 자료 검사·빌드·검사를 통과한 뒤 main에 커밋 → Vercel이 배포한다(바뀐 것이 없으면 배포 없음 — 하루 배포 한도).
+# 검색을 못 읽은 날은 경고만 남기고 넘어간다. 지면 그림(items)은 운영자가 보낸 PDF로만 더한다.
+name: press-watch
+on:
+  schedule:
+    - cron: "41 22 * * *" # 매일 07:41(한국 시각)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: press-watch
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: 새 연재 찾기
+        id: upd
+        run: |
+          node scripts/update-press.mjs || echo "::warning::이코노미조선 검색을 읽지 못해 오늘은 건너뜁니다."
+          if git diff --quiet -- src/data/press.json; then echo "changed=0" >> "$GITHUB_OUTPUT"; else echo "changed=1" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.upd.outputs.changed == '1'
+        run: npm ci
+      - name: 빌드·검사
+        if: steps.upd.outputs.changed == '1'
+        run: |
+          npm run build
+          npm test
+      - name: main에 커밋
+        if: steps.upd.outputs.changed == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/press.json
+          git commit -m "이코노미조선 연재 자동 반영(press-watch)"
+          git push origin HEAD:main
